@@ -55,7 +55,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <td>Backing up fonts</td><td><code>-backup</code></td>
 </tr>
 <tr>
-<td>Copying fonts to font libraries</td><td><code>-backup -font userlib</code></td>
+<td>Copying fonts to font libraries</td><td><code>-backup syslib -font cyrdfonts</code></td>
 </tr>
 </table>
 
