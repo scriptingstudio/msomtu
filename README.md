@@ -30,7 +30,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <th>Action</th> <th>Parameter</th>
 </tr></thead>
 <tr>
-<td>Geting MSO info</td><td><code>-report</code></td>
+<td>Getting MSO info</td><td><code>-report</code></td>
 <tr>
 <td>Listing/Removing UI languages</td><td><code>-lang</code></td>
 <tr>
