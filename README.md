@@ -24,7 +24,7 @@ $ [sudo] msomtu.sh [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font
 $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-?] [-run]
 ~~~
 
-### Use Cases
+#### Use Cases
 <table>
 <thead style="text-align:left;"><tr>
 <th>Action</th> <th>Parameter</th>
