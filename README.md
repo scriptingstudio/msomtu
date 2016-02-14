@@ -70,7 +70,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 ## Parameters
 <table>
 <tr><td><code>-app</code></td> <td>Filter <i>app_list</i>. Selects application to process.</td></tr>
-<tr><td><code>-lang</code></td> <td>Exclusive filter <i>ang_list</i>. Removes UI languages except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults.</td></tr>
+<tr><td><code>-lang</code></td> <td>Exclusive filter <i>lang_list</i>. Removes UI languages except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults.</td></tr>
 <tr><td><code>-proof</code></td> <td>Exclusive filter <i>proof_list</i>. Removes proofing tools except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults.</td></tr>
 <tr><td><code>-font</code></td> <td>Filter <i>font_pattern</i>. Removes selected fonts or 'DFonts' folder. Available fontsets: <i>cyrdfonts, noncyr, chinese, sysfonts</i>. Parameter '-rev' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update.</td></tr>
 <tr><td><code>-backup</code></td> <td>Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup alternates all deletions to backup.</td></tr>
