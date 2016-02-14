@@ -677,7 +677,7 @@ function show-helppage () {
 
 	local mp4=-4; local p12=12
 	printb "USE CASES:"
-	print-padding $mp4 "- Geting MSO info" 
+	print-padding $mp4 "- Getting MSO info" 
 		print-column 0 $p12 "" "Parameter '-report'."
 	print-padding $mp4 "- Listing/Removing UI languages" 
 		print-column 0 $p12 "" "Parameter '-lang'."
