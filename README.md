@@ -10,7 +10,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later.
 * File operations are case insensitive.
 * If you remove fonts, remove font lists as well. <code>DFonts</code> folder and font lists are safe to remove. Some of the fonts you may find useful, save them before deletion.
-* **Caution**: do not remove fonts from 'Fonts' folder! These are minimum needed for MSO applications to work.
+* **Caution**: do not remove fonts from <code>Fonts</code> folder! These are minimum needed for MSO applications to work.
 * Apply thinning after every MSO update.
 * You can change default settings in code for your needs.
 
@@ -61,10 +61,10 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 
 ## Arguments
 <table>
-<tr><td><code>app_list</code></td><td>App list. w - Word, e - Excel, p - PowerPoint, o - Outlook, n - OneNote. Default: 'w e p o n'.</td></tr>
-<tr><td><code>lang_list</code></td><td>Langauge list: <code>ru pl de</code> etc, see filenames with parameter <code>-verb</code>. Default: <code>en ru</code>.</td></tr>
-<tr><td><code>proof_list</code></td><td>Proofingtools list: <code>russian finnish</code> german etc, see filenames with parameter <code>-verb</code>. Wildcard '*' is available. Default: <code>english russian</code>.</td></tr>
-<tr><td><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty - removes folder 'DFonts' (default); <i>fontset</i> - removes fonts of predefined fontset; <i>mask</i> - removes selection: <i>*.*, arial*, *.ttc</i> etc. If you use single '*' enclose it in quotation marks: "*". Predefined fontsets: <code>library</code>, <code>cyrdfonts</code>, <code>noncyr</code>, <code>chfonts</code>, <code>sysfonts</code>, <code>symfonts</code>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (<code>DFonts</code> against libraries). You can use list of fontsets.</td></tr>
+<tr><td><code>app_list</code></td><td>App list. w - Word, e - Excel, p - PowerPoint, o - Outlook, n - OneNote. Default: <code>w e p o n</code>.</td></tr>
+<tr><td><code>lang_list</code></td><td>Langauge list: <code>ru pl de</code> etc; see filenames with parameter <code>-verb</code>. Default: <code>en ru</code>.</td></tr>
+<tr><td><code>proof_list</code></td><td>Proofingtools list: <code>russian finnish</code> german etc; see filenames with parameter <code>-verb</code>. Wildcard '*' is available. Default: <code>english russian</code>.</td></tr>
+<tr><td><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty - removes folder <code>DFonts</code> (default); <i>fontset</i> - removes fonts of predefined fontset; <i>mask</i> - removes selection: <i>*.*, arial*, *.ttc</i> etc. If you use single '*' enclose it in quotation marks: "*". Predefined fontsets: <code>library</code>, <code>cyrdfonts</code>, <code>noncyr</code>, <code>chfonts</code>, <code>sysfonts</code>, <code>symfonts</code>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (<code>DFonts</code> against libraries). You can use list of fontsets.</td></tr>
 <tr><td><code>destination</code></td><td>Backup destination folderpath for fonts. Default value is <code>~/Desktop/MSOFonts</code>. You can use predefined destinations: <code>syslib</code> - system library; <code>userlib</code> - user library.</td></tr>
 </table>
 ## Parameters
