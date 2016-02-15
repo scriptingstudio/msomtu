@@ -158,5 +158,5 @@ $ msomtu.sh -fontset
 ```
 
 ## Links
-* Inspiration idea: [OfficeThinner](https://github.com/goodbest/OfficeThinner)
+* Inspiration idea of "thinning": [OfficeThinner](https://github.com/goodbest/OfficeThinner)
 * More on OS X & MSO fonts: [Font Management in OS X, by Kurt Lang](http://www.jklstudios.com/misc/osxfonts.html)
