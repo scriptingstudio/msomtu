@@ -5,8 +5,8 @@
 Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so apps duplicate all of the components in its own application container that's waisting gigabytes of disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined or user defined destinations.
 
 ## Notes
-* *Safe scripting* technique — "Foolproof" or "Harmless Run". Default running mode is view. You cannot change or harm your system without switch '-run'. Parameter '-cache' does not depend on '-run'.
-* As MSO is installed with root on /Applications directory you have to run this script with *sudo* to make changes.
+* *Safe scripting* technique — "Foolproof" or "Harmless Run". Default running mode is view. You cannot change or harm your system without switch <code>-run</code>. Parameter <code>-cache</code> does not depend on <code>-run</code>.
+* As MSO is installed with root on /Applications directory you have to run this script with <code>sudo</code> to make changes.
 * As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later.
 * File operations are case insensitive.
 * If you remove fonts, remove font lists as well. 'DFonts' folder and font lists are safe to remove. Some of the fonts you may find useful, save them before deletion.
@@ -55,33 +55,33 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <td>Backing up fonts</td><td><code>-backup</code></td>
 </tr>
 <tr>
-<td>Copying fonts to font libraries</td><td><code>-backup syslib -font cyrdfonts</code></td>
+<td>Copying fonts to font libraries</td><td><code>-backup -font</code></td>
 </tr>
 </table>
 
 ## Arguments
 <table>
 <tr><td><code>app_list</code></td><td>App list. w - Word, e - Excel, p - PowerPoint, o - Outlook, n - OneNote. Default: 'w e p o n'.</td></tr>
-<tr><td><code>lang_list</code></td><td>Langauge list: ru pl de etc, see filenames with parameter '-verb'. Default: 'en ru'.</td></tr>
-<tr><td><code>proof_list</code></td><td>Proofingtools list: russian finnish german etc, see filenames with parameter '-verb'. Wildcard '*' is available. Default: 'english russian'.</td></tr>
-<tr><td><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty - removes folder 'DFonts' (default); <i>fontset</i> - removes fonts of predefined fontset; <i>mask</i> - removes selection: <i>*.*, arial*, *.ttc</i> etc. If you use single '*' enclose it in quotation marks: "*". Predefined fontsets: <i>library, cyrdfonts, noncyr, chfonts, sysfonts, symfonts</i>. See parameter '-fontset' and details in code. Fontset 'library' removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (DFonts against libraries). You can use list of fontsets.</td></tr>
-<tr><td><code>destination</code></td><td>Backup destination folderpath for fonts. Default value is '~/Desktop/MSOFonts'. You can use predefined destinations: <i>syslib</i> - system library; <i>userlib</i> - user library.</td></tr>
+<tr><td><code>lang_list</code></td><td>Langauge list: <code>ru pl de</code> etc, see filenames with parameter <code>-verb</code>. Default: <code>en ru</code>.</td></tr>
+<tr><td><code>proof_list</code></td><td>Proofingtools list: <code>russian finnish</code> german etc, see filenames with parameter <code>-verb</code>. Wildcard '*' is available. Default: <code>english russian</code>.</td></tr>
+<tr><td><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty - removes folder 'DFonts' (default); <i>fontset</i> - removes fonts of predefined fontset; <i>mask</i> - removes selection: <i>*.*, arial*, *.ttc</i> etc. If you use single '*' enclose it in quotation marks: "*". Predefined fontsets: <i>library, cyrdfonts, noncyr, chfonts, sysfonts, symfonts</i>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (DFonts against libraries). You can use list of fontsets.</td></tr>
+<tr><td><code>destination</code></td><td>Backup destination folderpath for fonts. Default value is '~/Desktop/MSOFonts'. You can use predefined destinations: <code>syslib</code> - system library; <code>userlib</code> - user library.</td></tr>
 </table>
 ## Parameters
 <table>
 <tr><td><code>-app</code></td> <td>Filter <i>app_list</i>. Selects application to process.</td></tr>
-<tr><td><code>-lang</code></td> <td>Exclusive filter <i>lang_list</i>. Removes UI languages except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults.</td></tr>
-<tr><td><code>-proof</code></td> <td>Exclusive filter <i>proof_list</i>. Removes proofing tools except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults.</td></tr>
-<tr><td><code>-font</code></td> <td>Filter <i>font_pattern</i>. Removes selected fonts or 'DFonts' folder. Available fontsets: <i>cyrdfonts, noncyr, chinese, sysfonts</i>. Parameter '-rev' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update.</td></tr>
+<tr><td><code>-lang</code></td> <td>Exclusive filter <i>lang_list</i>. Removes UI languages except defaults and user list. See also parameter <code>-rev</code>; it reverses user selection except defaults.</td></tr>
+<tr><td><code>-proof</code></td> <td>Exclusive filter <i>proof_list</i>. Removes proofing tools except defaults and user list. See also parameter <code>-rev</code>; it reverses user selection except defaults.</td></tr>
+<tr><td><code>-font</code></td> <td>Filter <i>font_pattern</i>. Removes selected fonts or 'DFonts' folder. Available fontsets: <i>cyrdfonts, noncyr, chinese, sysfonts</i>. Parameter <code>-rev</code> ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update.</td></tr>
 <tr><td><code>-backup</code></td> <td>Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup alternates all deletions to backup.</td></tr>
-<tr><td><code>-ex</code></td> <td>Exclusive filter <i>font_pattern</i>. Excludes font selection with parameter '-font'. Only mask can be used as <i>font_pattern</i>.</td></tr>
+<tr><td><code>-ex</code></td> <td>Exclusive filter <i>font_pattern</i>. Excludes font selection with parameter <code>-font</code>. Only mask can be used as <i>font_pattern</i>.</td></tr>
 <tr><td><code>-flist</code></td> <td>Switch. Removes fontlist (.plist) files.</td></tr>
-<tr><td><code>-all</code></td> <td>Switch. Activates all cleaning options: <i>lang, proof, font, flist, cache</i>. It does not affect a parameter '-app'.</td></tr>
+<tr><td><code>-all</code></td> <td>Switch. Activates all cleaning options: <i>lang, proof, font, flist, cache</i>. It does not affect a parameter <code>-app</code>.</td></tr>
 <tr><td><code>-cache</code></td> <td>Switch. Cleans font cache.</td></tr>
 <tr><td nowrap><code>-verbose</code></td> <td>Switch. Shows objects to be removed in view mode.</td></tr>
 <tr><td><code>-report</code></td> <td>Switch. Shows statistics on objects.</td></tr>
 <tr><td nowrap><code>-fontset</code></td> <td>Switch. Shows predefined fontsets.</td></tr>
-<tr><td><code>-rev</code></td> <td>Switch. Reverses effect of 'lang' and 'proof' filters.</td></tr>
+<tr><td><code>-rev</code></td> <td>Switch. Reverses effect of <code>-lang</code> and <code>-proof</code> filters.</td></tr>
 <tr><td><code>-help</code></td> <td>Switch. Shows help page. (Optional)</td></tr>
 <tr><td><code>-run</code></td> <td>Switch. Default mode is view (test). Activates operations execution.</td></tr>
 </table>
