@@ -3,6 +3,23 @@
 # Welcome user!
 # To get help just run this script without parameters.
 
+# .SYNOPSIS
+#	msomtu - Microsoft Office maintenance utility. Purpose - clean up MSO.
+#
+# .LINKS
+#	Inspiration idea     : https://github.com/goodbest/OfficeThinner
+#	On OS X & MSO fonts  : http://www.jklstudios.com/misc/osxfonts.html
+#	Git Repo             : https://github.com/scriptingstudio/msomtu
+#
+# .TODO
+#	- cleanup code; there are artefacts/leftovers 
+#	  after migration from previous version of the script
+#	- get more specific on duplicates and fontsets
+#	- migrate to input parser G3
+#	- uninstall MSO option
+#	- logging
+#
+
 defstate='skip'
 cmd_clean=0
 # params
@@ -34,7 +51,7 @@ defapp='w e p o n'
 deflang='ru' # user pref; english is added in create-filter
 defproof='russian' # user pref; english is added in create-filter
 
-WordPATH="Microsoft Word.app" # hashtable: bash4
+WordPATH="Microsoft Word.app" # apppath hashtable: bash4
 ExcelPATH="Microsoft Excel.app"
 PowerPointPATH="Microsoft PowerPoint.app"
 OutlookPATH="Microsoft Outlook.app"
