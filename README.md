@@ -6,13 +6,13 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 
 ## Notes
 * ***Safe scripting*** technique — "Foolproof" or "Harmless Run". Default running mode is view. You cannot change or harm your system without switch `-run`. Parameter `-cache` does not depend on `-run`.
-* As MSO is installed with root on `/Applications` directory you have to run this script with `sudo` to make changes.
-* As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later.
+* As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
+* As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the `Fonts` folder within each app. The rest are the `DFonts` folder.
 * File operations are case insensitive.
-* If you remove fonts, remove font lists as well. `DFonts` folder and font lists are safe to remove. Some of the fonts you may find useful, save them before deletion.
-* **Caution**: do not remove fonts from `Fonts` folder! These are minimum needed for MSO applications to work.
+* If you remove fonts, remove font lists as well. The `DFonts` folder and font lists are safe to remove. Some of the fonts you may find useful, save them before deletion.
+* **Caution**: do not remove fonts from the `Fonts` folder! These are minimum needed for MSO applications to work.
 * Apply thinning after every MSO update.
-* Default settings for `-lang` and `-proof` parameters: *english* and *russian*. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs.
+* Default settings for the `-lang` and `-proof` parameters: *english* and *russian*. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs.
 
 ## Usage
 
@@ -56,12 +56,12 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>-backup</code></td> <td>Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup alternates all deletions to backup.</td></tr>
 <tr><td valign="top"><code>-ex</code></td> <td>Exclusive filter <code>font_pattern</code>. Excludes font selection with parameter <code>-font</code>. Only mask can be used as <i>font_pattern</i>.</td></tr>
 <tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (.plist) files.</td></tr>
-<tr><td valign="top"><code>-all</code></td> <td>Switch. Activates all cleaning options: <code>lang</code>, <code>proof</code>, <code>font</code>, <code>flist</code>, <code>cache</code>. It does not affect a parameter <code>-app</code>.</td></tr>
-<tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans font cache.</td></tr>
-<tr><td nowrap valign="top"><code>-verbose</code></td> <td>Switch. Shows objects to be removed in view mode.</td></tr>
+<tr><td valign="top"><code>-all</code></td> <td>Switch. Activates all cleaning options: <code>lang</code>, <code>proof</code>, <code>font</code>, <code>flist</code>, <code>cache</code>. It does not affect the parameter <code>-app</code>.</td></tr>
+<tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans up font cache.</td></tr>
+<tr><td nowrap valign="top"><code>-verbose</code></td> <td>Switch. Shows objects to be removed, in view mode.</td></tr>
 <tr><td valign="top"><code>-report</code></td> <td>Switch. Shows statistics on objects.</td></tr>
 <tr><td nowrap valign="top"><code>-fontset</code></td> <td>Switch. Shows predefined fontsets.</td></tr>
-<tr><td valign="top"><code>-rev</code></td> <td>Switch. Reverses effect of <code>-lang</code> and <code>-proof</code> filters.</td></tr>
+<tr><td valign="top"><code>-rev</code></td> <td>Switch. Reverses effect of the <code>-lang</code> and <code>-proof</code> filters.</td></tr>
 <tr><td valign="top"><code>-help</code></td> <td>Switch. Shows help page. (Optional)</td></tr>
 <tr><td valign="top"><code>-run</code></td> <td>Switch. Default mode is view (test). Activates operations execution.</td></tr>
 </table>
@@ -79,7 +79,7 @@ Thin all apps with all parameters:
 $ sudo msomtu.sh -all -run
 ```
 
-Show app ('w e' for Word and Excel) language files installed:
+Show which app ('w e' for Word and Excel) language files installed:
 
 ```sh
 $ msomtu.sh -app "w e" -lang -verbose
@@ -103,19 +103,19 @@ Remove a number of proofing tools:
 $ sudo msomtu.sh -proof "Indonesian Isix*" -rev -run 
 ```
 
-Show duplicates of library fonts for Word:
+Show duplicates of the library fonts for Word:
 
 ```sh
 $ msomtu.sh -font lib -app w -verbose 
 ```
 
-Remove duplicated fonts in libraries for Word:
+Remove duplicated fonts in the libraries for Word:
 
 ```sh
 $ sudo msomtu.sh -font lib -app w -run 
 ```
 
-Remove 'chinese' and Arial fonts:
+Remove `chinese` and Arial fonts:
 
 ```sh
 $ sudo msomtu.sh -font "chinese arial*" -run 
