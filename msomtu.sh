@@ -19,7 +19,7 @@
 #	- uninstall MSO option
 #	- logging
 #	- help page: more clear text; format;
-#
+# 
 
 defstate='skip'
 cmd_clean=0
