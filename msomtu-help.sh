@@ -1,5 +1,5 @@
 if [[ "${LANG%\.*}" == "ru_RU" ]]; then
-	printb "НАЗНАЧЕНИЕ:" 
+	printb "НАЗНАЧЕНИЕ:"
 	print-column 0 $p4 "" "msomtu - скрипт конфигурации состава компонентов Microsoft Office (MSO)." 
 	echo
 	
