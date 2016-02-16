@@ -7,7 +7,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 ## Notes
 * ***Safe scripting*** technique — "Foolproof" or "Harmless Run". Default running mode is view. You cannot change or harm your system without switch `-run`. Parameter `-cache` does not depend on `-run`.
 * As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
-* As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the `Fonts` folder within each app. The rest are the `DFonts` folder.
+* As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the `Fonts` folder within each app. The rest are in the `DFonts` folder.
 * If you remove fonts, remove font lists as well. The `DFonts` folder and font lists are safe to remove. Some of the fonts you may find useful, save them before deletion.
 * **Caution**: do not remove fonts from the `Fonts` folder! These are minimum needed for the MSO applications to work.
 * File operations are case insensitive.
