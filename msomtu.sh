@@ -16,9 +16,9 @@
 #	  after migration from previous version of the script
 #	- get more specific on duplicates and fontsets
 #	- migrate to input parser G3
-#	- uninstall MSO option
-#	- logging
-#	- help page: more clear text; format;
+#	- uninstall MSO option (?)
+#	- logging (?)
+#	- help page: more clear text; format: split output onto short and full parts (-fullhelp);
 # 
 
 defstate='skip'
