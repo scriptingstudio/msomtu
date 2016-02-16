@@ -18,6 +18,7 @@
 #	- migrate to input parser G3
 #	- uninstall MSO option
 #	- logging
+#	- help page: more clear text; format;
 #
 
 defstate='skip'
@@ -48,7 +49,7 @@ version='2.8.21'
 util="${0##*/}"
 principalname='msomtu'
 defapp='w e p o n'
-deflang='ru' # user pref; english is added in create-filter
+deflang='ru' # user pref; english is added in create-filter; there are dependencies in code
 defproof='russian' # user pref; english is added in create-filter
 
 WordPATH="Microsoft Word.app" # apppath hashtable: bash4
@@ -91,7 +92,7 @@ function main () {
 	############ Simple input named parameter parser v2 [inline method]
 	local cmd='' # operation list - "clean=(flist font proof lang) report cache backup fontset"
 	local script_params="$#"
-	local PARGS=(); local INPUTPARAM=''
+	local PARGS=() INPUTPARAM=''
 	while [ "$#" != 0 ]; do
 		[[ "${1:0:1}" == "-" ]] && { INPUTPARAM="$1"; shift; }
 		PARGS=()
@@ -186,6 +187,7 @@ function main () {
 	# END input parser
 	
 	############ Operation selector
+	local c
 	cmd=$(unique "$cmd")
 	prepare-env
 	echo
@@ -232,7 +234,7 @@ function uninstall-mso () { # UNDER CONSTRUCTION
 
 function prepare-env () {
 # Preparing runtime environment
-	local temp=$(unique "$cmd_app")
+	local temp=$(unique "$cmd_app") appPATH i
 	cmd_app=()
 	for i in $temp; do # hashtable: bash4
 		[[ $i == 'w' ]] && cmd_app+=("$WordPATH")
@@ -256,6 +258,7 @@ function prepare-env () {
 } # END prepare
 
 function check-app () {
+	local appPATH
 	if [[ ${#appPathArray} -eq 0 ]]; then
 		echo "Nothing to do - no app defined or found. Bye."
 		exit
@@ -282,12 +285,13 @@ function make-report () {
 	__separate-unit () { fs=${fs/G/ G}; fs=${fs/M/ M}; }
 	local versionPATH="/Contents/Info.plist"
 	local versionKey="CFBundleShortVersionString"
-	local fmt1='   %-18s : %8s  %10s\n'; local na='--'
+	local fmt1='   %-18s : %8s  %10s\n' na='--'
+	local appPATH wpath appVersion msbuild fs fc plist flist filter
 	for appPATH in "${appPathArray[@]}"; do
 		printb "Processing '$appPATH'"
-		local wpath="$basePATH$appPATH$fontPATH/DFonts"
-		local appVersion=$(defaults read "$basePATH$appPATH$versionPATH" $versionKey)
-		local msbuild=$(defaults read "$basePATH$appPATH$versionPATH" "MicrosoftBuildNumber")
+		wpath="$basePATH$appPATH$fontPATH/DFonts"
+		appVersion=$(defaults read "$basePATH$appPATH$versionPATH" $versionKey)
+		msbuild=$(defaults read "$basePATH$appPATH$versionPATH" "MicrosoftBuildNumber")
 		printf "$fmt1" "Version (build)" "$appVersion" "($msbuild)"
 		##### fonts
 		if [[ -d "$wpath" ]]; then
@@ -306,8 +310,8 @@ function make-report () {
 		printf "$fmt1" "Fonts" "${fc// }" "${fs}B"
 		##### fontlists
 		wpath="$basePATH$appPATH$fontPATH"
-		#local plist=$(find "$wpath" -type f -name font*.plist -d 1)
-		local plist=("$wpath/"font*.plist)
+			#--- plist=$(find "$wpath" -type f -name font*.plist -d 1)
+		plist=("$wpath/"font*.plist)
 		if [[ -z "$plist" ]]; then
 			printf "$fmt1" "Plists" $na
 		else
@@ -317,8 +321,8 @@ function make-report () {
 			printf "$fmt1" "Plists" "${fc// }" "$fs $unit"
 		fi
 		##### UI languages
-		local filter=$( create-filter "lang" )
-		local flist=$(find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter)
+		filter=$( create-filter "lang" )
+		flist=$(find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter)
 		if [[ -z "$flist" ]]; then
 			printf "$fmt1" "Langpacks" $na
 		else
@@ -352,7 +356,7 @@ function make-report () {
 } # END report
 
 function clean-application () {
-	local fmt1='   %-14s : %6s %s\n'
+	local fmt1='   %-14s : %6s %s\n' appPATH wpath
 	for appPATH in "${appPathArray[@]}"; do
 		printb "Processing '$appPATH'"
 	# - removing of font files/folder DFonts
@@ -383,7 +387,7 @@ function clean-application () {
 } # END cleanup wrapper
 
 function clean-font () {
-	local wpath="$1"
+	local wpath="$1" fl=() name='' f m filter
 	if [[ ! -d "$wpath" ]]; then
 		echo "  Folder 'DFonts' does not exist."
 		return
@@ -394,7 +398,6 @@ function clean-font () {
 	fi
 	
 	cmd_font=$(unique "$cmd_font")
-	local fl=(); local name=''
 	for f in $cmd_font; do 	# expand fontsets
 		[[ $f == 'userlib' || $f == 'syslib' ]] && continue
 		m=$(inarray "$f" dfontsets)
@@ -405,7 +408,7 @@ function clean-font () {
 			fl+=("$f")
 		fi
 	done # fontset selector
-	local filter=$(create-filter 'exclude')
+	filter=$(create-filter 'exclude')
 	if [[ $run -eq 1 ]]; then # action mode
 		for f in $cmd_font; do
 			[[ "$f" == 'folder' ]] && rm -fdr "$wpath"
@@ -466,11 +469,12 @@ function remove-duplicate () {
 } # END remove duplicate fonts
 
 function find-newfont () {
-	local fsfiles=''; local allfiles=(); local list=''
+	local fsfiles='' allfiles=() list=''
+	local fc f i name fs newfont
 	echo "Searching for new fonts..."
 	for i in ${dfontsets[@]}; do
-    	local name=$i[@]
-		local fs=("${!name}")
+    	name=$i[@]
+		fs=("${!name}")
 		for f in "${fs[@]}"; do
 			list=$(find "$wpath" -type f -d 1 -iname "$f" -exec basename {} \;)
 			[[ "$list" != '' ]] && fsfiles+=$'\n'"$list"
@@ -482,7 +486,7 @@ function find-newfont () {
 	echo "Total font files  : ${fc// }"
 	fc=$(echo "${fsfiles[@]}" | wc -l)
 	echo "Fonts by fontsets : ${fc// }"
-	local newfont=$( comm -2 -3 -i <(echo "${allfiles[@]}" | sort -u) <(echo "${fsfiles[@]}" | sort -u) )
+	newfont=$( comm -2 -3 -i <(echo "${allfiles[@]}" | sort -u) <(echo "${fsfiles[@]}" | sort -u) )
 	if [[ "${#newfont}" -eq 0 ]]; then
 		echo "No new fonts found."
 		return
@@ -546,7 +550,7 @@ function clean-ptools () {
 
 function display-fontset () {
 	local fmt2='%*s %-13s  %s %b\n'
-	p4=4; p20=20;
+	local p4=4 p20=20
 	local fs1=$(joina , "${sysfonts[@]}")
 	local fs2=$(joina , "${chfonts[@]}")
 	local fs3=$(joina , "${noncyr[@]}")
@@ -581,8 +585,9 @@ function invoke-backup () { # for fonts only
 	fi
 	
 	printb "Backup fonts of '$appPathArray'"
-	local bsrc="$basePATH$appPathArray$fontPATH"; local bset=()
+	local bsrc="$basePATH$appPathArray$fontPATH" bset=()
 	local bdest="${cmd_backup}"
+	local ffolder="DFonts" f i m a name fl fc=0 c
 	if [[ "$bdest" == 'syslib' ]]; then
 		bdest="/Libraries/Fonts/"
 	elif [[ "$bdest" == 'userlib' ]]; then
@@ -600,23 +605,22 @@ function invoke-backup () { # for fonts only
 	[[ "$bdest" == '' ]] && return 
 	
 	[[ "$cmd_font" == '' ]] && cmd_font="*.*"
-	local ffolder="DFonts"
 	for f in $(unique "${cmd_font}"); do # expand array
 		[[ $f == userlib || $f == syslib ]] && continue
 		[[ $f == folder ]] && f="*.*"
 		[[ "$f" == 'cyrfonts' || "$f" == 'msofonts' ]] && ffolder='Fonts'
 		m=$(inarray "$f" allfontsets)
 		if [[ $m ]]; then
-			local name=$m[@]; a=("${!name}")
+			name=$m[@]; a=("${!name}")
 			bset+=("${a[@]}")
 		else
 			bset+=("$f")
 		fi
 	done # fontset selector
-	bsrc+="/$ffolder"; local fc=0
+	bsrc+="/$ffolder"
 	if [[ $run -eq 1 ]]; then
 		for i in "${bset[@]}"; do
-			local fl=$(find "$bsrc" -type f -iname "$i" -d 1)
+			fl=$(find "$bsrc" -type f -iname "$i" -d 1)
 			[[ "${fl// }" == '' ]] && continue
 			echo "$fl" | xargs -I{} cp -f "{}" "$bdest"/
 			error=$?
@@ -634,7 +638,7 @@ function invoke-backup () { # for fonts only
 	else # trace mode
 		echo "TRACE: source folder : '$bsrc'."
 		for i in "${bset[@]}"; do
-			local fl=$(find "$bsrc" -type f -iname "$i" -d 1 -exec basename {} \;)
+			fl=$(find "$bsrc" -type f -iname "$i" -d 1 -exec basename {} \;)
 			[[ "${fl// }" == '' ]] && continue
 			c=$(echo "$fl" | wc -l); [[ "$fl" == "" ]] && c=0;
 			let "fc+=$c"
@@ -654,7 +658,7 @@ function clean-cache () {
 } # END cache
 
 function show-helppage () {
-	local p3=3; local p4=4; local p6=6; local p8=8; local p20=20
+	local p3=3 p4=4 p6=6 p8=8 p20=20
 	local fs="${dfontsets[@]/chfonts/chinese}"; fs=${fs// /, }
 
 	if [[ "${LANG%\.*}" != "en_US" && "${LANG%\.*}" != "en_GB" && -z $nl ]]; then
@@ -681,7 +685,7 @@ function show-helppage () {
 	print-column 0 $p6 "" "Predefined fontsets do not intersect." '-'
 	print-column 0 $p6 "" "Script only accepts named parameters." '-'
 	print-column 0 $p6 "" "Apply thinning after every MSO update." '-'
-	print-column 0 $p6 "" "You can change default settings in code for your needs." '-'
+	print-column 0 $p6 "" "Default settings for '-lang' and '-proof' parameters: english and russian. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change default settings in code for your needs." '-'
 	echo
 
 	printb "USAGE:"
@@ -692,7 +696,7 @@ function show-helppage () {
 	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-?] [-run]"
 	echo 
 
-	local mp4=-4; local p12=12
+	local mp4=-4 p12=12
 	printb "USE CASES:"
 	print-padding $mp4 "- Getting MSO info" 
 		print-column 0 $p12 "" "Parameter '-report'."
@@ -795,7 +799,7 @@ function display-finalDU () {
 
 ########## Common routines
 function create-filter () {
-	local l=''; local pre=''; local sfx=''; local search=''
+	local l='' pre='' sfx='' search='' i
 	if [[ "$1" == "lang" ]]; then
 		l="$cmd_lang"
 		pre=".+/(en|en_GB"
@@ -831,7 +835,7 @@ function printb () { echo -e "\033[1m$1\033[0m"; }
 function printu () { echo -e "\033[4m$1\033[0m"; }
 function print-padding () {
 	[[ ! -n "$2" || -z "$1" ]] && return
-	local str=$2; local pad=''
+	local str=$2 pad=''
 	[[ $1 -ne 0 ]] && printf -v pad "%*s" $1 ' '
 	case "$3" in
 		b) if [[ $1 -gt 0 ]]; then echo -e "\033[1m$str\033[0m$pad"; 
@@ -849,10 +853,11 @@ function print-column () {
 # $3 - column1 text
 # $4 - column2 text
 # $5 - divider char
-	local pad1=$1; local pad2=$2; 
-	local str1="$3"; local str2="$4"; local div=${5:-' '} 
+	local pad1=$1 pad2=$2
+	local str1="$3" str2="$4" div=${5:-' '} 
 	local w=$(tput cols); let "w--"; [[ $w -gt 120 ]] && w=100
-	local rightpad=4; local gap=3 # predefined margins
+	local rightpad=4 gap=3 # predefined margins
+	local s1 s2
 	
 	[[ $gap -lt 3 ]] && div=''
 	[[ $pad2 -lt $pad1 ]] && pad2=$pad1
@@ -872,8 +877,8 @@ function print-column () {
 		count=${#col1[@]}; else count=${#col2[@]}; 
 	fi 
 	for (( i=0; i < $count; i++ )); do
-		local s1="${col1[$i]}"
-		local s2="${col2[$i]}"
+		s1="${col1[$i]}"
+		s2="${col2[$i]}"
 		[[ ${#s1} -gt $((0-$wcol1)) ]] && s1=${s1:0:$((0-$wcol1-1))}
 		printf "%${pad1}s%${wcol1}s%${gap}s%s\n" ' ' "$s1" "$div " "$s2"
 		div=''

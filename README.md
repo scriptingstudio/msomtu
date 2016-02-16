@@ -12,7 +12,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * If you remove fonts, remove font lists as well. `DFonts` folder and font lists are safe to remove. Some of the fonts you may find useful, save them before deletion.
 * **Caution**: do not remove fonts from `Fonts` folder! These are minimum needed for MSO applications to work.
 * Apply thinning after every MSO update.
-* You can change default settings in code for your needs.
+* Default settings for `-lang` and `-proof` parameters: *english* and *russian*. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs.
 
 ## Usage
 
