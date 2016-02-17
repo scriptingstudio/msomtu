@@ -18,6 +18,7 @@
 #	- migrate to input parser G3
 #	- uninstall MSO option (?)
 #	- logging (?)
+#	- view mode: estimate of thinning report
 #	- help page: more clear text; format;
 # 
 
@@ -45,7 +46,7 @@ cmd_uninstall=''
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.8.24'
+version='2.8.25'
 util="${0##*/}"
 principalname='msomtu'
 defapp='w e p o n'
@@ -180,8 +181,7 @@ function main () {
 	if [[ "$cmd_cache" == 1 ]];    then cmd="$cmd cache"; fi
 	if [[ "$cmd_fontset" == 1 ]];  then cmd="fontset"; fi
 	if [[ "$cmd_report" == 1 ]];   then
-		cmd_app="$defapp"
-		cmd="report"
+		cmd="report"; #cmd_app="$defapp"
 	fi
 	[[ "$script_params" == 0 || "$cmd_help" -eq 1 || "$cmd" == '' ]] && cmd='help'
 	# END input parser
@@ -189,7 +189,7 @@ function main () {
 	############ Operation selector
 	local c
 	cmd=$(unique "$cmd")
-	prepare-env
+	prepare-env	
 	echo
 	for c in $cmd; do
 		case $c in
@@ -201,11 +201,13 @@ function main () {
 			clean) 
 				check-app
 				echo
-				display-initialDU
-				echo
+				local score1 score2
+				get-diskusage score1
 				clean-application
+				get-diskusage score2
+				show-appdu score1 score2
 				echo
-				display-finalDU ;;
+				;;
 				
 			backup) 
 				invoke-backup ;;
@@ -286,16 +288,17 @@ function make-report () {
 	local versionPATH="/Contents/Info.plist"
 	local versionKey="CFBundleShortVersionString"
 	local fmt1='   %-18s : %8s  %10s\n' na='--'
-	local appPATH wpath appVersion msbuild fs fc plist flist filter
+	local appPATH wpath appVersion msbuild fs fc plist flist filter appfat
 	for appPATH in "${appPathArray[@]}"; do
 		printb "Processing '$appPATH'"
 		wpath="$basePATH$appPATH$fontPATH/DFonts"
 		appVersion=$(defaults read "$basePATH$appPATH$versionPATH" $versionKey)
 		msbuild=$(defaults read "$basePATH$appPATH$versionPATH" "MicrosoftBuildNumber")
 		printf "$fmt1" "Version (build)" "$appVersion" "($msbuild)"
+		appfat=0
 		##### fonts
 		if [[ -d "$wpath" ]]; then
-			fs=''; fs=$(du -sh "$wpath" | cut -f 1)
+			fs=''; fs=$(du -sh "$wpath" | cut -f 1); let "appfat+=${fs%[MGK]*}"
 			fc=$(ls -A "$wpath" | wc -l) #fc=$(find "$wpath" -type f | wc -l)
 			__separate-unit
 			printf "$fmt1" "DFonts" "${fc// }" "${fs}B"
@@ -328,7 +331,7 @@ function make-report () {
 		else
 			fs=$(du -sh -k "$wpath/"*.lproj | awk '{ total += $1 }; END {print total}')
 			__normalize-number
-			fc=$(echo "$flist" | wc -l)
+			fc=$(echo "$flist" | wc -l); let "appfat+=${fs%[MGK]*}"
 			printf "$fmt1" "Langpacks" "${fc// }" "$fs $unit"
 		fi
 		##### proofing tools
@@ -339,7 +342,7 @@ function make-report () {
 			printf "$fmt1" "Proofingtools" $na
 		else
 			fs=''; fs=$(du -sh "$wpath" | cut -f 1)
-			fc=$(echo "$flist" | wc -l)
+			fc=$(echo "$flist" | wc -l); let "appfat+=${fs%[MGK]*}"
 			__separate-unit
 			printf "$fmt1" "Proofingtools" "${fc// }" "${fs}B"
 		fi
@@ -348,10 +351,10 @@ function make-report () {
 		fc=$(ls -AR "$basePATH$appPATH" | wc -l)
 		__separate-unit; fc=$(printf "%'d" $fc)
 		printf "$fmt1" "Total app bundle" "$fc" "${fs}B"
+		printf "$fmt1" "Approx. thinning" '' "-$appfat MB"
 
 		echo
 	done # app selection
-	##echo "[*] Total includes all of the files in the application container."
 	echo
 } # END report
 
@@ -426,14 +429,14 @@ function clean-font () {
 	fi
 	
 	echo "  TRACE: remove fonts/folder '$wpath'."
-	[[ $cmd_verb -eq 0 ]] && return 
+	[[ $cmd_verb -eq 0 ]] && return  # calc du here!
 	for f in $cmd_font; do
 		[[ "$f" == 'folder' ]] && ls -A "$wpath"
 		[[ "$f" == lib* ]] && remove-duplicate "$wpath"
 	done
 	for f in "${fl[@]}"; do
 		if [[ "$filter" != '' ]]; then
-			find -E "$wpath" -type f -iname "$f" -d 1 ! -iregex "$filter" -exec basename {} \; 
+			find -E "$wpath" -type f -iname "$f" -d 1 ! -iregex "$filter" -exec basename {} \;
 		else
 			find "$wpath" -type f -iname "$f" -d 1 -exec basename {} \;
 		fi
@@ -520,7 +523,7 @@ function clean-lang () {
 			__rm-lang
 		else # trace mode
 			echo "  TRACE: remove extra UI languages - '$cmd_lang'."
-			[[ $cmd_verb -eq 1 ]] && __list-lang
+			[[ $cmd_verb -eq 1 ]] && __list-lang # calc du here!
 		fi
 	fi
 } # END lang
@@ -534,7 +537,7 @@ function clean-ptools () {
 		else # trace mode
 			cmd_proof=$(unique "english $cmd_proof")
 			echo "  TRACE: remove extra proofing tools. Keep '$cmd_proof'."
-			[[ $cmd_verb -eq 1 ]] &&
+			[[ $cmd_verb -eq 1 ]] && # calc du here!
 				find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec basename {} \;
 		fi
 	else # reverse filter
@@ -543,7 +546,7 @@ function clean-ptools () {
 		else # trace mode
 			echo "  TRACE: remove extra proofing tools - '$cmd_proof'."
 			[[ $cmd_verb -eq 1 ]] &&
-				find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec basename {} \;
+				find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec basename {} \; # calc du here!
 		fi
 	fi
 } # END proofingtools
@@ -786,22 +789,41 @@ function show-helppage () {
 	echo
 	fi
 	
+	echo $helpfile
 	exit 0
 } # END help page
 
 function write-log () { echo; } # under construction
-function display-initialDU () {
-	echo "Before cleaning MSO is taking:"
-	diskUsage "${appPathArray[@]}"
-} # END print du
-
-function display-finalDU () {
-	if [[ $run -eq 1 ]]; then
-		echo "After cleaning MSO is taking:"
-		diskUsage "${appPathArray[@]}"
-		printf '\n%s\n' "Office thinning complete."
-	fi
-} # END print du
+function calc-du () { echo; } # under construction
+function get-diskusage () {
+	[[ $run -eq 0 ]] && return
+	local app s1 score=()
+	for app in "${appPathArray[@]}"; do
+		s1=$( du -sh "$basePATH$app" )
+		score+=("$s1")
+	done
+	eval $1='("${score[@]}")'
+} # END MSO DU
+function show-appdu () {
+	[[ $run -eq 0 ]] && return
+	local s1 s2 a1 a2 as1 as2 du1=$1[@] du2=$2[@]
+	du1=("${!du1}"); du2=("${!du2}")
+	local fmt1='%-12s %8s %8s\n'
+	printb "After-effect of MSO thinning report"
+	printf "$fmt1" 'Application' 'Before' 'After'
+	printf "$fmt1" '-----------' '------' '-----'
+	for s1 in "${du1[@]}"; do
+		a1="${s1#*/}"
+		as1=${s1%%/*}; as1=$(echo -n $as1)
+		for s2 in "${du2[@]}"; do
+			if [[ "$a1" == "${s2#*/}" ]]; then
+				as2=${s2%%/*}; as2=$(echo -n $as2)
+				a1="${a1##*/}"; a1=${a1/.app/}
+				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2"
+			fi
+		done
+	done
+} # END app disk usage score report
 
 ########## Common routines
 function create-filter () {
@@ -901,12 +923,6 @@ function inarray () { # test item ($1) in array ($2 - passing by name!)
     local a=("${!name}") # expand to value - magic!
 	comm -1 -2 -i <(printf '%s\n' "${s[@]}" | sort -u) <(printf '%s\n' "${a[@]}" | sort -u)
 }
-
-function diskUsage () {
-	for appPATH in "${@}"; do
-		du -sh "$basePATH$appPATH"
-	done
-} # END MSO DU
 
 function mktest () {
 # development environment; I use it for testing; test data manager is in another script
