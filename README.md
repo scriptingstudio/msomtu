@@ -131,7 +131,7 @@ $ msomtu.sh -font -rev -app o
 Exclude a few useful fonts from deletion for Word:
 
 ```sh
-$ sudo msomtu.sh -font *.* -ex "brit* rockwell*" -app w 
+$ sudo msomtu.sh -font *.* -ex "brit* rockwell*" -app w -run 
 ```
 
 Clean font cache:
