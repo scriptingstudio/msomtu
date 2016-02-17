@@ -18,7 +18,7 @@
 #	- migrate to input parser G3
 #	- uninstall MSO option (?)
 #	- logging (?)
-#	- view mode: estimate of thinning report
+#	- view mode: assmt of thinning report
 #	- help page: more clear text; format;
 # 
 
@@ -50,10 +50,11 @@ version='2.8.25'
 util="${0##*/}"
 principalname='msomtu'
 defapp='w e p o n'
-deflang='ru' # user pref; english is added in create-filter; there are dependencies in code
+		# THERE ARE DEPENDENCIES IN CODE!
+deflang='ru' # user pref; english is added in create-filter;
 defproof='russian' # user pref; english is added in create-filter
 
-WordPATH="Microsoft Word.app" # apppath hashtable: bash4
+WordPATH="Microsoft Word.app" # app-path hashtable -> bash4 :-(
 ExcelPATH="Microsoft Excel.app"
 PowerPointPATH="Microsoft PowerPoint.app"
 OutlookPATH="Microsoft Outlook.app"
@@ -119,7 +120,7 @@ function main () {
 				cmd+=" clean"; cmd_lang=""
 				[[ "$PARGS" ]] && cmd_lang="$PARGS" ;;
 			-verbose|-verb) cmd_verb=1 ;;
-			-report|-rep) cmd+=" report"; cmd_report=1 ;;
+			-report|-rep|-info) cmd+=" report"; cmd_report=1 ;;
 			-cache) cmd+=" cache"; cmd_cache=1 ;;
 			-fontset|-fs) 
 				cmd+=" fontset"; cmd_fontset=1; cmd_app=() ;;
@@ -201,13 +202,12 @@ function main () {
 			clean) 
 				check-app
 				echo
-				local score1 score2
+				local score1 score2 appdu=()
 				get-diskusage score1
 				clean-application
 				get-diskusage score2
-				show-appdu score1 score2
-				echo
-				;;
+				show-appdu score1 score2 appdu
+				echo ;;
 				
 			backup) 
 				invoke-backup ;;
@@ -282,25 +282,27 @@ function make-report () {
 	__normalize-number () {
 		unit='KB'
 		[[ $fs -gt 1000 ]] && { let "fs/=1024"; unit='MB'; }
-		[[ $fs -gt 1000 ]] && { let "fs/=1024"; unit='GB'; }
+		[[ $fs -gt 1000 ]] && 
+		{ fs=$(awk "BEGIN {printf \"%.1f\",${fs}/1024}"); unit='GB'; }
+		#[[ $fs -gt 1000 ]] && { let "fs/=1024"; unit='GB'; }
 	}
 	__separate-unit () { fs=${fs/G/ G}; fs=${fs/M/ M}; }
 	local versionPATH="/Contents/Info.plist"
 	local versionKey="CFBundleShortVersionString"
 	local fmt1='   %-18s : %8s  %10s\n' na='--'
-	local appPATH wpath appVersion msbuild fs fc plist flist filter appfat
+	local appPATH wpath appVersion msbuild fs fc plist flist filter appfat appfiles
 	for appPATH in "${appPathArray[@]}"; do
 		printb "Processing '$appPATH'"
 		wpath="$basePATH$appPATH$fontPATH/DFonts"
 		appVersion=$(defaults read "$basePATH$appPATH$versionPATH" $versionKey)
 		msbuild=$(defaults read "$basePATH$appPATH$versionPATH" "MicrosoftBuildNumber")
 		printf "$fmt1" "Version (build)" "$appVersion" "($msbuild)"
-		appfat=0
+		appfat=0; appfiles=0
 		##### fonts
 		if [[ -d "$wpath" ]]; then
 			fs=''; fs=$(du -sh "$wpath" | cut -f 1); let "appfat+=${fs%[MGK]*}"
 			fc=$(ls -A "$wpath" | wc -l) #fc=$(find "$wpath" -type f | wc -l)
-			__separate-unit
+			__separate-unit; let "appfiles+=${fc// }"
 			printf "$fmt1" "DFonts" "${fc// }" "${fs}B"
 		else
 			printf "$fmt1" "DFonts" "does not exist"
@@ -321,6 +323,7 @@ function make-report () {
 			fs=$(du -sh -k "$wpath/"*.plist | awk '{ total += $1 }; END {print total}')
 			__normalize-number
 			fc=$(echo "$flist" | wc -l)
+			let "appfat+=${fs%[MGK]*}"; let "appfiles+=${fc// }"
 			printf "$fmt1" "Plists" "${fc// }" "$fs $unit"
 		fi
 		##### UI languages
@@ -331,7 +334,8 @@ function make-report () {
 		else
 			fs=$(du -sh -k "$wpath/"*.lproj | awk '{ total += $1 }; END {print total}')
 			__normalize-number
-			fc=$(echo "$flist" | wc -l); let "appfat+=${fs%[MGK]*}"
+			fc=$(echo "$flist" | wc -l); 
+			let "appfat+=${fs%[MGK]*}"; let "appfiles+=${fc// }"
 			printf "$fmt1" "Langpacks" "${fc// }" "$fs $unit"
 		fi
 		##### proofing tools
@@ -342,7 +346,8 @@ function make-report () {
 			printf "$fmt1" "Proofingtools" $na
 		else
 			fs=''; fs=$(du -sh "$wpath" | cut -f 1)
-			fc=$(echo "$flist" | wc -l); let "appfat+=${fs%[MGK]*}"
+			fc=$(echo "$flist" | wc -l); 
+			let "appfat+=${fs%[MGK]*}"; let "appfiles+=${fc// }"
 			__separate-unit
 			printf "$fmt1" "Proofingtools" "${fc// }" "${fs}B"
 		fi
@@ -350,17 +355,20 @@ function make-report () {
 		fs=$(du -sh "$basePATH$appPATH" | cut -f 1)
 		fc=$(ls -AR "$basePATH$appPATH" | wc -l)
 		__separate-unit; fc=$(printf "%'d" $fc)
+		printf "$fmt1" '' '' '------'
 		printf "$fmt1" "Total app bundle" "$fc" "${fs}B"
-		printf "$fmt1" "Approx. thinning" '' "-$appfat MB"
+		printf "$fmt1" "Approx. thinning" "$appfiles*" "-$appfat MB"
 
 		echo
 	done # app selection
+	echo "[*] Includes the default file sets which are reserved by settings."
 	echo
 } # END report
 
 function clean-application () {
-	local fmt1='   %-14s : %6s %s\n' appPATH wpath
+	local fmt1='   %-14s : %6s %s\n' appPATH wpath appfat
 	for appPATH in "${appPathArray[@]}"; do
+		appfat=0
 		printb "Processing '$appPATH'"
 	# - removing of font files/folder DFonts
 		[[ "$cmd_font" != '' ]] && 
@@ -384,12 +392,14 @@ function clean-application () {
 	# - cleaning of Proofing Tools; keep English*.proofingtool Grammar.proofingtool
 		[[ "$cmd_proof" != '' ]] &&
 			clean-ptools "$basePATH$appPATH$proofingPATH$proofingName"
-
+			
+		appdu+=("$appfat	$basePATH$appPATH")
 		echo
 	done
 } # END cleanup wrapper
 
 function clean-font () {
+	let "appfat+=100"
 	local wpath="$1" fl=() name='' f m filter
 	if [[ ! -d "$wpath" ]]; then
 		echo "  Folder 'DFonts' does not exist."
@@ -429,12 +439,12 @@ function clean-font () {
 	fi
 	
 	echo "  TRACE: remove fonts/folder '$wpath'."
-	[[ $cmd_verb -eq 0 ]] && return  # calc du here!
+	[[ $cmd_verb -eq 0 ]] && return
 	for f in $cmd_font; do
 		[[ "$f" == 'folder' ]] && ls -A "$wpath"
 		[[ "$f" == lib* ]] && remove-duplicate "$wpath"
 	done
-	for f in "${fl[@]}"; do
+	for f in "${fl[@]}"; do  # calc du here!
 		if [[ "$filter" != '' ]]; then
 			find -E "$wpath" -type f -iname "$f" -d 1 ! -iregex "$filter" -exec basename {} \;
 		else
@@ -561,23 +571,23 @@ function display-fontset () {
 	local fs5=$(joina , "${cyrfonts[@]}")
 	local fs6=$(joina , "${symfonts[@]}")
 	printb "Predefined fontsets:"
-	print-table $p4 $p20 "$fmt2" "sysfonts" "OS duplicated fonts (in DFonts):" "-"
-	print-table $p4 $p20 "$fmt2" "" "${fs1//,/, }"
+	print-column $p4 $p20 "sysfonts" "OS duplicated fonts (in DFonts):" "-"
+	print-column $p4 $p20 "" "${fs1//,/, }"
 	echo
-	print-table $p4 $p20 "$fmt2" "chinese" "All kind of hieroglyphic/eastern fonts (in DFonts):" "-"
-	print-table $p4 $p20 "$fmt2" "" "${fs2//,/, }"
+	print-column $p4 $p20 "chinese" "All kind of hieroglyphic/eastern fonts (in DFonts):" "-"
+	print-column $p4 $p20 "" "${fs2//,/, }"
 	echo
-	print-table $p4 $p20 "$fmt2" "noncyr" "Non-cyrillic fonts (in DFonts):" "-"
-	print-table $p4 $p20 "$fmt2" "" "${fs3//,/, })"
+	print-column $p4 $p20 "noncyr" "Non-cyrillic fonts (in DFonts):" "-"
+	print-column $p4 $p20 "" "${fs3//,/, })"
 	echo
-	print-table $p4 $p20 "$fmt2" "cyrdfonts" "Cyrillic original fonts (in DFonts; do not include 'sysfonts'):" "-"
-	print-table $p4 $p20 "$fmt2" "" "${fs4//,/, }"
+	print-column $p4 $p20 "cyrdfonts" "Cyrillic original fonts (in DFonts; do not include 'sysfonts'):" "-"
+	print-column $p4 $p20 "" "${fs4//,/, }"
 	echo
-	print-table $p4 $p20 "$fmt2" "cyrfonts" "Cyrillic original fonts (in Fonts):" "-"
-	print-table $p4 $p20 "$fmt2" "" "${fs5//,/, }"
+	print-column $p4 $p20 "cyrfonts" "Cyrillic original fonts (in Fonts):" "-"
+	print-column $p4 $p20 "" "${fs5//,/, }"
 	echo
-	print-table $p4 $p20 "$fmt2" "symfonts" "Symbolic fonts (in DFonts):" "-"
-	print-table $p4 $p20 "$fmt2" "" "${fs6//,/, }"
+	print-column $p4 $p20 "symfonts" "Symbolic fonts (in DFonts):" "-"
+	print-column $p4 $p20 "" "${fs6//,/, }"
 	echo
 } # END fontsets
 
@@ -777,7 +787,7 @@ function show-helppage () {
 	print-padding $p4 "Show new fonts for Outlook:"
 	  print-padding $p8 "$util -font -rev -app o" b
 	print-padding $p4 "Exclude a few useful fonts from deletion for Word:"
-	  print-padding $p8 "sudo $util -font *.* -ex \"brit* rockwell*\" -app w" b
+	  print-padding $p8 "sudo $util -font *.* -ex \"brit* rockwell*\" -app w -run" b
 	print-padding $p4 "Clean font cache:"
 	  print-padding $p8 "sudo $util -cache" b
 	print-padding $p4 "Backup fonts to default destination:"
@@ -796,7 +806,7 @@ function show-helppage () {
 function write-log () { echo; } # under construction
 function calc-du () { echo; } # under construction
 function get-diskusage () {
-	[[ $run -eq 0 ]] && return
+	[[ $run -eq 0 && $1 != '-f' ]] && return
 	local app s1 score=()
 	for app in "${appPathArray[@]}"; do
 		s1=$( du -sh "$basePATH$app" )
@@ -805,9 +815,11 @@ function get-diskusage () {
 	eval $1='("${score[@]}")'
 } # END MSO DU
 function show-appdu () {
-	[[ $run -eq 0 ]] && return
+	[[ $run -eq 0 && $4 != '-f' ]] && return
 	local s1 s2 a1 a2 as1 as2 du1=$1[@] du2=$2[@]
+	if [[ $run -eq 0 ]]; then du2=$3[@]; else du2=$2[@]; fi
 	du1=("${!du1}"); du2=("${!du2}")
+	[[ -z "${du1[@]}" && -z "${du2[@]}" ]] && return
 	local fmt1='%-12s %8s %8s\n'
 	printb "After-effect of MSO thinning report"
 	printf "$fmt1" 'Application' 'Before' 'After'
