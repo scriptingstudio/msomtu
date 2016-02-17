@@ -18,7 +18,7 @@
 #	- migrate to input parser G3
 #	- uninstall MSO option (?)
 #	- logging (?)
-#	- help page: more clear text; format: split output onto short and full parts (-fullhelp);
+#	- help page: more clear text; format;
 # 
 
 defstate='skip'
