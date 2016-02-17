@@ -1,5 +1,7 @@
 if [[ "${LANG%\.*}" == "ru_RU" ]]; then
-	printb "НАЗНАЧЕНИЕ:"
+	
+	if [[ $cmd_all -eq 1 ]]; then
+	printb "НАЗНАЧЕНИЕ:" 
 	print-column 0 $p4 "" "msomtu - скрипт конфигурации состава компонентов Microsoft Office (MSO)." 
 	echo
 	
@@ -8,18 +10,18 @@ if [[ "${LANG%\.*}" == "ru_RU" ]]; then
 	echo
 	
 	printb "ПРИМЕЧАНИЯ:"
-	print-column 0 $p6 "" "В скрипте реализован принцип безопасного исполнения - 'защита от дураков'. Режим исполнения по умолчанию - эмуляция. Скрипт не сможет внести изменения в систему без параметра '-run'. Параметр '-cache' не зависит от '-run'." '-'
+	print-column 0 $p6 "" "В скрипте реализован принцип безопасного исполнения - \"защита от дураков\". Режим исполнения по умолчанию - эмуляция. Скрипт не сможет внести изменения в систему без параметра '-run'. Параметр '-cache' не зависит от '-run'." '-'
 	print-column 0 $p6 "" "Так как приложения устанавливаются с привилегиями root, для запуска скрипта (когда нужно сделать изменения) необходимо использовать sudo." '-'
-	print-column 0 $p6 "" "Все файловые операции регистронезависимы." '-'
-	print-column 0 $p6 "" "Удаление шрифтов работает только с версией MSO 15.17 и выше, поскольку была изменена организация шрифтов. В папке 'Fonts' обязательные шрифты, 'DFonts' - не обязятельные." '-'
+	print-column 0 $p6 "" "Удаление шрифтов работает только с версией MSO 15.17 и выше, поскольку Microsoft изменила организацию шрифтов. В папке 'Fonts' обязательные шрифты, в 'DFonts' - не обязательные." '-'
 	print-column 0 $p6 "" "Если удаляете шрифты, также удаляйте файлы списков шрифтов. Папка 'DFonts' и файлы списков шрифтов не обязательны - их можно удалять. Некоторые некириллические шрифты могут быть полезны - сохраните их перед удалением." '-'
 	print-column 0 $p6 "" "Внимание: не удаляйте шрифты из папки 'Fonts'! Они необходимы для работы самих приложений." '-'
 	print-column 0 $p6 "" "Предопределенные шрифтовые наборы не пересекаются." '-'
-	#print-column 0 $p6 "" "Backup is scheduled before any other operations." '-'
+	print-column 0 $p6 "" "Все файловые операции регистронезависимы." '-'
 	print-column 0 $p6 "" "Скрипт обрабатывает только именные параметры." '-'
 	print-column 0 $p6 "" "Скрипт необходимо запускать после каждого обновления программ MSO." '-'
-	print-column 0 $p6 "" "Установки по умолчанию для параметров '-lang' и '-proof': english и russian. Это зависит от системного языка и здравого смысла: для целостности MSO англиский лучше оставить. Установки по умолчанию, специфичные для вашей системы, настраиваются прямо в скрипте." '-'
+	print-column 0 $p6 "" "Установки по умолчанию для параметров '-lang' и '-proof': english и russian. Это зависит от системного языка и здравого смысла: для целостности MSO английский лучше оставить. Установки по умолчанию, специфичные для вашей системы, настраиваются прямо в скрипте." '-'
 	echo
+	fi
 	
 	printb "ИСПОЛЬЗОВАНИЕ:"
 	print-column 0 $p4 "" "[sudo] $util [-<parameter> [<arguments>]]..."
@@ -29,6 +31,7 @@ if [[ "${LANG%\.*}" == "ru_RU" ]]; then
 	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-?] [-run]"
 	echo
 	
+	if [[ $cmd_all -eq 1 ]]; then
 #	p30=43
 #	local fmt21='%*s %-40s  %s %b\n'
 	local mp4=-4; p12=12
@@ -63,6 +66,7 @@ if [[ "${LANG%\.*}" == "ru_RU" ]]; then
 	print-padding $mp4 "- Копирование шрифтов в библиотеки шрифтов" 
 		print-column 0 $p12 "" "Параметр '-backup'."
 		echo
+	fi
 	
 	printb "АРГУМЕНТЫ:"
 	print-column $p4 $p20 "app_list" "Список выбора приложений. w - Word, e - Excel, p - PowerPoint, o - Outlook, n - OneNote. Значение по умолчанию - 'w e p o n'." ":"
@@ -86,10 +90,11 @@ if [[ "${LANG%\.*}" == "ru_RU" ]]; then
 	print-column $p4 $p20 "-report" "Ключ. Показывает статистику по приложениям." ":"
 	print-column $p4 $p20 "-fontset" "Ключ. Показывает предопределенные шрифтовые наборы." ":"
 	print-column $p4 $p20 "-rev" "Ключ. Изменяет результат работы фильтров '-lang' и '-proof' на обратный." ":"
-	print-column $p4 $p20 "-help" "Ключ. Показывает страницу помощи. (Необязателен)" ":"
 	print-column $p4 $p20 "-run" "Ключ. Разрешает режим изменений." ":"
+	print-column $p4 $p20 "-help" "Ключ. Показывает страницу помощи. Есть два вида страницы: краткая и полная. По умолчанию (без параметров) выводится краткая страница. Для полного вида используйте параметр '-help -full'." ":"
 	echo
 	
+	if [[ $cmd_all -eq 1 ]]; then
 	printb "ПРИМЕРЫ:"
 	p4=$((0-$p4)); p8=$((0-$p8))
 	print-padding $p4 "Очистить все приложения с параметрами по умолчанию:"
@@ -123,17 +128,20 @@ if [[ "${LANG%\.*}" == "ru_RU" ]]; then
 	print-padding $p4 "Показать предопределенные наборы шрифтов:"
 	  print-padding $p8 "$util -fontset" b
 	echo
+	fi
 	exit 0
 fi
 
 # template block for help in your language
 #if [[ "${LANG%\.*}" == "????" ]]; then
+#	if [[ $cmd_all -eq 1 ]]; then
 #	printb "SYNOPSIS:"
 #	echo
 #	printb "DESCRIPTION:"
 #	echo 
 #	printb "NOTES:"
 #	echo 
+#	fi
 #	printb "USAGE:"
 #	print-column 0 $p4 "" "[sudo] $util [-<parameter> [<arguments>]]..."
 #	echo
@@ -142,15 +150,19 @@ fi
 #	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-?] [-run]"
 #	echo 
 
-#	local mp4=-4; local p12=12
+#	if [[ $cmd_all -eq 1 ]]; then
+#	local mp4=-4 p12=12
 #	printb "USE CASES:"
 #	echo 
+#	fi
 #	printb "ARGUMENTS:"
 #	echo 
 #	printb "PARAMETERS:"
 #	echo 
+#	if [[ $cmd_all -eq 1 ]]; then
 #	printb "EXAMPLES:"
 #	echo 
+#	fi
 #	exit 0
 #fi
 
