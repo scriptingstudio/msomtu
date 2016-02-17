@@ -203,10 +203,10 @@ function main () {
 				check-app
 				echo
 				local score1 score2 appdu=()
-				get-diskusage score1
+				get-diskusage score1 
 				clean-application
-				get-diskusage score2
-				show-appdu score1 score2 appdu
+				get-diskusage score2 
+				show-appdu score1 score2 appdu 
 				echo ;;
 				
 			backup) 
@@ -806,7 +806,7 @@ function show-helppage () {
 function write-log () { echo; } # under construction
 function calc-du () { echo; } # under construction
 function get-diskusage () {
-	[[ $run -eq 0 && $1 != '-f' ]] && return
+	[[ $run -eq 0 && $2 != '-f' ]] && return
 	local app s1 score=()
 	for app in "${appPathArray[@]}"; do
 		s1=$( du -sh "$basePATH$app" )
@@ -814,7 +814,7 @@ function get-diskusage () {
 	done
 	eval $1='("${score[@]}")'
 } # END MSO DU
-function show-appdu () {
+function show-appdu () { # in test mode!
 	[[ $run -eq 0 && $4 != '-f' ]] && return
 	local s1 s2 a1 a2 as1 as2 du1=$1[@] du2=$2[@]
 	if [[ $run -eq 0 ]]; then du2=$3[@]; else du2=$2[@]; fi
