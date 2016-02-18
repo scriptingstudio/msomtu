@@ -35,7 +35,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 | Action  | Parameter |
 |:--------|:----------|
 | Getting MSO info | `-report` |
-| Getting assessment of thinning (view mode) | Fonts: `-font -verbose` <br/>UI langs: `-lang -verbose` <br/>Proofingtools: `-proof -verbose` <br/>Fontlists: `-flist -verbose` |
+| Getting proactive assessment of thinning (view mode) | Fonts: `-font -verbose` <br/>UI langs: `-lang -verbose` <br/>Proofingtools: `-proof -verbose` <br/>Fontlists: `-flist -verbose` |
 | Listing/Removing UI languages | `-lang` |
 | Listing/Removing proofingtools | `-proof` |
 | Listing/Removing fonts | `-font` |
