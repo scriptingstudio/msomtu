@@ -4,8 +4,15 @@
 ## Description
 Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so apps duplicate all of the components in their own application container that's waisting gigabytes of disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined or user defined destinations.
 
-## Notes
+## Features
 * ***Safe scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. You cannot change or harm your system without switch `-run`. Parameter `-cache` does not depend on `-run`.
+* Assessment. You can estimate disk space by MSO app components.
+* Duplicate font finder. You can find out conflicting and extra app fonts against the font libraries.
+* New font finder. You can find out new (standard sets considered) fonts added in each app after the new MSO update.
+* Backup. You can backup your fonts before deletion.
+* Move fonts to the libraries.
+
+## Notes
 * As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
 * As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the `Fonts` folder within each app. The rest are in the `DFonts` folder.
 * If you remove fonts, remove font lists as well. The `DFonts` folder and font lists are safe to remove. Some of the fonts you may find useful, save them before deletion.
@@ -28,6 +35,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 | Action  | Parameter |
 |:--------|:----------|
 | Getting MSO info | `-report` |
+| Getting assessment of thinning (view mode) | Fonts: `-font -verbose` <br/>UI langs: `-lang -verbose` <br/>Proofingtools: `-proof -verbose` <br/>Fontlists: `-flist -verbose` |
 | Listing/Removing UI languages | `-lang` |
 | Listing/Removing proofingtools | `-proof` |
 | Listing/Removing fonts | `-font` |
