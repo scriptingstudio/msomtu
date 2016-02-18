@@ -2,20 +2,20 @@
 ***Msomtu*** is Microsoft Office 2016 for Mac maintenance utility.
 
 ## Description
-Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so apps duplicate all of the components in their own application container that's waisting gigabytes of disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined or user defined destinations.
+Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so apps duplicate all of the components in their own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined or user defined destinations.
 
 ## Features
 * ***Safe scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. You cannot change or harm your system without switch `-run`. Parameter `-cache` does not depend on `-run`.
-* Assessment. You can estimate disk space by MSO app components.
-* Duplicate font finder. You can find out conflicting and extra app fonts against the font libraries.
-* New font finder. You can find out new (standard sets considered) fonts added in each app after the new MSO update.
+* Proactive assessment. You can estimate your disk space taken by MSO app components before thinning.
+* Duplicate fonts finder. You can find out conflicting and extra app fonts against the font libraries.
+* New fonts finder. You can find out new (standard sets considered) fonts added in each app after the new MSO update.
 * Backup. You can backup your fonts before deletion.
-* Move fonts to the libraries.
+* Copy or move fonts to the libraries.
 
 ## Notes
 * As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
 * As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the `Fonts` folder within each app. The rest are in the `DFonts` folder.
-* If you remove fonts, remove font lists as well. The `DFonts` folder and font lists are safe to remove. Some of the fonts you may find useful, save them before deletion.
+* If you remove fonts, remove font lists as well. The `DFonts` folder and font lists are safe to remove. Neither third party app can see MSO fonts installed to the `DFonts` folder. Some of the fonts you may find useful, save them before deletion.
 * **Caution**: do not remove fonts from the `Fonts` folder! These are minimum needed for the MSO applications to work.
 * File operations are case insensitive.
 * Apply thinning after every MSO update.
@@ -52,8 +52,8 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>app_list</code></td><td>Application list. <b>w</b> — Word, <b>e</b> — Excel, <b>p</b> — PowerPoint, <b>o</b> — Outlook, <b>n</b> — OneNote. Default: <code>w e p o n</code>.</td></tr>
 <tr><td valign="top"><code>lang_list</code></td><td>Langauge list: <code>ru pl de</code> etc; see filenames with parameter <code>-verb</code>. Default: <code>en ru</code>, see NOTES.</td></tr>
 <tr><td valign="top"><code>proof_list</code></td><td>Proofingtools list: <code>russian finnish german</code> etc; see filenames with parameter <code>-verb</code>. Wildcard <code>*</code> is available to use. Default: <code>english russian</code>, see NOTES.</td></tr>
-<tr><td valign="top"><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty — removes the <code>DFonts</code> folder (default); <i>fontset</i> — removes fonts of predefined fontset; <i>mask</i> — removes selection: <i>*.*, arial*, *.ttc</i> etc. If you use single <code>*</code> enclose it in quotation marks: <code>"*"</code>. Predefined fontsets: <code>library</code>, <code>cyrdfonts</code>, <code>noncyr</code>, <code>chfonts</code>, <code>sysfonts</code>, <code>symfonts</code>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates from system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (<code>DFonts</code> against libraries). You can use list of fontsets.</td></tr>
-<tr><td valign="top"><code>destination</code></td><td>Backup destination folderpath for fonts. Default value is <code>~/Desktop/MSOFonts</code>. You can use predefined destinations: <code>syslib</code> — system library; <code>userlib</code> — user library.</td></tr>
+<tr><td valign="top"><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty — removes the <code>DFonts</code> folder (default); <i>fontset</i> — removes fonts of predefined fontset; <i>mask</i> — removes selection: <i>*.*, arial*, *.ttc</i> etc. If you use single <code>*</code> enclose it in quotation marks: <code>"*"</code>. Predefined fontsets: <code>library</code>, <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>, <code>symfonts</code>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates from system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (<code>DFonts</code> against libraries). You can use list of fontsets as well.</td></tr>
+<tr><td valign="top"><code>destination</code></td><td>Backup destination folderpath for fonts. Default value is <code>~/Desktop/MSOFonts</code>. You can use predefined destinations as well: <code>syslib</code> — system library; <code>userlib</code> — user library.</td></tr>
 </table>
 
 ## Parameters
