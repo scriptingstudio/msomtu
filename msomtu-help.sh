@@ -39,6 +39,9 @@ if [[ "${LANG%\.*}" == "ru_RU" ]]; then
 	print-padding $mp4 "- Просмотр статистики MSO" 
 		print-column 0 $p12 "" "Параметр '-report'."
 		echo
+	print-padding $mp4 "- Оценка экономии дискового пространства (в режиме просмотра)" 
+		print-column 0 $p12 "" "Параметр '-verbose' в комбинации с выбранным компонентом: font, flist, lang, proof."
+		echo
 	print-padding $mp4 "- Просмотр/Удаление языков локализации" 
 		print-column 0 $p12 "" "Параметр '-lang'. Значение параметра - список кодов языков, разделенных пробелом. Пустое значение - удаление всех языков, кроме en и ru."
 		echo
@@ -118,7 +121,7 @@ if [[ "${LANG%\.*}" == "ru_RU" ]]; then
 	print-padding $p4 "Найти новые шрифты в Outlook:"
 	  print-padding $p8 "$util -font -rev -app o" b
 	print-padding $p4 "Удалить в Word все шрифты, кроме заданных:"
-	  print-padding $p8 "sudo $util -font *.* -ex \"brit* rockwell*\" -app w" b
+	  print-padding $p8 "sudo $util -font *.* -ex \"brit* rockwell*\" -app w -run" b
 	print-padding $p4 "Очистить кэш шрифтов:"
 	  print-padding $p8 "sudo $util -cache" b
 	print-padding $p4 "Выполнить резерное копирование выбранных шрифтов по умолчанию:"
