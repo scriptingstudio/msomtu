@@ -2,7 +2,7 @@
 ***Msomtu*** is Microsoft Office 2016 for Mac maintenance utility.
 
 ## Description
-Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined or user defined destinations.
+Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined and user defined destinations.
 
 ## Features
 * ***Safe scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. You cannot change or harm your system without switch `-run`. Parameter `-cache` does not depend on `-run`.
@@ -35,7 +35,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 | Action  | Parameter |
 |:--------|:----------|
 | Getting MSO info | `-report` |
-| Getting proactive assessment of thinning (view mode) | Fonts: `-font -verbose` <br/>UI langs: `-lang -verbose` <br/>Proofingtools: `-proof -verbose` <br/>Fontlists: `-flist -verbose` |
+| Getting proactive assessment of thinning (view mode) <br/><br/> *Note*: calculated values are arithmetically rounded. | Fonts: `-font -verbose` <br/>UI langs: `-lang -verbose` <br/>Proofingtools: `-proof -verbose` <br/>Fontlists: `-flist -verbose` |
 | Listing/Removing UI languages | `-lang` |
 | Listing/Removing proofingtools | `-proof` |
 | Listing/Removing fonts | `-font` |
