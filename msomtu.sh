@@ -17,9 +17,9 @@
 #	- get more specific on duplicates and fontsets
 #	- migrate to input parser G3
 #	- uninstall MSO option (?)
-#	- logging (?)
-#	- view mode: assmt of thinning report
+#	- logging (??)
 #	- help page: more clear text; format;
+#	- rename to msomt - Microsoft Office maintenance tool???
 # 
 
 defstate='skip'
@@ -46,7 +46,7 @@ cmd_uninstall=''
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.8.25'
+version='2.8.32'
 util="${0##*/}"
 principalname='msomtu'
 defapp='w e p o n'
@@ -184,7 +184,9 @@ function main () {
 	if [[ "$cmd_report" == 1 ]];   then
 		cmd="report"; #cmd_app="$defapp"
 	fi
-	[[ "$script_params" == 0 || "$cmd_help" -eq 1 || "$cmd" == '' ]] && cmd='help'
+	[[ "$script_params" == 0 || "$cmd_help" -eq 1 ]] && cmd='help'
+	[[ "$cmd" == '' ]] && 
+		{ echo -e "\nNo valid actions or parameters defined (font lang proof flist report fontset cache backup help). Correct your command line parameters. See help.\n"; exit 3; }
 	# END input parser
 	
 	############ Operation selector
@@ -289,7 +291,7 @@ function make-report () {
 	__separate-unit () { fs=${fs/G/ G}; fs=${fs/M/ M}; }
 	local versionPATH="/Contents/Info.plist"
 	local versionKey="CFBundleShortVersionString"
-	local fmt1='   %-18s : %8s  %10s\n' na='--'
+	local fmt1='   %-18s : %10s  %10s\n' na='--'
 	local appPATH wpath appVersion msbuild fs fc plist flist filter appfat appfiles
 	for appPATH in "${appPathArray[@]}"; do
 		printb "Processing '$appPATH'"
@@ -366,7 +368,7 @@ function make-report () {
 } # END report
 
 function clean-application () {
-	local fmt1='   %-14s : %6s %s\n' appPATH wpath appfat
+	local fmt1='   %-14s : %6s %s\n' appPATH wpath appfat fl fc
 	for appPATH in "${appPathArray[@]}"; do
 		appfat=0
 		printb "Processing '$appPATH'"
@@ -381,8 +383,10 @@ function clean-application () {
 				find "$wpath" -type f -name font*.plist -d 1 -exec rm -f {} \;
 			else
 				echo "  TRACE: remove font-list files (.plist)."
-				[[ $cmd_verb -eq 1 ]] &&
-					find "$wpath" -type f -name font*.plist -d 1 -exec basename {} \;
+				if [[ $cmd_verb -eq 1 ]]; then
+					fl=$(find "$wpath" -type f -name font*.plist -d 1 -exec basename {} \;)
+					echo "$fl"; fc=$(calc-du "$fl" "$wpath"); let "appfat+=fc"
+				fi
 			fi
 		fi # END plist (fontlist files)
 	
@@ -392,15 +396,18 @@ function clean-application () {
 	# - cleaning of Proofing Tools; keep English*.proofingtool Grammar.proofingtool
 		[[ "$cmd_proof" != '' ]] &&
 			clean-ptools "$basePATH$appPATH$proofingPATH$proofingName"
-			
-		appdu+=("$appfat	$basePATH$appPATH")
+		
+		unit='K'	
+		[[ $appfat -gt 1000 ]] && { appfat=$(awk "BEGIN {printf \"%.2f\",${appfat}/1024}"); unit='M'; }
+		[[ ${appfat%,*} -gt 1000 ]] && { appfat=$(awk "BEGIN {printf \"%.1f\",\"${appfat}\"/1024}"); unit='G'; }
+		[[ $unit != 'G' ]] && appfat=${appfat%,*}
+		appdu+=("${appfat}$unit	$basePATH$appPATH")
 		echo
 	done
 } # END cleanup wrapper
 
 function clean-font () {
-	let "appfat+=100"
-	local wpath="$1" fl=() name='' f m filter
+	local wpath="$1" fl=() name='' f m filter fc fs
 	if [[ ! -d "$wpath" ]]; then
 		echo "  Folder 'DFonts' does not exist."
 		return
@@ -441,15 +448,19 @@ function clean-font () {
 	echo "  TRACE: remove fonts/folder '$wpath'."
 	[[ $cmd_verb -eq 0 ]] && return
 	for f in $cmd_font; do
-		[[ "$f" == 'folder' ]] && ls -A "$wpath"
+		if [[ "$f" == 'folder' ]]; then
+			fs=$(ls -A "$wpath"); echo "$fs"
+			fc=$(calc-du "$fs" "$wpath"); let "appfat+=fc"
+		fi
 		[[ "$f" == lib* ]] && remove-duplicate "$wpath"
 	done
 	for f in "${fl[@]}"; do  # calc du here!
 		if [[ "$filter" != '' ]]; then
-			find -E "$wpath" -type f -iname "$f" -d 1 ! -iregex "$filter" -exec basename {} \;
+			fs=$(find -E "$wpath" -type f -iname "$f" -d 1 ! -iregex "$filter" -exec basename {} \;)
 		else
-			find "$wpath" -type f -iname "$f" -d 1 -exec basename {} \;
+			fs=$(find "$wpath" -type f -iname "$f" -d 1 -exec basename {} \;)
 		fi
+		echo "$fs"; fc=$(calc-du "$fs" "$wpath"); let "appfat+=fc"
 	done
 } # END clean fonts
 
@@ -516,7 +527,11 @@ function find-newfont () {
 } # END new fonts
 
 function clean-lang () {
-	__list-lang () { find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec basename {} \; ; }
+	__list-lang () { 
+		local fs fc
+		fs=$( find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec basename {} \; )
+		echo "$fs"; fc=$(calc-du "$fs" "$wpath"); let "appfat+=fc" 
+	}
 	__rm-lang () { find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec rm -fdr {} \; ; }
 	local wpath="$1"
 	local filter=$( create-filter "lang" )
@@ -539,7 +554,7 @@ function clean-lang () {
 } # END lang
 
 function clean-ptools () {
-	local wpath="$1"
+	local wpath="$1" fs fc
 	local filter=$( create-filter "proof" )
 	if [[ cmd_reverse -eq 0 ]]; then
 		if [[ $run -eq 1 ]]; then
@@ -547,22 +562,25 @@ function clean-ptools () {
 		else # trace mode
 			cmd_proof=$(unique "english $cmd_proof")
 			echo "  TRACE: remove extra proofing tools. Keep '$cmd_proof'."
-			[[ $cmd_verb -eq 1 ]] && # calc du here!
-				find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec basename {} \;
+			if [[ $cmd_verb -eq 1 ]]; then # calc du here!
+				fs=$( find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec basename {} \; )
+				echo "$fs"; fc=$(calc-du "$fs" "$wpath"); let "appfat+=fc" 
+			fi
 		fi
 	else # reverse filter
 		if [[ $run -eq 1 ]]; then
 			find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec rm -fdr {} \;
 		else # trace mode
 			echo "  TRACE: remove extra proofing tools - '$cmd_proof'."
-			[[ $cmd_verb -eq 1 ]] &&
-				find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec basename {} \; # calc du here!
+			if [[ $cmd_verb -eq 1 ]]; then # calc du here!
+				fs=$( find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec basename {} \; )
+				echo "$fs"; fc=$(calc-du "$fs" "$wpath"); let "appfat+=fc"
+			fi
 		fi
 	fi
 } # END proofingtools
 
 function display-fontset () {
-	local fmt2='%*s %-13s  %s %b\n'
 	local p4=4 p20=20
 	local fs1=$(joina , "${sysfonts[@]}")
 	local fs2=$(joina , "${chfonts[@]}")
@@ -686,14 +704,14 @@ function show-helppage () {
 	echo
 	
 	printb "DESCRIPTION:"
-	print-column 0 $p4 "" "Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so apps duplicate all of the components in its own application container that's waisting gigabytes of disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined or user defined destinations." 
+	print-column 0 $p4 "" "Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined or user defined destinations." 
 	echo
 
 	printb "NOTES:"
 	print-column 0 $p6 "" "Safe scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. You cannot change or harm your system without switch '-run'. Parameter '-cache' does not depend on '-run'." '-'
 	print-column 0 $p6 "" "As MSO is installed with root on /Applications directory you have to run this script with sudo to make changes." '-'
 	print-column 0 $p6 "" "As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder." '-'
-	print-column 0 $p6 "" "If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. Some of the fonts you may find useful, save them before deletion." '-'
+	print-column 0 $p6 "" "If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. Neither third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion." '-'
 	print-column 0 $p6 "" "Caution: do not remove fonts from the 'Fonts' folder! These are minimum needed for the MSO applications to work." '-'
 	print-column 0 $p6 "" "File operations are case insensitive." '-'
 	print-column 0 $p6 "" "Predefined fontsets do not intersect." '-'
@@ -716,6 +734,8 @@ function show-helppage () {
 	printb "USE CASES:"
 	print-padding $mp4 "- Getting MSO info" 
 		print-column 0 $p12 "" "Parameter '-report'."
+	print-padding $mp4 "- Getting assessment of thinning (view mode)" 
+		print-column 0 $p12 "" "Parameter '-verbose' along with resource selector: font, flist, lang, proof."
 	print-padding $mp4 "- Listing/Removing UI languages" 
 		print-column 0 $p12 "" "Parameter '-lang'."
 	print-padding $mp4 "- Listing/Removing proofingtools" 
@@ -741,8 +761,8 @@ function show-helppage () {
 	print-column $p4 $p20 "app_list" "App list. w - Word, e - Excel, p - PowerPoint, o - Outlook, n - OneNote. Default: 'w e p o n'." ":"
 	print-column $p4 $p20 "lang_list" "Langauge list: ru pl de etc, see filenames with parameter '-verb'. Default: 'en ru', see NOTES." ":"
 	print-column $p4 $p20 "proof_list" "Proofingtools list: russian finnish german etc, see filenames with parameter '-verb'. Wildcard '*' is available. Default: 'english russian', see NOTES." ":"
-	print-column $p4 $p20 "font_pattern" "Font operations are based on patterns. Font patterns: empty - removes the 'DFonts' folder (default); <fontset> - removes fonts of predefined fontset; <mask> - removes selection: *.*, arial*, *.ttc etc. If you use single '*' enclose it in quotation marks: \"*\". Predefined fontsets: library, $fs. See parameter '-fontset' and details in code. Fontset 'library' removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (DFonts against libraries). You can use list of fontsets." ":"
-	print-column $p4 $p20 "destination" "Backup destination folderpath for fonts. Default value is '~/Desktop/MSOFonts'. You can use predefined destinations: 'syslib' - system library; 'userlib' - user library." ":"
+	print-column $p4 $p20 "font_pattern" "Font operations are based on patterns. Font patterns: empty - removes the 'DFonts' folder (default); <fontset> - removes fonts of predefined fontset; <mask> - removes selection: *.*, arial*, *.ttc etc. If you use single '*' enclose it in quotation marks: \"*\". Predefined fontsets: library, $fs. See parameter '-fontset' and details in code. Fontset 'library' removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (DFonts against libraries). You can use list of fontsets as well." ":"
+	print-column $p4 $p20 "destination" "Backup destination folderpath for fonts. Default value is '~/Desktop/MSOFonts'. You can use predefined destinations as well: 'syslib' - system library; 'userlib' - user library." ":"
 	echo
 
 	printb "PARAMETERS:"
@@ -804,26 +824,17 @@ function show-helppage () {
 } # END help page
 
 function write-log () { echo; } # under construction
-function calc-du () { echo; } # under construction
-function get-diskusage () {
-	[[ $run -eq 0 && $2 != '-f' ]] && return
-	local app s1 score=()
-	for app in "${appPathArray[@]}"; do
-		s1=$( du -sh "$basePATH$app" )
-		score+=("$s1")
-	done
-	eval $1='("${score[@]}")'
-} # END MSO DU
 function show-appdu () { # in test mode!
-	[[ $run -eq 0 && $4 != '-f' ]] && return
-	local s1 s2 a1 a2 as1 as2 du1=$1[@] du2=$2[@]
-	if [[ $run -eq 0 ]]; then du2=$3[@]; else du2=$2[@]; fi
+# after: abs (percent)
+	[[ $run -eq 0 && $cmd_verb -eq 0 ]] && return
+	local s1 s2 a1 a2 as1 as2 du1=$1[@] du2=$2[@] dif='-' difpc
+	[[ $run -eq 0 ]] && du2=$3[@]
 	du1=("${!du1}"); du2=("${!du2}")
 	[[ -z "${du1[@]}" && -z "${du2[@]}" ]] && return
-	local fmt1='%-12s %8s %8s\n'
+	local fmt1='%-12s %8s %8s %14s\n'
 	printb "After-effect of MSO thinning report"
-	printf "$fmt1" 'Application' 'Before' 'After'
-	printf "$fmt1" '-----------' '------' '-----'
+	printf "$fmt1" 'Application' 'Before' 'After' 'Thinning'
+	printf "$fmt1" '-----------' '------' '-----' '--------'
 	for s1 in "${du1[@]}"; do
 		a1="${s1#*/}"
 		as1=${s1%%/*}; as1=$(echo -n $as1)
@@ -831,11 +842,34 @@ function show-appdu () { # in test mode!
 			if [[ "$a1" == "${s2#*/}" ]]; then
 				as2=${s2%%/*}; as2=$(echo -n $as2)
 				a1="${a1##*/}"; a1=${a1/.app/}
-				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2"
+				if [[ $run -eq 0 ]]; then 
+					dif=$as2
+					as2=$(math-diffexpr $as1 $as2 1); 
+					difpc="${as2#*|}"; as2="${as2%|*}"
+				else
+					dif=$(math-diffexpr $as1 $as2); 
+					difpc="${dif#*|}"; dif="${dif%|*}"
+				fi
+				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='-'
+				[[ $dif != '-' && $difpc ]] && dif="$dif ($difpc)"
+				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2" "$dif"
 			fi
 		done
 	done
 } # END app disk usage score report
+function get-diskusage () {
+	[[ $run -eq 0 && $cmd_verb -eq 0 ]] && return
+	local app s1 score=()
+	for app in "${appPathArray[@]}"; do
+		s1=$( du -sh "$basePATH$app" )
+		score+=("$s1")
+	done
+	eval $1='("${score[@]}")'
+} # END MSO DU
+function calc-du () {
+# $1 - '\n' delimited file list; $2 - filepath;
+	echo "${1}" | xargs -I{} du -sh -k "$2"/"{}" | awk '{ total += $1 }; END {print total}'
+}
 
 ########## Common routines
 function create-filter () {
@@ -935,6 +969,42 @@ function inarray () { # test item ($1) in array ($2 - passing by name!)
     local a=("${!name}") # expand to value - magic!
 	comm -1 -2 -i <(printf '%s\n' "${s[@]}" | sort -u) <(printf '%s\n' "${a[@]}" | sort -u)
 }
+function math-diffexpr () {
+	local dif difpc exp='{
+		e1=toupper($1); e2=toupper($2); child=$3}; END {
+		u1=substr(e1,length(e1),1); u2=substr(e2,length(e2),1)
+		m1=e1; sub(/[A-Z]/,"",m1); m2=e2; sub(/[A-Z]/,"",m2);
+		if (0+m1 < 1) {m1*=1024; if (u1 == "G") u1="M"; else u1="K"}
+		if (0+m2 < 1) {m2*=1024; if (u2 == "G") u2="M"; else u2="K"}
+		unit=u1; x=match(unit,"[A-Z]"); if (!x) unit=""
+		x=match(u2,"[A-Z]"); if (!x) u2=unit
+		if (u1 == u2) { # G-G M-M K-K
+			if (m2 > m1) {t=m1; m1=m2; m2=t}
+			r = m1-m2; rbyte=unit; (child) ? pc=(m2/m1)*100 : pc=(r/m1)*100
+			if (r < 1) {
+				r*=1024
+				if (u1 == "G") {rbyte="M"; u1="M";} 
+				else {rbyte="K"; u1="K";}
+				if (r < 1) {rbyte=""; u1="";}
+			}
+			(u1 == "G") ? fmt1="%.1f" : fmt1="%.f" #if (u1 == "G") fmt1="%.1f"; else fmt1="%.f"
+		} else if (u1 == "G") { # G-M G-K
+			rbyte="G"; unit="G"; h=m1
+			if (u2 == "M") m1*=1024; if (u2 == "K") m1*=(1024*1024)
+			r = m1-m2; (child) ? pc=(m2/m1)*100 : pc=(r/m1)*100
+			if (r > 1000) {r/=1024;}; if (r > 1000) {r/=1024;}
+			if (r > h) unit=u2;
+			if (unit == "G") fmt1="%.1f"; else {fmt1="%.f"; rbyte="M"}
+		} else { # M-K; K-M M-G K-G - unpredictable
+			r = (m1*1024 - m2)/1024; rbyte="M"
+			if (r < 1) {r*=1024; rbyte="K"}
+			fmt1="%.1f"; (child) ? pc=(m2/(m1*1024))*100 : pc=(r/(m1))*100
+		}
+		if (r == 0) rbyte=""; if (pc == 100 || pc < 1) {pc=""; fpc=""} else fpc=" ; difpc=(%.f%%)"
+		printf "dif="fmt1"%s"fpc, r, rbyte,pc
+	}'
+	eval $(echo "${@}" | awk "$exp"); echo "$dif|$difpc"
+} # END difference of byte expressions
 
 function mktest () {
 # development environment; I use it for testing; test data manager is in another script
