@@ -6,9 +6,9 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 
 ## Features
 * ***Safe scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. You cannot change or harm your system without switch `-run`. Parameter `-cache` does not depend on `-run`.
-* Proactive assessment. You can estimate your disk space taken by MSO app components before thinning.
+* Proactive assessment. You can estimate your disk space taken by the MSO app components before thinning.
 * Duplicate fonts finder. You can find out conflicting and extra app fonts against the font libraries.
-* New fonts finder. You can find out new (standard sets considered) fonts added in each app after the new MSO update.
+* New fonts finder. You can find out new (standard sets considered) fonts added in each app after new MSO update.
 * Backup. You can backup your fonts before deletion.
 * Copy or move fonts to the libraries.
 
@@ -35,7 +35,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 | Action  | Parameter |
 |:--------|:----------|
 | Getting MSO info | `-report` |
-| Getting proactive assessment of thinning (view mode) <br/><br/> *Note*: calculated values are arithmetically rounded. | Fonts: `-font -verbose` <br/>UI langs: `-lang -verbose` <br/>Proofingtools: `-proof -verbose` <br/>Fontlists: `-flist -verbose` |
+| Getting proactive assessment of thinning (view mode) <br/><br/> | Fonts: `-font -verbose` <br/>UI langs: `-lang -verbose` <br/>Proofingtools: `-proof -verbose` <br/>Fontlists: `-flist -verbose` |
 | Listing/Removing UI languages | `-lang` |
 | Listing/Removing proofingtools | `-proof` |
 | Listing/Removing fonts | `-font` |
