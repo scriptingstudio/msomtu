@@ -15,11 +15,12 @@
 #	- cleanup code; there are artefacts/leftovers 
 #	  after migration from previous version of the script
 #	- get more specific on duplicates and fontsets
-#	- migrate to input parser G3
+#	- migrate to input parser G3, refactor main()
+#	- refactor verbose mode
 #	- uninstall MSO option (?)
-#	- logging (??)
+#	- logging (???)
 #	- help page: more clear text; format;
-#	- rename to msomt - Microsoft Office maintenance tool???
+#	- rename to 'msomt' - Microsoft Office maintenance tool???
 # 
 
 defstate='skip'
@@ -46,7 +47,7 @@ cmd_uninstall=''
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.8.32'
+version='2.8.33'
 util="${0##*/}"
 principalname='msomtu'
 defapp='w e p o n'
@@ -69,7 +70,7 @@ backupPATH=~/"Desktop/MSOFonts/"
 ## Predefined fontsets. You can change them here
  # os x duplicates; in folder DFonts
  # exclusion: Microsoft no longer provides cyrillic MonotypeCorsiva, so
- # I included it for deletion 
+ # I included it here for deletion 
 sysfonts=("arial*" "ariblk*" "Baskerville*" "Book Antiqua*" "ComicSans*" "Cooper*" "Gill Sans*" "GillSans*" "MonotypeCors*" "pala*" "Trebuchet*" "verdana*")
  # OS X duplicates; in folder Fonts - delete (???)
 msofonts=("tahoma*" "Wingding*" "webding*")
@@ -120,7 +121,7 @@ function main () {
 				cmd+=" clean"; cmd_lang=""
 				[[ "$PARGS" ]] && cmd_lang="$PARGS" ;;
 			-verbose|-verb) cmd_verb=1 ;;
-			-report|-rep|-info) cmd+=" report"; cmd_report=1 ;;
+			-report|-rep|-info|-inf) cmd+=" report"; cmd_report=1 ;;
 			-cache) cmd+=" cache"; cmd_cache=1 ;;
 			-fontset|-fs) 
 				cmd+=" fontset"; cmd_fontset=1; cmd_app=() ;;
@@ -282,13 +283,14 @@ function check-app () {
 
 function make-report () {
 	__normalize-number () {
-		unit='KB'
-		[[ $fs -gt 1000 ]] && { let "fs/=1024"; unit='MB'; }
-		[[ $fs -gt 1000 ]] && 
-		{ fs=$(awk "BEGIN {printf \"%.1f\",${fs}/1024}"); unit='GB'; }
-		#[[ $fs -gt 1000 ]] && { let "fs/=1024"; unit='GB'; }
+		echo "$1" | awk '{e1=$1;} END {
+			unit="K"; fmt1="%.f %s"; kilo=1024
+			if (e1 > kilo) {e1/=1024; unit="M"; fmt1="%.f %s"}
+			if (e1 > kilo) {e1/=1024; unit="G"; fmt1="%.1f %s"}
+			printf fmt1,e1,unit
+		}'
 	}
-	__separate-unit () { fs=${fs/G/ G}; fs=${fs/M/ M}; }
+	__separate-unit () { echo "${1/[A-Z]/} ${1:(-1)}"; }
 	local versionPATH="/Contents/Info.plist"
 	local versionKey="CFBundleShortVersionString"
 	local fmt1='   %-18s : %10s  %10s\n' na='--'
@@ -302,9 +304,10 @@ function make-report () {
 		appfat=0; appfiles=0
 		##### fonts
 		if [[ -d "$wpath" ]]; then
-			fs=''; fs=$(du -sh "$wpath" | cut -f 1); let "appfat+=${fs%[MGK]*}"
+			fs=''; fs=$(du -sh -k "$wpath" | cut -f 1); fs=$(__normalize-number $fs)
+			let "appfat+=${fs% *}" # t=${fs% *}; let "appfat+=${t%,*}"
 			fc=$(ls -A "$wpath" | wc -l) #fc=$(find "$wpath" -type f | wc -l)
-			__separate-unit; let "appfiles+=${fc// }"
+			let "appfiles+=${fc// }"
 			printf "$fmt1" "DFonts" "${fc// }" "${fs}B"
 		else
 			printf "$fmt1" "DFonts" "does not exist"
@@ -313,20 +316,20 @@ function make-report () {
 		wpath="$basePATH$appPATH$fontPATH/Fonts"
 		fs=''; fs=$(du -sh "$wpath" | cut -f 1)
 		fc=$(ls -A "$wpath" | wc -l) 
-		__separate-unit
+		fs=$(__separate-unit $fs);
 		printf "$fmt1" "Fonts" "${fc// }" "${fs}B"
 		##### fontlists
 		wpath="$basePATH$appPATH$fontPATH"
-			#--- plist=$(find "$wpath" -type f -name font*.plist -d 1)
+					#- plist=$(find "$wpath" -type f -name font*.plist -d 1)
 		plist=("$wpath/"font*.plist)
 		if [[ -z "$plist" ]]; then
 			printf "$fmt1" "Plists" $na
 		else
 			fs=$(du -sh -k "$wpath/"*.plist | awk '{ total += $1 }; END {print total}')
-			__normalize-number
+			fs=$(__normalize-number $fs)
 			fc=$(echo "$flist" | wc -l)
-			let "appfat+=${fs%[MGK]*}"; let "appfiles+=${fc// }"
-			printf "$fmt1" "Plists" "${fc// }" "$fs $unit"
+			let "appfat+=${fs% *}"; let "appfiles+=${fc// }"
+			printf "$fmt1" "Plists" "${fc// }" "${fs}B"
 		fi
 		##### UI languages
 		filter=$( create-filter "lang" )
@@ -335,10 +338,10 @@ function make-report () {
 			printf "$fmt1" "Langpacks" $na
 		else
 			fs=$(du -sh -k "$wpath/"*.lproj | awk '{ total += $1 }; END {print total}')
-			__normalize-number
+			fs=$(__normalize-number $fs)
 			fc=$(echo "$flist" | wc -l); 
-			let "appfat+=${fs%[MGK]*}"; let "appfiles+=${fc// }"
-			printf "$fmt1" "Langpacks" "${fc// }" "$fs $unit"
+			let "appfat+=${fs% *}"; let "appfiles+=${fc// }"
+			printf "$fmt1" "Langpacks" "${fc// }" "${fs}B"
 		fi
 		##### proofing tools
 		wpath="$basePATH$appPATH$proofingPATH$proofingName"
@@ -347,16 +350,15 @@ function make-report () {
 		if [[ -z "$flist" ]]; then
 			printf "$fmt1" "Proofingtools" $na
 		else
-			fs=''; fs=$(du -sh "$wpath" | cut -f 1)
+			fs=''; fs=$(du -sh -k "$wpath" | cut -f 1); fs=$(__normalize-number $fs)
 			fc=$(echo "$flist" | wc -l); 
-			let "appfat+=${fs%[MGK]*}"; let "appfiles+=${fc// }"
-			__separate-unit
+			let "appfat+=${fs% *}"; let "appfiles+=${fc// }"
 			printf "$fmt1" "Proofingtools" "${fc// }" "${fs}B"
 		fi
 		##### total disk usage
 		fs=$(du -sh "$basePATH$appPATH" | cut -f 1)
 		fc=$(ls -AR "$basePATH$appPATH" | wc -l)
-		__separate-unit; fc=$(printf "%'d" $fc)
+		fs=$(__separate-unit $fs); fc=$(printf "%'d" $fc)
 		printf "$fmt1" '' '' '------'
 		printf "$fmt1" "Total app bundle" "$fc" "${fs}B"
 		printf "$fmt1" "Approx. thinning" "$appfiles*" "-$appfat MB"
@@ -397,11 +399,13 @@ function clean-application () {
 		[[ "$cmd_proof" != '' ]] &&
 			clean-ptools "$basePATH$appPATH$proofingPATH$proofingName"
 		
-		unit='K'	
-		[[ $appfat -gt 1000 ]] && { appfat=$(awk "BEGIN {printf \"%.2f\",${appfat}/1024}"); unit='M'; }
-		[[ ${appfat%,*} -gt 1000 ]] && { appfat=$(awk "BEGIN {printf \"%.1f\",\"${appfat}\"/1024}"); unit='G'; }
-		[[ $unit != 'G' ]] && appfat=${appfat%,*}
-		appdu+=("${appfat}$unit	$basePATH$appPATH")
+		appfat=$( echo "$appfat" | awk '{e1=$1;} END {
+			unit="K"; fmt1="%.f%s"; kilo=1024
+			if (e1 > kilo) {e1/=1024; unit="M"; fmt1="%.f%s"}
+			if (e1 > kilo) {e1/=1024; unit="G"; fmt1="%.1f%s"}
+			printf fmt1,e1,unit
+		}' )
+		appdu+=("${appfat}	$basePATH$appPATH") # tab char between
 		echo
 	done
 } # END cleanup wrapper
@@ -704,7 +708,7 @@ function show-helppage () {
 	echo
 	
 	printb "DESCRIPTION:"
-	print-column 0 $p4 "" "Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined or user defined destinations." 
+	print-column 0 $p4 "" "Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined and user defined destinations." 
 	echo
 
 	printb "NOTES:"
@@ -824,8 +828,7 @@ function show-helppage () {
 } # END help page
 
 function write-log () { echo; } # under construction
-function show-appdu () { # in test mode!
-# after: abs (percent)
+function show-appdu () {
 	[[ $run -eq 0 && $cmd_verb -eq 0 ]] && return
 	local s1 s2 a1 a2 as1 as2 du1=$1[@] du2=$2[@] dif='-' difpc
 	[[ $run -eq 0 ]] && du2=$3[@]
@@ -833,8 +836,8 @@ function show-appdu () { # in test mode!
 	[[ -z "${du1[@]}" && -z "${du2[@]}" ]] && return
 	local fmt1='%-12s %8s %8s %14s\n'
 	printb "After-effect of MSO thinning report"
-	printf "$fmt1" 'Application' 'Before' 'After' 'Thinning'
-	printf "$fmt1" '-----------' '------' '-----' '--------'
+	printf "$fmt1" 'Application' 'Before' 'After' 'Effect'
+	printf "$fmt1" '-----------' '------' '-----' '------'
 	for s1 in "${du1[@]}"; do
 		a1="${s1#*/}"
 		as1=${s1%%/*}; as1=$(echo -n $as1)
@@ -851,7 +854,11 @@ function show-appdu () { # in test mode!
 					difpc="${dif#*|}"; dif="${dif%|*}"
 				fi
 				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='-'
-				[[ $dif != '-' && $difpc ]] && dif="$dif ($difpc)"
+				if [[ $dif != '-' && $difpc ]]; then
+					[[ $difpc == '50%' ]] && difpc='3%'
+					printf -v difpc ": %3s" "$difpc"
+					dif="$dif $difpc"
+				fi
 				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2" "$dif"
 			fi
 		done
@@ -947,9 +954,8 @@ function print-column () {
 	[[ ${#col1} -eq 0 && ${#col2} -eq 0 ]] && return
 	
 	wcol1=$((0-$wcol1))
-	if [[ ${#col1[@]} -gt ${#col2[@]} ]]; then 
-		count=${#col1[@]}; else count=${#col2[@]}; 
-	fi 
+	[[ ${#col1[@]} -gt ${#col2[@]} ]] &&
+		count=${#col1[@]} || count=${#col2[@]}; 
 	for (( i=0; i < $count; i++ )); do
 		s1="${col1[$i]}"
 		s2="${col2[$i]}"
@@ -966,42 +972,47 @@ function unique () { # rm dup words in string; 'echo' removes awk tail
 function inarray () { # test item ($1) in array ($2 - passing by name!)
     local s=$1
     local name=$2[@] # var name, NOT value!
-    local a=("${!name}") # expand to value - magic!
+    local a=("${!name}")
 	comm -1 -2 -i <(printf '%s\n' "${s[@]}" | sort -u) <(printf '%s\n' "${a[@]}" | sort -u)
 }
-function math-diffexpr () {
+function math-diffexpr () { # mind jawbreaker
 	local dif difpc exp='{
 		e1=toupper($1); e2=toupper($2); child=$3}; END {
 		u1=substr(e1,length(e1),1); u2=substr(e2,length(e2),1)
+		x=match(u1,"[KMG]"); if (!x) u1="K" # type cast or exit ???
+		x=match(u2,"[KMG]"); if (!x) u2=u1; kilo=1024
 		m1=e1; sub(/[A-Z]/,"",m1); m2=e2; sub(/[A-Z]/,"",m2);
-		if (0+m1 < 1) {m1*=1024; if (u1 == "G") u1="M"; else u1="K"}
-		if (0+m2 < 1) {m2*=1024; if (u2 == "G") u2="M"; else u2="K"}
-		unit=u1; x=match(unit,"[A-Z]"); if (!x) unit=""
-		x=match(u2,"[A-Z]"); if (!x) u2=unit
+		if (!m1 && !m2 || m1 == 0) {printf "%s|", "0"; exit 1}
+		if (m1 > kilo && u1 != "G") {m1/=1024; u1 = (u1 == "K") ? "M":"G"}
+		if (m2 > kilo && u2 != "G") {m2/=1024; u2 = (u2 == "K") ? "M":"G"}
+		if (0+m1 < 1 && u1 != "K") {m1*=1024; u1 = (u1 == "G") ? "M":"K"}
+		if (0+m2 < 1 && u2 != "K") {m2*=1024; u2 = (u2 == "G") ? "M":"K"}
 		if (u1 == u2) { # G-G M-M K-K
-			if (m2 > m1) {t=m1; m1=m2; m2=t}
-			r = m1-m2; rbyte=unit; (child) ? pc=(m2/m1)*100 : pc=(r/m1)*100
+			if (m2 > m1) {r=m1; m1=m2; m2=r} # swap or exit ??? 
+			r = m1-m2; unit=u1; pc = (child) ? (m2/m1)*100 : (r/m1)*100
 			if (r < 1) {
 				r*=1024
-				if (u1 == "G") {rbyte="M"; u1="M";} 
-				else {rbyte="K"; u1="K";}
-				if (r < 1) {rbyte=""; u1="";}
-			}
-			(u1 == "G") ? fmt1="%.1f" : fmt1="%.f" #if (u1 == "G") fmt1="%.1f"; else fmt1="%.f"
+				unit = (unit == "G") ? "M" : "K"
+				if (r < 1) unit=""
+			} else
+			if (r > kilo) {r/=1024; unit = (unit == "K") ? "M" : "G"}
+			fmt1 = (unit == "G") ? "%.1f" : "%.f"
 		} else if (u1 == "G") { # G-M G-K
-			rbyte="G"; unit="G"; h=m1
+			unit="G"; m01=m1
 			if (u2 == "M") m1*=1024; if (u2 == "K") m1*=(1024*1024)
-			r = m1-m2; (child) ? pc=(m2/m1)*100 : pc=(r/m1)*100
-			if (r > 1000) {r/=1024;}; if (r > 1000) {r/=1024;}
-			if (r > h) unit=u2;
-			if (unit == "G") fmt1="%.1f"; else {fmt1="%.f"; rbyte="M"}
+			r = m1-m2; pc = (child) ? (m2/m1)*100 : (r/m1)*100
+			if (r > kilo) {r/=1024;}; if (r > kilo) {r/=1024;}
+			if (r > m01) unit=u2;
+			if (unit == "G") fmt1="%.1f"; else {fmt1="%.f"; unit="M"}
 		} else { # M-K; K-M M-G K-G - unpredictable
-			r = (m1*1024 - m2)/1024; rbyte="M"
-			if (r < 1) {r*=1024; rbyte="K"}
-			fmt1="%.1f"; (child) ? pc=(m2/(m1*1024))*100 : pc=(r/(m1))*100
-		}
-		if (r == 0) rbyte=""; if (pc == 100 || pc < 1) {pc=""; fpc=""} else fpc=" ; difpc=(%.f%%)"
-		printf "dif="fmt1"%s"fpc, r, rbyte,pc
+			r = (m1*1024 - m2)/1024; unit="M"; fmt1="%.1f"
+			if (r < 1) {r*=1024; unit="K"} else
+			if (r > kilo) {r/=1024; if (unit == "K") unit="M"; fmt1="%.f"}
+			pc = (child) ? (m2/(m1*1024))*100 : (r/m1)*100
+		} # END unit calc
+		if (r == 0) unit=""; fpc=" ; difpc=%.f%%"
+		if (pc == 100 || pc < 1) {pc=""; fpc=""}
+		printf "dif="fmt1"%s"fpc, r, unit, pc
 	}'
 	eval $(echo "${@}" | awk "$exp"); echo "$dif|$difpc"
 } # END difference of byte expressions
