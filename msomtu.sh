@@ -17,6 +17,7 @@
 #	- get more specific on duplicates and fontsets
 #	- migrate to input parser G3, refactor main()
 #	- refactor verbose mode
+#	- new fonts finder: remove or not?
 #	- uninstall MSO option (?)
 #	- logging (???)
 #	- help page: more clear text; format;
@@ -498,7 +499,9 @@ function remove-duplicate () {
 
 function find-newfont () {
 	local fsfiles='' allfiles=() list=''
-	local fc f i name fs newfont
+	local fc f i name fs newfont wpath="$1"
+	[[ $run -eq 0 ]] &&
+		echo -e "  TRACE: find and remove new fonts.\n"
 	echo "Searching for new fonts..."
 	for i in ${dfontsets[@]}; do
     	name=$i[@]
@@ -519,11 +522,12 @@ function find-newfont () {
 		echo "No new fonts found."
 		return
 	fi
+	echo
 	if [[ $run -eq 0 ]]; then
-		echo "  TRACE: remove new fonts."
+		echo -e "New font(s) found:\n------------------"
 		echo "$newfont"
 	else
-		for f in "${newfont[@]}"; do # ???
+		for f in "${newfont[@]}"; do # remove or someth else ???
 			echo "Removing '$f'..."
 			#find "$wpath" -type f -d 1 -name "$f" -exec rm -f {} \;
 		done
@@ -782,7 +786,7 @@ function show-helppage () {
 	print-column $p4 $p20 "-verbose" "Switch. Shows objects to be removed in view mode." ":"
 	print-column $p4 $p20 "-report" "Switch. Shows statistics on objects." ":"
 	print-column $p4 $p20 "-fontset" "Switch. Shows predefined fontsets." ":"
-	print-column $p4 $p20 "-rev" "Switch. Reverses effect of the 'lang' and 'proof' filters." ":"
+	print-column $p4 $p20 "-rev" "Switch. Reverses effect of the 'lang' and 'proof' filters. For parameter '-font' it is to search for the new fonts." ":"
 	print-column $p4 $p20 "-run" "Switch. The default mode is view (test). Activates operations execution." ":"
 	print-column $p4 $p20 "-help" "Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters '-help -full'." ":"
 	echo
