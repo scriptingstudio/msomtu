@@ -6,7 +6,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 
 ## Features
 * ***Safe scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. You cannot change or harm your system without switch `-run`. Parameter `-cache` does not depend on `-run`.
-* Proactive assessment. You can estimate your disk space taken by the MSO app components before thinning.
+* Proactive assessment. You can evaluate your disk space taken by the MSO app components before thinning.
 * Duplicate fonts finder. You can find out conflicting and extra app fonts against the font libraries.
 * New fonts finder. You can find out new (standard sets considered) fonts added in each app after new MSO update.
 * Backup. You can backup your fonts before deletion.
@@ -20,6 +20,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * File operations are case insensitive.
 * Apply thinning after every MSO update.
 * Default settings for the `-lang` and `-proof` parameters: *english* and *russian*. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs.
+* Font classification specifics in predefined fontsets (in descending): cyrillic, non-cyrillic, hieroglyphic, symbolic, system.
 
 ## Usage
 
@@ -50,8 +51,8 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 ## Arguments
 <table>
 <tr><td valign="top"><code>app_list</code></td><td>Application list. <b>w</b> — Word, <b>e</b> — Excel, <b>p</b> — PowerPoint, <b>o</b> — Outlook, <b>n</b> — OneNote. Default: <code>w e p o n</code>.</td></tr>
-<tr><td valign="top"><code>lang_list</code></td><td>Langauge list: <code>ru pl de</code> etc; see filenames with parameter <code>-verb</code>. Default: <code>en ru</code>, see NOTES.</td></tr>
-<tr><td valign="top"><code>proof_list</code></td><td>Proofingtools list: <code>russian finnish german</code> etc; see filenames with parameter <code>-verb</code>. Wildcard <code>*</code> is available to use. Default: <code>english russian</code>, see NOTES.</td></tr>
+<tr><td valign="top"><code>lang_list</code></td><td>Langauge list: <code>ru pl de</code> etc; see filenames with parameter <code>-verbose</code>. Default: <code>en ru</code>, see NOTES.</td></tr>
+<tr><td valign="top"><code>proof_list</code></td><td>Proofingtools list: <code>russian finnish german</code> etc; see filenames with parameter <code>-verbose</code>. Wildcard <code>*</code> is available to use. Default: <code>english russian</code>, see NOTES.</td></tr>
 <tr><td valign="top"><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty — removes the <code>DFonts</code> folder (default); <i>fontset</i> — removes fonts of predefined fontset; <i>mask</i> — removes selection: <i>*.*, arial*, *.ttc</i> etc. If you use single <code>*</code> enclose it in quotation marks: <code>"*"</code>. Predefined fontsets: <code>library</code>, <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>, <code>symfonts</code>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates from system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (<code>DFonts</code> against libraries). You can use list of fontsets as well.</td></tr>
 <tr><td valign="top"><code>destination</code></td><td>Backup destination folderpath for fonts. Default value is <code>~/Desktop/MSOFonts</code>. You can use predefined destinations as well: <code>syslib</code> — system library; <code>userlib</code> — user library.</td></tr>
 </table>
