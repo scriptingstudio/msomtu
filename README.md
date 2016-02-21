@@ -20,7 +20,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * File operations are case insensitive.
 * Apply thinning after every MSO update.
 * Default settings for the `-lang` and `-proof` parameters: *english* and *russian*. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs.
-* Font classification specifics in predefined fontsets (in descending): cyrillic, non-cyrillic, hieroglyphic, symbolic, system.
+* **Font classification specifics** in predefined fontsets (in descending): cyrillic, non-cyrillic, hieroglyphic, symbolic, system. Fontsets do not intersect.
 
 ## Usage
 
@@ -33,6 +33,8 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 ```
 
 #### Use Cases
+**Solo actions:** `-report`, `-fontset`, `-backup`, `-cache`, `-help`.
+
 | Action  | Parameter |
 |:--------|:----------|
 | Getting MSO info | `-report` |
