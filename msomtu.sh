@@ -12,15 +12,14 @@
 #	Git Repo             : https://github.com/scriptingstudio/msomtu
 #
 # .TODO
-#	- cleanup code; there are artefacts/leftovers 
+#	- dev. cleanup code; there are artefacts/leftovers 
 #	  after migration from the previous version
-#	- get more specific on duplicates and fontsets
-#	- migrate to input parser G3 !!!
-#	- new fonts finder: remove or not?
-#	- uninstall MSO option (?)
-#	- logging (???)
-#	- help page: more clear text; format;
-#	- rename to 'msomt' - Microsoft Office maintenance tool???
+#	- dev. new fonts finder: remove or not?
+#	- dev. get more specific on duplicates and fontsets
+#	- dev. help page: more clear text; format;
+#	- update. migrate to input parser G3 and refactor param definitions !!!
+#	- new feat. uninstall MSO option (?)
+#	- new feat. logging (???)
 # 
 
 defstate='skip'
@@ -38,7 +37,7 @@ cmd_report=0
 cmd_backup=''
 cmd_cache=0
 cmd_fontset=0
-cmd_verb=0
+cmd_verb=''
 cmd_reverse=0
 cmd_exclude=''
 cmd_log=''
@@ -47,7 +46,7 @@ cmd_uninstall=''
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.8.38'
+version='2.8.40'
 util="${0##*/}"
 principalname='msomtu'
 defapp='w e p o n'
@@ -89,7 +88,7 @@ allfontsets=("${dfontsets[@]}" "${fontsets[@]}")
 # END definitions
 
 	
-function main () {
+function main () { # first version of the starter
 	printb "$toolname. Version $version."
 
 	############ Simple input named parameter parser v2 [inline method]
@@ -104,7 +103,7 @@ function main () {
 			shift
 		done
 		case "$INPUTPARAM" in # check parameters
-			-help|-h|-\?) cmd_help=1 ;;
+			-help|-h|-\?) [[ "$PARGS" ]] && cmd_help="$PARGS" || cmd_help=1 ;;
 			-all|-full) 
 				cmd_fontlist=1; cmd_font=1; cmd_cache=1; cmd_all=1 ;;
 			-flist|-fl) 
@@ -120,7 +119,7 @@ function main () {
 			-lang|-ui)
 				cmd+=" clean"; cmd_lang=""
 				[[ "$PARGS" ]] && cmd_lang="$PARGS" ;;
-			-verbose|-verb) cmd_verb=1 ;;
+			-verbose|-verb) [[ "$PARGS" ]] && cmd_verb="$PARGS" || cmd_verb='1' ;;
 			-report|-rep|-info|-inf) cmd+=" report"; cmd_report=1 ;;
 			-cache) cmd+=" cache"; cmd_cache=1 ;;
 			-fontset|-fs) 
@@ -133,7 +132,6 @@ function main () {
 				[[ "$PARGS" ]] && cmd_backup="$PARGS" ;;
 			-check) open -a safari "http://macadmins.software" ;;
 			--test) mktest; ;;
-			-nl) nl=1; let "script_params--" ;;
 			-log) cmd_log=1; [[ "$PARGS" ]] && cmd_log=2 ;;
 			-uninstall) cmd_uninstall=1; cmd="uninstall" ;;
 		esac
@@ -182,7 +180,7 @@ function main () {
 	if [[ "$cmd_report" == 1 ]];   then
 		cmd="report"; #cmd_app="$defapp"
 	fi
-	[[ "$script_params" == 0 || "$cmd_help" -eq 1 ]] && cmd='help'
+	[[ "$script_params" == 0 || "$cmd_help" != 0 ]] && cmd='help'
 	[[ "$cmd" == '' ]] && 
 		{ echo -e "\nNo valid actions or parameters defined (font lang proof flist report fontset cache backup help). Correct your command line parameters. See help.\n"; exit 3; }
 	# END input parser
@@ -383,9 +381,9 @@ function clean-application () {
 				find "$wpath" -type f -name font*.plist -d 1 -exec rm -f {} \;
 			else
 				echo "  TRACE: remove font-list files (.plist)."
-				if [[ $cmd_verb -eq 1 ]]; then
+				if [[ $cmd_verb ]]; then
 					fl=$(find "$wpath" -type f -name font*.plist -d 1 -exec basename {} \;)
-					[[ -z $nl ]] && echo "$fl"; aggregator "$fl" "$wpath"
+					[[ $cmd_verb != 'nl' ]] && echo "$fl"; update-counter "$fl" "$wpath"
 				fi
 			fi
 		fi # END plist (fontlist files)
@@ -448,11 +446,11 @@ function clean-font () {
 	fi
 	
 	echo "  TRACE: remove fonts/folder '$wpath'."
-	[[ $cmd_verb -eq 0 ]] && return
+	[[ $cmd_verb == '' ]] && return
 	for f in $cmd_font; do # folder alone
 		if [[ "$f" == 'folder' ]]; then
-			fs=$(ls -A "$wpath"); [[ -z $nl ]] && echo "$fs"
-			aggregator "$fs" "$wpath"
+			fs=$(ls -A "$wpath"); [[ $cmd_verb != 'nl' ]] && echo "$fs"
+			update-counter "$fs" "$wpath"
 		fi
 		[[ "$f" == lib* ]] && remove-duplicate "$wpath"
 	done
@@ -462,7 +460,7 @@ function clean-font () {
 		else
 			fs=$(find "$wpath" -type f -iname "$f" -d 1 -exec basename {} \;)
 		fi
-		[[ -z $nl ]] && echo "$fs"; aggregator "$fs" "$wpath"
+		[[ $cmd_verb != 'nl' ]] && echo "$fs"; update-counter "$fs" "$wpath"
 	done
 } # END clean fonts
 
@@ -536,7 +534,7 @@ function clean-lang () {
 	__list-lang () { 
 		local fs fc
 		fs=$( find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec basename {} \; )
-		[[ -z $nl ]] && echo "$fs"; aggregator "$fs" "$wpath" 
+		[[ $cmd_verb != 'nl' ]] && echo "$fs"; update-counter "$fs" "$wpath" 
 	}
 	__rm-lang () { find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec rm -fdr {} \; ; }
 	local wpath="$1"
@@ -547,14 +545,14 @@ function clean-lang () {
 		else # trace mode
 			cmd_lang=$(unique "en $cmd_lang")
 			echo "  TRACE: remove extra UI languages. Keep '$cmd_lang'."
-			[[ $cmd_verb -eq 1 ]] && __list-lang
+			[[ $cmd_verb ]] && __list-lang
 		fi
 	else # reverse filter
 		if [[ $run -eq 1 ]]; then
 			__rm-lang
 		else # trace mode
 			echo "  TRACE: remove extra UI languages - '$cmd_lang'."
-			[[ $cmd_verb -eq 1 ]] && __list-lang 
+			[[ $cmd_verb ]] && __list-lang 
 		fi
 	fi
 } # END lang
@@ -568,9 +566,9 @@ function clean-ptools () {
 		else # trace mode
 			cmd_proof=$(unique "english $cmd_proof")
 			echo "  TRACE: remove extra proofing tools. Keep '$cmd_proof'."
-			if [[ $cmd_verb -eq 1 ]]; then 
+			if [[ $cmd_verb ]]; then 
 				fs=$( find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec basename {} \; )
-				[[ -z $nl ]] && echo "$fs"; aggregator "$fs" "$wpath" 
+				[[ $cmd_verb != 'nl' ]] && echo "$fs"; update-counter "$fs" "$wpath" 
 			fi
 		fi
 	else # reverse filter
@@ -578,9 +576,9 @@ function clean-ptools () {
 			find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec rm -fdr {} \;
 		else # trace mode
 			echo "  TRACE: remove extra proofing tools - '$cmd_proof'."
-			if [[ $cmd_verb -eq 1 ]]; then 
+			if [[ $cmd_verb ]]; then 
 				fs=$( find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec basename {} \; )
-				[[ -z $nl ]] && echo "$fs"; aggregator "$fs" "$wpath"
+				[[ $cmd_verb != 'nl' ]] && echo "$fs"; update-counter "$fs" "$wpath"
 			fi
 		fi
 	fi
@@ -679,7 +677,7 @@ function invoke-backup () { # for fonts only
 			[[ "${fl// }" == '' ]] && continue
 			c=$(echo "$fl" | wc -l); [[ "$fl" == "" ]] && c=0;
 			let "fc+=$c"
-			[[ $cmd_verb -eq 1 ]] && echo "$fl"
+			[[ $cmd_verb ]] && echo "$fl"
 		done
 		echo "-----------"
 		echo "Total files : ${fc// }."
@@ -698,9 +696,10 @@ function show-helppage () {
 	local p3=3 p4=4 p6=6 p8=8 p20=20
 	local fs="${dfontsets[@]/chfonts/chinese}"; fs=${fs// /, }
 
-	if [[ "${LANG%\.*}" != "en_US" && "${LANG%\.*}" != "en_GB" && -z $nl ]]; then
+	if [[ "${LANG%\.*}" != "en_US" && "${LANG%\.*}" != "en_GB" && 
+	$cmd_help != 'en' ]]; then
 		local extless="${0%.*}"
-		local helpfile="${extless%-*}-help.sh"  # clean dev stage suffix
+		local helpfile="${extless%-*}-help.sh"  # clear dev stage suffix
 		[[ -f "$helpfile" ]] && { . "$helpfile"; exit 0; }
 	fi
 
@@ -732,7 +731,7 @@ function show-helppage () {
 	echo
 	print-column 0 $p4 "" "[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
 	echo
-	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-?] [-run]"
+	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]"
 	echo 
 
 	if [[ $cmd_all -eq 1 ]]; then
@@ -783,13 +782,12 @@ function show-helppage () {
 	print-column $p4 $p20 "-flist" "Switch. Removes fontlist (.plist) files." ":"
 	print-column $p4 $p20 "-all" "Switch. Activates all cleaning options: lang, proof, font, flist, cache. It does not affect a parameter '-app'." ":"
 	print-column $p4 $p20 "-cache" "Switch. Cleans up font cache." ":"
-	print-column $p4 $p20 "-verbose" "Switch. Shows objects to be removed in view mode." ":"
+	print-column $p4 $p20 "-verbose" "Switch. Shows objects to be removed in view mode. With special argument 'nl' skips file listing." ":"
 	print-column $p4 $p20 "-report" "Switch. Shows statistics on objects." ":"
 	print-column $p4 $p20 "-fontset" "Switch. Shows predefined fontsets." ":"
 	print-column $p4 $p20 "-rev" "Switch. Reverses effect of the 'lang' and 'proof' filters. For parameter '-font' it is to search for the new fonts." ":"
 	print-column $p4 $p20 "-run" "Switch. The default mode is view (test). Activates operations execution." ":"
-	print-column $p4 $p20 "-help" "Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters '-help -full'." ":"
-	print-column $p4 $p20 "-help" "Special switch. With parameter '-help' forces english help. With parameter '-verbose' skips file listing; the same as without '-verbose' but displays report table." ":"
+	print-column $p4 $p20 "-help" "Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters '-help -full'. Special argument 'en' forces english help page." ":"
 	echo
 	
 	if [[ $cmd_all -eq 1 ]]; then
@@ -833,8 +831,8 @@ function show-helppage () {
 } # END help page
 
 function write-log () { echo; } # under construction
-function show-appdu () {
-	[[ $run -eq 0 && $cmd_verb -eq 0 ]] && return
+function show-appdu () { # final report
+	[[ $run -eq 0 && $cmd_verb == '' ]] && return
 	local s1 s2 a1 a2 as1 as2 du1=$1[@] du2=$2[@] dif='-' difpc
 	[[ $run -eq 0 ]] && du2=$3[@]
 	du1=("${!du1}"); du2=("${!du2}")
@@ -870,7 +868,7 @@ function show-appdu () {
 	done
 } # END app disk usage score report
 function get-diskusage () {
-	[[ $run -eq 0 && $cmd_verb -eq 0 ]] && return
+	[[ $run -eq 0 && $cmd_verb == '' ]] && return
 	local app s1 score=()
 	for app in "${appPathArray[@]}"; do
 		s1=$( du -sh "$basePATH$app" )
@@ -878,7 +876,7 @@ function get-diskusage () {
 	done
 	eval $1='("${score[@]}")'
 } # END MSO DU
-function aggregator () {
+function update-counter () {
 # $1 - '\n' delimited file list; $2 - filepath;	
 	local fc=$( echo "${1}" | 
 		xargs -I{} du -sh -k "$2"/"{}" | 
@@ -935,7 +933,7 @@ function print-padding () {
 			else echo -e "$pad$str"; fi ;;
 	esac
 } # END print-padding
-function print-column () {
+function print-column () { # simple formatter
 # Prints 1 or 2 columns of text. UNIX sucks: printf is not unicode-aware!
 # $1 - column1 padding
 # $2 - column2 padding
@@ -982,7 +980,7 @@ function inarray () { # test item ($1) in array ($2 - passing by name!)
     local a=("${!name}")
 	comm -1 -2 -i <(printf '%s\n' "${s[@]}" | sort -u) <(printf '%s\n' "${a[@]}" | sort -u)
 }
-function math-diffexpr () { # simple unit calculator
+function math-diffexpr () { # simple unit calculator; couldnot find in the www
 	local dif difpc exp='{
 		e1=toupper($1); e2=toupper($2); child=$3}; END {
 		u1=substr(e1,length(e1),1); u2=substr(e2,length(e2),1)
@@ -992,6 +990,10 @@ function math-diffexpr () { # simple unit calculator
 		m1=e1; sub(/[A-Z]/,"",m1); m2=e2; sub(/[A-Z]/,"",m2);
 		m1 = 0 + m1; m2 = 0 + m2
 		if (!m1 && !m2 || m1 == 0) {printf "%s|", "0"; exit 1}
+#		if (m1 > kilo && u1 != "G") {m1/=1024; u1 = (u1 == "K") ? "M":"G"}
+#		if (m2 > kilo && u2 != "G") {m2/=1024; u2 = (u2 == "K") ? "M":"G"}
+		if (m1 < 1 && u1 != "K") {m1*=1024; u1 = (u1 == "G") ? "M":"K"}
+		if (m2 < 1 && u2 != "K") {m2*=1024; u2 = (u2 == "G") ? "M":"K"}
 
 		if (u1 == "G") m1*=(1024*1024); else
 			if (u1 == "M") m1*=1024
