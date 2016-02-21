@@ -29,7 +29,7 @@ $ [sudo] msomtu.sh [-<parameter> [<arguments>]]...
 
 $ [sudo] msomtu.sh [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]
 
-$ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-?] [-run]
+$ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]
 ```
 
 #### Use Cases
@@ -38,7 +38,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 | Action  | Parameter |
 |:--------|:----------|
 | Getting MSO info | `-report` |
-| Getting proactive assessment of thinning (view mode) <br/><br/> | Fonts: `-font -verbose` <br/>UI langs: `-lang -verbose` <br/>Proofingtools: `-proof -verbose` <br/>Fontlists: `-flist -verbose` |
+| Getting proactive assessment of thinning (view mode) <br/><br/> | Fonts: `-font -verbose nl` <br/>UI langs: `-lang -verbose nl` <br/>Proofingtools: `-proof -verbose nl` <br/>Fontlists: `-flist -verbose nl` |
 | Listing/Removing UI languages | `-lang` |
 | Listing/Removing proofingtools | `-proof` |
 | Listing/Removing fonts | `-font` |
@@ -70,13 +70,12 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (.plist) files.</td></tr>
 <tr><td valign="top"><code>-all</code></td> <td>Switch. Activates all cleaning options: <code>lang</code>, <code>proof</code>, <code>font</code>, <code>flist</code>, <code>cache</code>. It does not affect the parameter <code>-app</code>.</td></tr>
 <tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans up font cache.</td></tr>
-<tr><td nowrap valign="top"><code>-verbose</code></td> <td>Switch. Shows objects to be removed, in view mode.</td></tr>
+<tr><td nowrap valign="top"><code>-verbose</code></td> <td>Switch. Shows objects to be removed, in view mode. With special argument <code>nl</code> skips file listing.</td></tr>
 <tr><td valign="top"><code>-report</code></td> <td>Switch. Shows statistics on objects.</td></tr>
 <tr><td nowrap valign="top"><code>-fontset</code></td> <td>Switch. Shows predefined fontsets.</td></tr>
 <tr><td valign="top"><code>-rev</code></td> <td>Switch. Reverses effect of the <code>-lang</code> and <code>-proof</code> filters. For parameter <code>-font</code> it is to search for the new fonts.</td></tr>
 <tr><td valign="top"><code>-run</code></td> <td>Switch. The default mode is view (test). Activates operations execution.</td></tr>
-<tr><td valign="top"><code>-help</code></td> <td>Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters <code>-help -full</code>.</td></tr>
-<tr><td valign="top"><code>-nl</code></td> <td>Special switch. With parameter <code>-help</code> forces english help. With parameter <code>-verbose</code> skips file listing; the same as without <code>-verbose</code> but displays report table. </td></tr>
+<tr><td valign="top"><code>-help</code></td> <td>Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters <code>-help -full</code>. Special argument <code>en</code> forces english help page.</td></tr>
 </table>
 
 ## Examples
