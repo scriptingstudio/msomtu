@@ -76,6 +76,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>-rev</code></td> <td>Switch. Reverses effect of the <code>-lang</code> and <code>-proof</code> filters. For parameter <code>-font</code> it is to search for the new fonts.</td></tr>
 <tr><td valign="top"><code>-run</code></td> <td>Switch. The default mode is view (test). Activates operations execution.</td></tr>
 <tr><td valign="top"><code>-help</code></td> <td>Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters <code>-help -full</code>.</td></tr>
+<tr><td valign="top"><code>-nl</code></td> <td>Special switch. With parameter <code>-help</code> forces english help. With parameter <code>-verbose</code> skips file listing; the same as without <code>-verbose</code> but displays report table. </td></tr>
 </table>
 
 ## Examples
