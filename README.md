@@ -48,7 +48,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 | Finding new fonts | `-font -rev` |
 | Backing up fonts | `-backup -font` |
 | Copying fonts to font libraries | `-backup -font` |
-| Getting help | Short page — no parameters<br/>Full page — `-help -full` |
+| Getting help | Short page — no parameters <br/>Full page — `-help -full` <br/>Force english page — `-help en` |
 
 ## Arguments
 <table>
