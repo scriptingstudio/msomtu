@@ -15,10 +15,9 @@
 #	- cleanup code; there are artefacts/leftovers 
 #	  after migration from the previous version
 #	- get more specific on duplicates and fontsets
-#	- migrate to input parser G3
+#	- migrate to input parser G3 !!!
 #	- new fonts finder: remove or not?
 #	- uninstall MSO option (?)
-#	- refactor verbose mode (?)
 #	- logging (???)
 #	- help page: more clear text; format;
 #	- rename to 'msomt' - Microsoft Office maintenance tool???
@@ -48,7 +47,7 @@ cmd_uninstall=''
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.8.37'
+version='2.8.38'
 util="${0##*/}"
 principalname='msomtu'
 defapp='w e p o n'
@@ -291,8 +290,8 @@ function make-report () {
 	__separate-unit () { echo "${1/[A-Z]/} ${1:(-1)}"; }
 	local versionPATH="/Contents/Info.plist"
 	local versionKey="CFBundleShortVersionString"
-	local fmt1='   %-18s : %10s  %10s\n' na='--' sfx=''
-	local appPATH wpath appVersion msbuild fs fc plist flist filter appfat appfiles
+	local fmt1='   %-18s : %10s  %10s\n' na='--' sfx='' appfat appfiles
+	local appPATH wpath appVersion msbuild fs fc plist flist filter
 	for appPATH in "${appPathArray[@]}"; do
 		printb "Processing '$appPATH'"
 		wpath="$basePATH$appPATH$fontPATH/DFonts"
@@ -318,9 +317,9 @@ function make-report () {
 		printf "$fmt1" "Fonts" "${fc// }" "${fs}$sfx"
 		##### fontlists
 		wpath="$basePATH$appPATH$fontPATH"
-					#- plist=$(find "$wpath" -type f -name font*.plist -d 1)
-		plist=("$wpath/"font*.plist)
-		if [[ -z "$plist" ]]; then
+					#- flist=$(find "$wpath" -type f -name font*.plist -d 1)
+		flist=$(ls "$wpath/"font*.plist 2> /dev/null)
+		if [[ -z "$flist" ]]; then
 			printf "$fmt1" "Plists" $na
 		else
 			fs=$(du -sh -k "$wpath/"*.plist | awk '{ total += $1 }; END {print total}')
@@ -386,7 +385,7 @@ function clean-application () {
 				echo "  TRACE: remove font-list files (.plist)."
 				if [[ $cmd_verb -eq 1 ]]; then
 					fl=$(find "$wpath" -type f -name font*.plist -d 1 -exec basename {} \;)
-					echo "$fl"; aggregator "$fl" "$wpath"
+					[[ -z $nl ]] && echo "$fl"; aggregator "$fl" "$wpath"
 				fi
 			fi
 		fi # END plist (fontlist files)
@@ -452,7 +451,7 @@ function clean-font () {
 	[[ $cmd_verb -eq 0 ]] && return
 	for f in $cmd_font; do # folder alone
 		if [[ "$f" == 'folder' ]]; then
-			fs=$(ls -A "$wpath"); echo "$fs"
+			fs=$(ls -A "$wpath"); [[ -z $nl ]] && echo "$fs"
 			aggregator "$fs" "$wpath"
 		fi
 		[[ "$f" == lib* ]] && remove-duplicate "$wpath"
@@ -463,7 +462,7 @@ function clean-font () {
 		else
 			fs=$(find "$wpath" -type f -iname "$f" -d 1 -exec basename {} \;)
 		fi
-		echo "$fs"; aggregator "$fs" "$wpath"
+		[[ -z $nl ]] && echo "$fs"; aggregator "$fs" "$wpath"
 	done
 } # END clean fonts
 
@@ -537,7 +536,7 @@ function clean-lang () {
 	__list-lang () { 
 		local fs fc
 		fs=$( find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec basename {} \; )
-		echo "$fs"; aggregator "$fs" "$wpath" 
+		[[ -z $nl ]] && echo "$fs"; aggregator "$fs" "$wpath" 
 	}
 	__rm-lang () { find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec rm -fdr {} \; ; }
 	local wpath="$1"
@@ -571,7 +570,7 @@ function clean-ptools () {
 			echo "  TRACE: remove extra proofing tools. Keep '$cmd_proof'."
 			if [[ $cmd_verb -eq 1 ]]; then 
 				fs=$( find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec basename {} \; )
-				echo "$fs"; aggregator "$fs" "$wpath" 
+				[[ -z $nl ]] && echo "$fs"; aggregator "$fs" "$wpath" 
 			fi
 		fi
 	else # reverse filter
@@ -581,7 +580,7 @@ function clean-ptools () {
 			echo "  TRACE: remove extra proofing tools - '$cmd_proof'."
 			if [[ $cmd_verb -eq 1 ]]; then 
 				fs=$( find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec basename {} \; )
-				echo "$fs"; aggregator "$fs" "$wpath"
+				[[ -z $nl ]] && echo "$fs"; aggregator "$fs" "$wpath"
 			fi
 		fi
 	fi
@@ -790,6 +789,7 @@ function show-helppage () {
 	print-column $p4 $p20 "-rev" "Switch. Reverses effect of the 'lang' and 'proof' filters. For parameter '-font' it is to search for the new fonts." ":"
 	print-column $p4 $p20 "-run" "Switch. The default mode is view (test). Activates operations execution." ":"
 	print-column $p4 $p20 "-help" "Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters '-help -full'." ":"
+	print-column $p4 $p20 "-help" "Special switch. With parameter '-help' forces english help. With parameter '-verbose' skips file listing; the same as without '-verbose' but displays report table." ":"
 	echo
 	
 	if [[ $cmd_all -eq 1 ]]; then
@@ -858,8 +858,8 @@ function show-appdu () {
 					dif=$(math-diffexpr $as1 $as2); 
 					difpc="${dif#*|}"; dif="${dif%|*}"
 				fi
-				#[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='n/a'
-				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='<1'${dif:(-1)}
+				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='n/a'
+				###[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='<1'${dif:(-1)}
 				#if [[ $dif != 'n/a' && $difpc ]]; then
 					printf -v difpc ": %3s" "$difpc"
 					dif="$dif $difpc"
