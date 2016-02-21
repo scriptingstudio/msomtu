@@ -48,7 +48,7 @@ cmd_uninstall=''
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.8.34'
+version='2.8.37'
 util="${0##*/}"
 principalname='msomtu'
 defapp='w e p o n'
@@ -175,10 +175,7 @@ function main () {
 	fi
 	[[ "$cmd_app" == '0' || -z "${cmd_app// }" ]] && 
 		cmd_app="$defapp"
-	# backup? backup first; exit
-	# cache? cache last
-	# fontset? fs first; exit
-	# report? rep first; exit
+	# solo operations: backup, cache, fontset, report, help
 	[[ $cmd_uninstall -eq 1 ]] && cmd="uninstall"
 	if [[ -n "$cmd_backup" ]];     then cmd="backup"; fi
 	if [[ "$cmd_cache" == 1 ]];    then cmd="$cmd cache"; fi
@@ -285,7 +282,7 @@ function check-app () {
 function make-report () {
 	__normalize-number () { # restr: input - kilobytes
 		echo "$1" | awk '{e1=$1;} END {
-			unit="K"; fmt1="%.f %s"; kilo=1000
+			unit="K"; fmt1="%.f %s"; kilo=1024
 			if (e1 > kilo) {e1/=1024; unit="M"; fmt1="%.f %s"}
 			if (e1 > kilo) {e1/=1024; unit="G"; fmt1="%.1f %s"}
 			printf fmt1,e1,unit
@@ -294,7 +291,7 @@ function make-report () {
 	__separate-unit () { echo "${1/[A-Z]/} ${1:(-1)}"; }
 	local versionPATH="/Contents/Info.plist"
 	local versionKey="CFBundleShortVersionString"
-	local fmt1='   %-18s : %10s  %10s\n' na='--' sfx='B'
+	local fmt1='   %-18s : %10s  %10s\n' na='--' sfx=''
 	local appPATH wpath appVersion msbuild fs fc plist flist filter appfat appfiles
 	for appPATH in "${appPathArray[@]}"; do
 		printb "Processing '$appPATH'"
@@ -367,7 +364,7 @@ function make-report () {
 
 		echo
 	done # app selection
-	echo "[*] Includes the default file sets which are reserved by settings."
+	echo -e "----\n[*] Includes the default file sets which are reserved\n    by settings. The folder 'Fonts' is reserved."
 	echo
 } # END report
 
@@ -724,11 +721,10 @@ function show-helppage () {
 	print-column 0 $p6 "" "If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. Neither third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion." '-'
 	print-column 0 $p6 "" "Caution: do not remove fonts from the 'Fonts' folder! These are minimum needed for the MSO applications to work." '-'
 	print-column 0 $p6 "" "File operations are case insensitive." '-'
-	print-column 0 $p6 "" "Predefined fontsets do not intersect." '-'
 	print-column 0 $p6 "" "Script only accepts named parameters." '-'
 	print-column 0 $p6 "" "Apply thinning after every MSO update." '-'
 	print-column 0 $p6 "" "Default settings for the '-lang' and '-proof' parameters: english and russian. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs." '-'
-	print-column 0 $p6 "" "Font classification spicifics in predefined fontsets (in descending): cyrillic, non-cyrillic, hieroglyphic, symbolic, system." '-'
+	print-column 0 $p6 "" "Font classification spicifics in predefined fontsets (in descending): cyrillic, non-cyrillic, hieroglyphic, symbolic, system. Fontsets do not intersect." '-'
 	echo
 	fi
 
@@ -743,6 +739,8 @@ function show-helppage () {
 	if [[ $cmd_all -eq 1 ]]; then
 	local mp4=-4 p12=12
 	printb "USE CASES:"
+	print-padding $mp4 "Solo actions: 'backup', 'cache', 'fontset', 'report', 'help'."
+	echo
 	print-padding $mp4 "- Getting MSO info" 
 		print-column 0 $p12 "" "Parameter '-report'."
 	print-padding $mp4 "- Getting assessment of thinning (view mode)" 
@@ -860,11 +858,12 @@ function show-appdu () {
 					dif=$(math-diffexpr $as1 $as2); 
 					difpc="${dif#*|}"; dif="${dif%|*}"
 				fi
-				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='-'
-				if [[ $dif != '-' && $difpc ]]; then
+				#[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='n/a'
+				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='<1'${dif:(-1)}
+				#if [[ $dif != 'n/a' && $difpc ]]; then
 					printf -v difpc ": %3s" "$difpc"
 					dif="$dif $difpc"
-				fi
+				#fi
 				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2" "$dif"
 			fi
 		done
@@ -983,44 +982,31 @@ function inarray () { # test item ($1) in array ($2 - passing by name!)
     local a=("${!name}")
 	comm -1 -2 -i <(printf '%s\n' "${s[@]}" | sort -u) <(printf '%s\n' "${a[@]}" | sort -u)
 }
-function math-diffexpr () { # mind jawbreaker
+function math-diffexpr () { # simple unit calculator
 	local dif difpc exp='{
 		e1=toupper($1); e2=toupper($2); child=$3}; END {
 		u1=substr(e1,length(e1),1); u2=substr(e2,length(e2),1)
-		x=match(u1,"[KMG]"); if (!x) u1="K" # type cast or exit ???
-		x=match(u2,"[KMG]"); if (!x) u2=u1; kilo=1024
+		x=match(u1,"[KMG]"); if (!x) u1="K" # type cast
+		x=match(u2,"[KMG]"); if (!x) u2=u1; 
+		kilo=1024; unit="K"
 		m1=e1; sub(/[A-Z]/,"",m1); m2=e2; sub(/[A-Z]/,"",m2);
+		m1 = 0 + m1; m2 = 0 + m2
 		if (!m1 && !m2 || m1 == 0) {printf "%s|", "0"; exit 1}
-		if (m1 > kilo && u1 != "G") {m1/=1024; u1 = (u1 == "K") ? "M":"G"}
-		if (m2 > kilo && u2 != "G") {m2/=1024; u2 = (u2 == "K") ? "M":"G"}
-		if (0+m1 < 1 && u1 != "K") {m1*=1024; u1 = (u1 == "G") ? "M":"K"}
-		if (0+m2 < 1 && u2 != "K") {m2*=1024; u2 = (u2 == "G") ? "M":"K"}
-		if (u1 == u2) { # G-G M-M K-K
-			if (m2 > m1) {r=m1; m1=m2; m2=r} # swap or exit ??? 
-			r = m1-m2; unit=u1; pc = (child) ? (m2/m1)*100 : (r/m1)*100
-			if (r < 1) {
-				r*=1024
-				unit = (unit == "G") ? "M" : "K"
-				if (r < 1) unit=""
-			} else
-			if (r > kilo) {r/=1024; unit = (unit == "K") ? "M" : "G"}
-			fmt1 = (unit == "G") ? "%.1f" : "%.f"
-		} else if (u1 == "G") { # G-M G-K
-			unit="G"; m01=m1
-			if (u2 == "M") m1*=1024; if (u2 == "K") m1*=(1024*1024)
-			r = m1-m2; pc = (child) ? (m2/m1)*100 : (r/m1)*100
-			if (r > kilo) {r/=1024;}; if (r > kilo) {r/=1024;}
-			if (r > m01) unit=u2;
-			if (unit == "G") fmt1="%.1f"; else {fmt1="%.f"; unit="M"}
-		} else { # M-K; K-M M-G K-G - unpredictable
-			r = (m1*1024 - m2)/1024; unit="M"; fmt1="%.1f"
-			if (r < 1) {r*=1024; unit="K"} else
-			if (r > kilo) {r/=1024; if (unit == "K") unit="M"; fmt1="%.f"}
-			pc = (child) ? (m2/(m1*1024))*100 : (r/m1)*100
-		} # END unit calc
-		if (r == 0) unit=""; fmtpc=" ; difpc=%.f%%"
-		if (pc == 100 || pc < 1) {pc=""; fmtpc=""}
-		printf "dif="fmt1"%s"fmtpc, r, unit, pc
+
+		if (u1 == "G") m1*=(1024*1024); else
+			if (u1 == "M") m1*=1024
+		if (u2 == "G") m2*=(1024*1024); else
+			if (u2 == "M") m2*=1024
+		if (m2 > m1) {r=m1; m1=m2; m2=r} # swap or exit ???
+		r = m1-m2; pc = (child) ? m2/m1 : r/m1; pc*=100
+		if (r > kilo) {r/=1024; unit="M"}; if (r > kilo) {r/=1024; unit="G"}
+
+		fmt1 = (unit == "G") ? "%.1f" : "%.f"
+		if (r%1 >= 0.95) fmt1="%.f"; if (r == 0) unit=""	
+		fmtpc = "%.f%%"	
+		if (pc < 1) {pc="\\<1"; fmtpc="%s%%"} else
+			if (pc > 99.5) {pc="abs"; fmtpc="%s"}
+		printf "dif="fmt1"%s; difpc="fmtpc, r, unit, pc
 	}'
 	eval $(echo "${@}" | awk "$exp"); echo "$dif|$difpc"
 } # END difference of byte expressions
