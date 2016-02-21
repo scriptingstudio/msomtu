@@ -28,7 +28,7 @@ if [[ "${LANG%\.*}" == "ru_RU" ]]; then
 	echo
 	print-column 0 $p4 "" "[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
 	echo
-	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-?] [-run]"
+	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]"
 	echo
 	
 	if [[ $cmd_all -eq 1 ]]; then
@@ -89,12 +89,12 @@ if [[ "${LANG%\.*}" == "ru_RU" ]]; then
 	print-column $p4 $p20 "-flist" "Ключ. Удаление файлов списков шрифтов (.plist)." ":"
 	print-column $p4 $p20 "-all" "Ключ. Активация всех параметров очистки: lang, proof, font, flist, cache. Не влияет на параметр '-app'." ":"
 	print-column $p4 $p20 "-cache" "Ключ. Очистка кэша шрифтов." ":"
-	print-column $p4 $p20 "-verbose" "Ключ. Показывает детальную информацию по объектам выбора в режиме эмуляции." ":"
+	print-column $p4 $p20 "-verbose" "Ключ. Показывает детальную информацию по объектам выбора в режиме эмуляции. С аргументом 'nl' отменяет вывод списка файлов. " ":"
 	print-column $p4 $p20 "-report" "Ключ. Показывает статистику по приложениям." ":"
 	print-column $p4 $p20 "-fontset" "Ключ. Показывает предопределенные шрифтовые наборы." ":"
 	print-column $p4 $p20 "-rev" "Ключ. Изменяет результат работы фильтров '-lang' и '-proof' на обратный." ":"
 	print-column $p4 $p20 "-run" "Ключ. Разрешает режим изменений." ":"
-	print-column $p4 $p20 "-help" "Ключ. Показывает страницу помощи. Есть два вида страницы: краткая и полная. По умолчанию (без параметров) выводится краткая страница. Для полного вида используйте параметр '-help -full'." ":"
+	print-column $p4 $p20 "-help" "Ключ. Показывает страницу помощи. Есть два вида страницы: краткая и полная. По умолчанию (без параметров) выводится краткая страница. Для полного вида используйте параметр '-help -full'. С аргументом 'en' выводит английскую страницу помощи." ":"
 	echo
 	
 	if [[ $cmd_all -eq 1 ]]; then
@@ -150,7 +150,7 @@ fi
 #	echo
 #	print-column 0 $p4 "" "[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
 #	echo
-#	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-?] [-run]"
+#	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]"
 #	echo 
 
 #	if [[ $cmd_all -eq 1 ]]; then
@@ -169,4 +169,4 @@ fi
 #	exit 0
 #fi
 
-echo "No help for your language? Use parameter '-nl' for english."
+echo "No help for your language? Use argument '-help en' for english."
