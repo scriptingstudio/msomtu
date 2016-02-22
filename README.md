@@ -2,7 +2,14 @@
 ***Msomtu*** is Microsoft Office for Mac Maintenance Utility.
 
 ## Description
-Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container waisting gigabytes of your disk space and making MSO unmanageable. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined and user defined destinations.
+Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container waisting gigabytes of your disk space and making MSO unmanageable. This script safely removes (thinning) extra parts of the folowing components: 
+
+* UI languages; 
+* Proofing tools; 
+* OS X duplicated font files; 
+* Fontlist files.
+
+It also can backup/copy font files to predefined and user defined destinations.
 ## Requirements
 * Microsoft Office 2016 for Mac 15.17 or later.
 
@@ -17,7 +24,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 ## Notes
 * As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
 * As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the `Fonts` folder within each app. The rest are in the `DFonts` folder.
-* If you remove fonts, remove font lists as well. The `DFonts` folder and font lists are safe to remove. Neither third party app can see MSO fonts installed to the `DFonts` folder. Some of the fonts you may find useful, save them before deletion.
+* If you remove fonts, remove font lists as well. The `DFonts` folder and font lists are safe to remove. No third party app can see MSO fonts installed to the `DFonts` folder. Some of the fonts you may find useful, save them before deletion.
 * **Caution**: do not remove fonts from the `Fonts` folder! These are minimum needed for the MSO applications to work.
 * File operations are case insensitive.
 * Apply thinning after every MSO update.
