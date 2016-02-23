@@ -131,9 +131,6 @@ function main () { # first version of the starter
 				cmd="backup"; cmd_backup="$backupPATH"
 				[[ "$PARGS" ]] && cmd_backup="$PARGS" ;;
 			-check) open -a safari "http://macadmins.software" ;;
-			#-uninstall|-un) cmd_uninstall=1; cmd="uninstall" ;;
-			-log) cmd_log=1; [[ "$PARGS" ]] && cmd_log=2 ;;
-			--test) mktest; ;;
 		esac
 	done
 	## Post parsing alignment
@@ -173,7 +170,6 @@ function main () { # first version of the starter
 	[[ "$cmd_app" == '0' || -z "${cmd_app// }" ]] && 
 		cmd_app="$defapp"
 	# solo operations: backup, cache, fontset, report, help
-	#[[ $cmd_uninstall -eq 1 ]] && cmd="uninstall"
 	if [[ -n "$cmd_backup" ]];     then cmd="backup"; fi
 	if [[ "$cmd_cache" == 1 ]];    then cmd="$cmd cache"; fi
 	if [[ "$cmd_fontset" == 1 ]];  then cmd="fontset"; fi
@@ -215,8 +211,6 @@ function main () { # first version of the starter
 				
 			cache) 
 				clean-cache ;;
-				
-			#uninstall) 	uninstall-mso ;;
 				
 			help)
 				show-helppage ;;
@@ -688,7 +682,7 @@ function show-helppage () { # english page
 	echo
 
 	printb "NOTES:"
-	print-column 0 $p6 "" "Safe scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. You cannot change or harm your system without switch '-run'. Parameter '-cache' does not depend on '-run'." '-'
+	print-column 0 $p6 "" "Safe scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. The script cannot make changes or harm your system without parameter '-run'." '-'
 	print-column 0 $p6 "" "As MSO is installed with root on /Applications directory you have to run this script with sudo to make changes." '-'
 	print-column 0 $p6 "" "As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder." '-'
 	print-column 0 $p6 "" "If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. No third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion." '-'
@@ -757,7 +751,7 @@ function show-helppage () { # english page
 	print-column $p4 $p20 "-flist" "Switch. Removes fontlist (.plist) files." ":"
 	print-column $p4 $p20 "-all" "Switch. Activates all cleaning options: lang, proof, font, flist, cache. It does not affect a parameter '-app'." ":"
 	print-column $p4 $p20 "-cache" "Switch. Cleans up font cache." ":"
-	print-column $p4 $p20 "-verbose" "Switch. Shows objects to be removed in view mode. With special argument 'nl' skips file listing." ":"
+	print-column $p4 $p20 "-verbose" "Switch. View mode: shows objects to be removed. With special argument 'nl' skips file listing. It does not depend on '-run'." ":"
 	print-column $p4 $p20 "-report" "Switch. Shows statistics on objects." ":"
 	print-column $p4 $p20 "-fontset" "Switch. Shows predefined fontsets." ":"
 	print-column $p4 $p20 "-rev" "Switch. Reverses effect of the 'lang' and 'proof' filters. For parameter '-font' it is to search for the new fonts." ":"
@@ -801,7 +795,6 @@ function show-helppage () { # english page
 	echo
 	fi
 	
-	echo $helpfile
 	exit 0
 } # END help page
 
@@ -832,11 +825,8 @@ function show-appdu () { # final report
 					difpc="${dif#*|}"; dif="${dif%|*}"
 				fi
 				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='n/a'
-				###[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='<1'${dif:(-1)}
-				#if [[ $dif != 'n/a' && $difpc ]]; then
 					printf -v difpc ": %3s" "$difpc"
 					dif="$dif $difpc"
-				#fi
 				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2" "$dif"
 			fi
 		done
@@ -987,18 +977,6 @@ function math-diffexpr () { # simple unit calculator; couldnot find in the www
 	}'
 	eval $(echo "${@}" | awk "$exp"); echo "$dif|$difpc"
 } # END difference of byte expressions
-
-function mktest () {
-# development environment; I use it for testing; test data manager is in another script
-# remove this function (and input parsing option '--test') before public distribution
-	WordPATH="Microsoft Word"
-	ExcelPATH="Microsoft Excel"
-	PowerPointPATH="Microsoft PowerPoint"
-	OutlookPATH="Microsoft Outlook"
-	OneNotePATH="Microsoft OneNote"
-	basePATH=~/"Desktop/msotest/"
-	[[ ! -d "$basePATH" ]] && exit 1
-}
 
 ############# Your show begins here
 main "${@}"
