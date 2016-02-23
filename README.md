@@ -9,8 +9,6 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * OS X duplicated font files; 
 * Fontlist files.
 
-It also can backup/copy font files to predefined and user defined destinations.
-
 ## Requirements
 * Microsoft Office 2016 for Mac 15.17 or later to work with fonts.
 
@@ -20,8 +18,8 @@ It also can backup/copy font files to predefined and user defined destinations.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
 * **Predefined fontsets** are custom classes of fonts. Font classification specifics: cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
-* Backup. You can backup your fonts before deletion.
-* Copy or move fonts to the libraries.
+* **Font backup**. You can backup your fonts to predefined and user defined destinations before deletion.
+* Copy or move fonts to the font libraries.
 * Flexible parameter filters.
 * Multilanguage help. Currently english and russian. Non-english help pages are in the separate module. You can extend help with your language by the template in the module.
 
