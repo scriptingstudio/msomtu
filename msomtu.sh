@@ -11,16 +11,6 @@
 #	On OS X & MSO fonts  : http://www.jklstudios.com/misc/osxfonts.html
 #	Git Repo             : https://github.com/scriptingstudio/msomtu
 #
-# .TODO
-#	- dev. cleanup code; there are artefacts/leftovers 
-#	  after migration from the previous version
-#	- dev. new fonts finder: remove or not?
-#	- dev. get more specific on duplicates and fontsets
-#	- dev. help page: more clear text; format;
-#	- update. migrate to input parser G3 and refactor param definitions !!!
-#	- new feat. uninstall MSO option (?)
-#	- new feat. logging (???)
-# 
 
 defstate='skip'
 cmd_clean=0
@@ -41,13 +31,14 @@ cmd_verb=''
 cmd_reverse=0
 cmd_exclude=''
 cmd_log=''
-cmd_uninstall=''
+#cmd_uninstall=''
 # END params
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.8.40'
+version='2.8.41'
 util="${0##*/}"
+helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
 principalname='msomtu'
 defapp='w e p o n'
 		# THERE ARE DEPENDENCIES IN CODE!
@@ -66,26 +57,35 @@ proofingName="Proofing Tools"
 fontPATH="/Contents/Resources"
 backupPATH=~/"Desktop/MSOFonts/"
 
-## Predefined fontsets. You can change them here
- # os x duplicates; in folder DFonts
+## Predefined fontsets definition block. You can change them here
+## in bash4 it would be a hashtable
+ # os x duplicates; in  DFonts folder.
  # exclusion: Microsoft no longer provides cyrillic MonotypeCorsiva, so
- # I included it here for deletion 
-sysfonts=("arial*" "ariblk*" "Baskerville*" "Book Antiqua*" "ComicSans*" "Cooper*" "Gill Sans*" "GillSans*" "MonotypeCors*" "pala*" "Trebuchet*" "verdana*")
- # OS X duplicates; in folder Fonts - delete (???)
-msofonts=("tahoma*" "Wingding*" "webding*")
- # custom sets; in folder DFonts
+ # I included it here for deletion (Ive got it cyrillic in the lib).
+sysfonts=("arial*" "ariblk*" "Baskerville*" "Book Antiqua*" "ComicSans*" "Cooper*" "Gill Sans*" "GillSans*" "pala*" "Trebuchet*" "verdana*" "MonotypeCors*")
+ # OS X duplicates; in Fonts folder
+msoessential=("tahoma*" "Wingding*" "webding*")
+ # custom sets; in DFonts folder
  	# chfonts - all kind of hieroglyphic/eastern fonts; chinese is idiomatic name 
 chfonts=("Fangsong*" "Deng*" "gulim*" "HGR*" "kaiti*" "malgun*" "Meiryo*" "mingliu*" "MSJH*" "msyh*" "SimHei*" "simsun*" "STH*" "STX*" "STZ*" "STL*" "taile*" "YuGoth*" "yumin*")
 noncyr=("Abadi*" "angsa*" "BellMT*" "Bauhaus93*" "BernardMT*" "Calisto MT*" "Braggadocio*" "Britannic*" "CalistoMT*" "ColonnaMT*" "COOPBL*" "CopperplateGothic*" "CurlzMT*" "Desdemona*" "EdwardianScriptITC*" "EngraversMT*" "Eurostile*" "FootlightMT*" "GloucesterMT*" "Goudy Old Style*" "Haettenschweiler*" "Harrington*" "ImprintMTShadow*" "KinoMT*" "Lucida Sans.*" "Lucida Sans Demibold*" "Lucida Sans Italic.*" "LucidaBright*" "LucidaBlackletter.*" "LucidaFax*" "LucidaCalligraphy*" "LucidaHandwriting*" "LucidaSansTypewrite*" "MaturaMTScriptCapitals*" "ModernNo.20*" "News Gothic MT*" "ntailu*" "Onyx*" "Perpetua*" "Rockwell*" "Stencil*" "Tw Cen*" "WideLatin*") # but some of non-cyr fonts may be useful
 symfonts=("Bookshelf Symbol*" "Marlett*" "MS Reference Specialty*" "MonotypeSorts*")
 cyrdfonts=("batang*" "Bookman Old Style*" "Candara*" "Century*" "Consola*" "Constan*" "Corbel*" "Franklin Gothic*" "Gabriola*" "GARA*" "Lucida Console*" "Lucida Sans Unicode*" "Mistral*" "MS Reference Sans Serif.*" "msgothic*" "Segoe Print Bold.*" "Segoe Script Bold.*")
- # custom sets; in folder Fonts
+ # custom sets; in Fonts folder
 cyrfonts=("Calibri*" "Cambria*" "Century.*" "Corbel.*") # original cyr fonts
-# 
+# fontset macros
 dfontsets=(cyrdfonts noncyr chfonts sysfonts symfonts)
-fontsets=(cyrfonts msofonts)
+fontsets=(cyrfonts msoessential)
 allfontsets=("${dfontsets[@]}" "${fontsets[@]}")
-# END definitions
+fsdescriptor=( # for display-fontset function
+	"sysfonts|sysfonts|OS duplicated fonts (in DFonts)"
+	"chfonts|chinese|All kind of hieroglyphic/eastern fonts (in DFonts)" # 2 replmnt in code
+	"noncyr|noncyr|Non-cyrillic fonts (in DFonts)"
+	"cyrdfonts|cyrdfonts|Cyrillic original fonts (in DFonts; do not include 'sysfonts')"
+	"cyrfonts|cyrfonts|Cyrillic original fonts (in Fonts)"
+	"symfonts|symfonts|Symbolic fonts (in DFonts)"
+)
+# END all definitions
 
 	
 function main () { # first version of the starter
@@ -131,9 +131,9 @@ function main () { # first version of the starter
 				cmd="backup"; cmd_backup="$backupPATH"
 				[[ "$PARGS" ]] && cmd_backup="$PARGS" ;;
 			-check) open -a safari "http://macadmins.software" ;;
-			--test) mktest; ;;
+			#-uninstall|-un) cmd_uninstall=1; cmd="uninstall" ;;
 			-log) cmd_log=1; [[ "$PARGS" ]] && cmd_log=2 ;;
-			-uninstall) cmd_uninstall=1; cmd="uninstall" ;;
+			--test) mktest; ;;
 		esac
 	done
 	## Post parsing alignment
@@ -168,12 +168,12 @@ function main () { # first version of the starter
 	elif [[ "$cmd_font" == $defstate ]]; then
 		cmd_font=''
 	else
-		cmd_font=${cmd_font/chinese/chfonts} # !!!!! confusing names
+		cmd_font=${cmd_font/chinese/chfonts} # name/disp name
 	fi
 	[[ "$cmd_app" == '0' || -z "${cmd_app// }" ]] && 
 		cmd_app="$defapp"
 	# solo operations: backup, cache, fontset, report, help
-	[[ $cmd_uninstall -eq 1 ]] && cmd="uninstall"
+	#[[ $cmd_uninstall -eq 1 ]] && cmd="uninstall"
 	if [[ -n "$cmd_backup" ]];     then cmd="backup"; fi
 	if [[ "$cmd_cache" == 1 ]];    then cmd="$cmd cache"; fi
 	if [[ "$cmd_fontset" == 1 ]];  then cmd="fontset"; fi
@@ -193,12 +193,12 @@ function main () { # first version of the starter
 	for c in $cmd; do
 		case $c in
 			report) 
-				check-app 'skip'
+				check-app 'skip' 
 				echo
 				make-report ;;
 				
 			clean) 
-				check-app
+				check-app 
 				echo
 				local score1 score2 appdu=()
 				get-diskusage score1 
@@ -216,7 +216,7 @@ function main () { # first version of the starter
 			cache) 
 				clean-cache ;;
 				
-			uninstall) uninstall-mso ;;
+			#uninstall) 	uninstall-mso ;;
 				
 			help)
 				show-helppage ;;
@@ -224,13 +224,6 @@ function main () { # first version of the starter
 	done # END operation selector
 	echo
 } # END main
-
-function uninstall-mso () { # UNDER CONSTRUCTION
-	if [[ $run -eq 0 ]]; then
-		echo "  TRACE: uninstall Microsoft Office."
-		return
-	fi 
-} # END uninstall MSO
 
 function prepare-env () {
 # Preparing runtime environment
@@ -267,13 +260,12 @@ function check-app () {
 	for appPATH in "${appInstalled[@]}"; do
 		echo "- $appPATH"
 	done
-	if [[ "$1" == '' ]]; then
+	[[ "$1" ]] && return
 		echo
 		printb "Apps to process:"
 		for appPATH in "${appPathArray[@]}"; do
 			echo "- ${appPATH/.app/}"
 		done
-	fi
 } # END checking app list
 
 function make-report () {
@@ -585,32 +577,16 @@ function clean-ptools () {
 } # END proofingtools
 
 function display-fontset () {
-	local p4=4 p20=20
-	local fs1=$(joina , "${sysfonts[@]}")
-	local fs2=$(joina , "${chfonts[@]}")
-	local fs3=$(joina , "${noncyr[@]}")
-	local fs4=$(joina , "${cyrdfonts[@]}")
-	local fs5=$(joina , "${cyrfonts[@]}")
-	local fs6=$(joina , "${symfonts[@]}")
+	local fset name array fs fd fn disp desc
 	printb "Predefined fontsets:"
-	print-column $p4 $p20 "sysfonts" "OS duplicated fonts (in DFonts):" "-"
-	print-column $p4 $p20 "" "${fs1//,/, }"
-	echo
-	print-column $p4 $p20 "chinese" "All kind of hieroglyphic/eastern fonts (in DFonts):" "-"
-	print-column $p4 $p20 "" "${fs2//,/, }"
-	echo
-	print-column $p4 $p20 "noncyr" "Non-cyrillic fonts (in DFonts):" "-"
-	print-column $p4 $p20 "" "${fs3//,/, })"
-	echo
-	print-column $p4 $p20 "cyrdfonts" "Cyrillic original fonts (in DFonts; do not include 'sysfonts'):" "-"
-	print-column $p4 $p20 "" "${fs4//,/, }"
-	echo
-	print-column $p4 $p20 "cyrfonts" "Cyrillic original fonts (in Fonts):" "-"
-	print-column $p4 $p20 "" "${fs5//,/, }"
-	echo
-	print-column $p4 $p20 "symfonts" "Symbolic fonts (in DFonts):" "-"
-	print-column $p4 $p20 "" "${fs6//,/, }"
-	echo
+	for f in "${fsdescriptor[@]}"; do
+		fn="${f%%|*}"; disp="${f%|*}"; disp="${disp#*|}"; desc="${f##*|}"
+		name=${fn}[@]; array=("${!name}")
+		fset=$(joina ',' "${array[@]}")
+		print-column 4 20 "$disp" "$desc:" "-"
+		print-column 4 20 "" "${fset//,/, }"
+		echo
+	done
 } # END fontsets
 
 function invoke-backup () { # for fonts only
@@ -643,7 +619,7 @@ function invoke-backup () { # for fonts only
 	for f in $(unique "${cmd_font}"); do # expand array
 		[[ $f == userlib || $f == syslib ]] && continue
 		[[ $f == folder ]] && f="*.*"
-		[[ "$f" == 'cyrfonts' || "$f" == 'msofonts' ]] && ffolder='Fonts'
+		[[ "$f" == 'cyrfonts' || "$f" == 'msoessential' ]] && ffolder='Fonts'
 		m=$(inarray "$f" allfontsets)
 		if [[ $m ]]; then
 			name=$m[@]; a=("${!name}")
@@ -692,14 +668,13 @@ function clean-cache () {
 	atsutil databases -remove
 } # END cache
 
-function show-helppage () {
+function show-helppage () { # english page
 	local p3=3 p4=4 p6=6 p8=8 p20=20
-	local fs="${dfontsets[@]/chfonts/chinese}"; fs=${fs// /, }
+	local fs="${dfontsets[@]/chfonts/chinese}"; fs=${fs// /, } # name/disp name
 
-	if [[ "${LANG%\.*}" != "en_US" && "${LANG%\.*}" != "en_GB" && 
-	$cmd_help != 'en' ]]; then
-		local extless="${0%.*}"
-		local helpfile="${extless%-*}-help.sh"  # clear dev stage suffix
+	if [[ "${LANG%\.*}" != "en_US" && 
+		  "${LANG%\.*}" != "en_GB" && 
+	      $cmd_help != 'en' ]]; then
 		[[ -f "$helpfile" ]] && { . "$helpfile"; exit 0; }
 	fi
 
@@ -709,14 +684,14 @@ function show-helppage () {
 	echo
 	
 	printb "DESCRIPTION:"
-	print-column 0 $p4 "" "Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS duplicated font files. It also can backup/copy font files to predefined and user defined destinations." 
+	print-column 0 $p4 "" "Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS X duplicated font files. It also can backup/copy font files to predefined and user defined destinations." 
 	echo
 
 	printb "NOTES:"
 	print-column 0 $p6 "" "Safe scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. You cannot change or harm your system without switch '-run'. Parameter '-cache' does not depend on '-run'." '-'
 	print-column 0 $p6 "" "As MSO is installed with root on /Applications directory you have to run this script with sudo to make changes." '-'
 	print-column 0 $p6 "" "As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder." '-'
-	print-column 0 $p6 "" "If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. Neither third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion." '-'
+	print-column 0 $p6 "" "If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. No third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion." '-'
 	print-column 0 $p6 "" "Caution: do not remove fonts from the 'Fonts' folder! These are minimum needed for the MSO applications to work." '-'
 	print-column 0 $p6 "" "File operations are case insensitive." '-'
 	print-column 0 $p6 "" "Script only accepts named parameters." '-'
