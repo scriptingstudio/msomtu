@@ -577,8 +577,8 @@ function display-fontset () {
 		fn="${f%%|*}"; disp="${f%|*}"; disp="${disp#*|}"; desc="${f##*|}"
 		name=${fn}[@]; array=("${!name}")
 		fset=$(joina ',' "${array[@]}")
-		print-column 4 20 "$disp" "$desc:" "-"
-		print-column 4 20 "" "${fset//,/, }"
+		print-row 4 20 "$disp" "$desc:" "-"
+		print-row 4 20 "" "${fset//,/, }"
 		echo
 	done
 } # END fontsets
@@ -674,33 +674,33 @@ function show-helppage () { # english page
 
 	if [[ $cmd_all -eq 1 ]]; then
 	printb "SYNOPSIS:"
-	print-column 0 $p4 "" "MSOMTU is Microsoft Office maintenance utility."
+	print-row 0 $p4 "" "MSOMTU is Microsoft Office maintenance utility."
 	echo
 	
 	printb "DESCRIPTION:"
-	print-column 0 $p4 "" "Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS X duplicated font files. It also can backup/copy font files to predefined and user defined destinations." 
+	print-row 0 $p4 "" "Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS X duplicated font files. It also can backup/copy font files to predefined and user defined destinations." 
 	echo
 
 	printb "NOTES:"
-	print-column 0 $p6 "" "Safe scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. The script cannot make changes or harm your system without parameter '-run'." '-'
-	print-column 0 $p6 "" "As MSO is installed with root on /Applications directory you have to run this script with sudo to make changes." '-'
-	print-column 0 $p6 "" "As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder." '-'
-	print-column 0 $p6 "" "If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. No third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion." '-'
-	print-column 0 $p6 "" "Caution: do not remove fonts from the 'Fonts' folder! These are minimum needed for the MSO applications to work." '-'
-	print-column 0 $p6 "" "File operations are case insensitive." '-'
-	print-column 0 $p6 "" "Script only accepts named parameters." '-'
-	print-column 0 $p6 "" "Apply thinning after every MSO update." '-'
-	print-column 0 $p6 "" "Default settings for the '-lang' and '-proof' parameters: english and russian. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs." '-'
-	print-column 0 $p6 "" "Font classification spicifics in predefined fontsets (in descending): cyrillic, non-cyrillic, hieroglyphic, symbolic, system. Fontsets do not intersect." '-'
+	print-row 0 $p6 "" "Safe scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. The script cannot make changes or harm your system without parameter '-run'." '-'
+	print-row 0 $p6 "" "As MSO is installed with root on /Applications directory you have to run this script with sudo to make changes." '-'
+	print-row 0 $p6 "" "As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder." '-'
+	print-row 0 $p6 "" "If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. No third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion." '-'
+	print-row 0 $p6 "" "Caution: do not remove fonts from the 'Fonts' folder! These are minimum needed for the MSO applications to work." '-'
+	print-row 0 $p6 "" "File operations are case insensitive." '-'
+	print-row 0 $p6 "" "Script only accepts named parameters." '-'
+	print-row 0 $p6 "" "Apply thinning after every MSO update." '-'
+	print-row 0 $p6 "" "Default settings for the '-lang' and '-proof' parameters: english and russian. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs." '-'
+	print-row 0 $p6 "" "Font classification spicifics in predefined fontsets: cyrillic, non-cyrillic, hieroglyphic, symbolic, system. Fontsets do not intersect." '-'
 	echo
 	fi
 
 	printb "USAGE:"
-	print-column 0 $p4 "" "[sudo] $util [-<parameter> [<arguments>]]..."
+	print-row 0 $p4 "" "[sudo] $util [-<parameter> [<arguments>]]..."
 	echo
-	print-column 0 $p4 "" "[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
+	print-row 0 $p4 "" "[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
 	echo
-	print-column 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]"
+	print-row 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]"
 	echo 
 
 	if [[ $cmd_all -eq 1 ]]; then
@@ -709,54 +709,54 @@ function show-helppage () { # english page
 	print-padding $mp4 "Solo actions: 'backup', 'cache', 'fontset', 'report', 'help'."
 	echo
 	print-padding $mp4 "- Getting MSO info" 
-		print-column 0 $p12 "" "Parameter '-report'."
+		print-row 0 $p12 "" "Parameter '-report'."
 	print-padding $mp4 "- Getting assessment of thinning (view mode)" 
-		print-column 0 $p12 "" "Parameter '-verbose' along with resource selector: font, flist, lang, proof."
+		print-row 0 $p12 "" "Parameter '-verbose' along with resource selector: font, flist, lang, proof."
 	print-padding $mp4 "- Listing/Removing UI languages" 
-		print-column 0 $p12 "" "Parameter '-lang'."
+		print-row 0 $p12 "" "Parameter '-lang'."
 	print-padding $mp4 "- Listing/Removing proofingtools" 
-		print-column 0 $p12 "" "Parameter '-proof'."
+		print-row 0 $p12 "" "Parameter '-proof'."
 	print-padding $mp4 "- Listing/Removing fonts" 
-		print-column 0 $p12 "" "Parameter '-font'."
+		print-row 0 $p12 "" "Parameter '-font'."
 	print-padding $mp4 "- Listing/Removing font list files" 
-		print-column 0 $p12 "" "Parameter '-fontlist'."
+		print-row 0 $p12 "" "Parameter '-fontlist'."
 	print-padding $mp4 "- Listing fontsets" 
-		print-column 0 $p12 "" "Parameter '-fontset'."
+		print-row 0 $p12 "" "Parameter '-fontset'."
 	print-padding $mp4 "- Removing font cache" 
-		print-column 0 $p12 "" "Parameter '-cache'."
+		print-row 0 $p12 "" "Parameter '-cache'."
 	print-padding $mp4 "- Finding new fonts" 
-		print-column 0 $p12 "" "Parameter '-font -rev'."
+		print-row 0 $p12 "" "Parameter '-font -rev'."
 	print-padding $mp4 "- Backing up fonts" 
-		print-column 0 $p12 "" "Parameter '-backup'."
+		print-row 0 $p12 "" "Parameter '-backup'."
 	print-padding $mp4 "- Copying fonts to font libraries" 
-		print-column 0 $p12 "" "Parameter '-backup'."
+		print-row 0 $p12 "" "Parameter '-backup'."
 	echo
 	fi
 	
 	printb "ARGUMENTS:"
-	print-column $p4 $p20 "app_list" "App list. w - Word, e - Excel, p - PowerPoint, o - Outlook, n - OneNote. Default: 'w e p o n'." ":"
-	print-column $p4 $p20 "lang_list" "Langauge list: ru pl de etc, see filenames with parameter '-verbose'. Default: 'en ru', see NOTES." ":"
-	print-column $p4 $p20 "proof_list" "Proofingtools list: russian finnish german etc, see filenames with parameter '-verbose'. Wildcard '*' is available. Default: 'english russian', see NOTES." ":"
-	print-column $p4 $p20 "font_pattern" "Font operations are based on patterns. Font patterns: empty - removes the 'DFonts' folder (default); <fontset> - removes fonts of predefined fontset; <mask> - removes selection: *.*, arial*, *.ttc etc. If you use single '*' enclose it in quotation marks: \"*\". Predefined fontsets: library, $fs. See parameter '-fontset' and details in code. Fontset 'library' removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (DFonts against libraries). You can use list of fontsets as well." ":"
-	print-column $p4 $p20 "destination" "Backup destination folderpath for fonts. Default value is '~/Desktop/MSOFonts'. You can use predefined destinations as well: 'syslib' - system library; 'userlib' - user library." ":"
+	print-row $p4 $p20 "app_list" "App list. w - Word, e - Excel, p - PowerPoint, o - Outlook, n - OneNote. Default: 'w e p o n'." ":"
+	print-row $p4 $p20 "lang_list" "Langauge list: ru pl de etc, see filenames with parameter '-verbose'. Default: 'en ru', see NOTES." ":"
+	print-row $p4 $p20 "proof_list" "Proofingtools list: russian finnish german etc, see filenames with parameter '-verbose'. Wildcard '*' is available. Default: 'english russian', see NOTES." ":"
+	print-row $p4 $p20 "font_pattern" "Font operations are based on patterns. Font patterns: empty - removes the 'DFonts' folder (default); <fontset> - removes fonts of predefined fontset; <mask> - removes selection: *.*, arial*, *.ttc etc. If you use single '*' enclose it in quotation marks: \"*\". Predefined fontsets: library, $fs. See parameter '-fontset' and details in code. Fontset 'library' removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (DFonts against libraries). You can use list of fontsets as well." ":"
+	print-row $p4 $p20 "destination" "Backup destination folderpath for fonts. Default value is '~/Desktop/MSOFonts'. You can use predefined destinations as well: 'syslib' - system library; 'userlib' - user library." ":"
 	echo
 
 	printb "PARAMETERS:"
-	print-column $p4 $p20 "-app" "Filter <app_list>. Selects application to process." ":"
-	print-column $p4 $p20 "-lang" "Exclusive filter <lang_list>. Removes UI languages except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults." ":"
-	print-column $p4 $p20 "-proof" "Exclusive filter <proof_list>. Removes proofing tools except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults." ":"
-	print-column $p4 $p20 "-font" "Filter <font_pattern>. Removes selected fonts or the 'DFonts' folder. Available fontsets: cyrdfonts, noncyr, chinese, sysfonts. Parameter '-rev' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update." ":"
-	print-column $p4 $p20 "-backup" "Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup alternates all deletions to backup." ":"
-	print-column $p4 $p20 "-ex" "Exclusive filter <font_pattern>. Excludes font selection with parameter '-font'. Only mask can be used as 'font_pattern'." ":"
-	print-column $p4 $p20 "-flist" "Switch. Removes fontlist (.plist) files." ":"
-	print-column $p4 $p20 "-all" "Switch. Activates all cleaning options: lang, proof, font, flist, cache. It does not affect a parameter '-app'." ":"
-	print-column $p4 $p20 "-cache" "Switch. Cleans up font cache." ":"
-	print-column $p4 $p20 "-verbose" "Switch. View mode: shows objects to be removed. With special argument 'nl' skips file listing. It does not depend on '-run'." ":"
-	print-column $p4 $p20 "-report" "Switch. Shows statistics on objects." ":"
-	print-column $p4 $p20 "-fontset" "Switch. Shows predefined fontsets." ":"
-	print-column $p4 $p20 "-rev" "Switch. Reverses effect of the 'lang' and 'proof' filters. For parameter '-font' it is to search for the new fonts." ":"
-	print-column $p4 $p20 "-run" "Switch. The default mode is view (test). Activates operations execution." ":"
-	print-column $p4 $p20 "-help" "Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters '-help -full'. Special argument 'en' forces english help page." ":"
+	print-row $p4 $p20 "-app" "Filter <app_list>. Selects application to process." ":"
+	print-row $p4 $p20 "-lang" "Exclusive filter <lang_list>. Removes UI languages except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults." ":"
+	print-row $p4 $p20 "-proof" "Exclusive filter <proof_list>. Removes proofing tools except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults." ":"
+	print-row $p4 $p20 "-font" "Filter <font_pattern>. Removes selected fonts or the 'DFonts' folder. Available fontsets: cyrdfonts, noncyr, chinese, sysfonts. Parameter '-rev' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update." ":"
+	print-row $p4 $p20 "-backup" "Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup alternates all deletions to backup." ":"
+	print-row $p4 $p20 "-ex" "Exclusive filter <font_pattern>. Excludes font selection with parameter '-font'. Only mask can be used as 'font_pattern'." ":"
+	print-row $p4 $p20 "-flist" "Switch. Removes fontlist (.plist) files." ":"
+	print-row $p4 $p20 "-all" "Switch. Activates all cleaning options: lang, proof, font, flist, cache. It does not affect a parameter '-app'." ":"
+	print-row $p4 $p20 "-cache" "Switch. Cleans up font cache." ":"
+	print-row $p4 $p20 "-verbose" "Switch. View mode: shows objects to be removed. With special argument 'nl' skips file listing. It does not depend on '-run'." ":"
+	print-row $p4 $p20 "-report" "Switch. Shows statistics on objects." ":"
+	print-row $p4 $p20 "-fontset" "Switch. Shows predefined fontsets." ":"
+	print-row $p4 $p20 "-rev" "Switch. Reverses effect of the 'lang' and 'proof' filters. For parameter '-font' it is to search for the new fonts." ":"
+	print-row $p4 $p20 "-run" "Switch. The default mode is view (test). Activates operations execution." ":"
+	print-row $p4 $p20 "-help" "Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters '-help -full'. Special argument 'en' forces english help page." ":"
 	echo
 	
 	if [[ $cmd_all -eq 1 ]]; then
@@ -898,7 +898,7 @@ function print-padding () {
 			else echo -e "$pad$str"; fi ;;
 	esac
 } # END print-padding
-function print-column () { # simple formatter
+function print-row () { # simple table formatter
 # Prints 1 or 2 columns of text. UNIX sucks: printf is not unicode-aware!
 # $1 - column1 padding
 # $2 - column2 padding
@@ -934,7 +934,7 @@ function print-column () { # simple formatter
 		printf "%${pad1}s%${wcol1}s%${gap}s%s\n" ' ' "$s1" "$div " "$s2"
 		div=''
 	done
-} # END print-column
+} # END print-row
 function unique () { # rm dup words in string; 'echo' removes awk tail
 	[[ "${1// }" == '' ]] && { echo; return; }
 	echo $( awk 'BEGIN{RS=ORS=" "}!a[$0]++' <<<"$1 " )
