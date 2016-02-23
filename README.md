@@ -15,11 +15,11 @@ It also can backup/copy font files to predefined and user defined destinations.
 * Microsoft Office 2016 for Mac 15.17 or later to work with fonts.
 
 ## Features
-* ***Safe scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. The script cannot make changes or harm your system without parameter `-run`. 
-* Proactive **assessment**. You can evaluate your disk space taken by the MSO app components before thinning.
+* ***Safe Scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. The script cannot make changes or harm your system without parameter `-run`. 
+* **Proactive assessment**. You can evaluate your disk space taken by the MSO app components before thinning.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
-* **Predefined fontsets** are custom classes of fonts. Font classification specifics (in descending): cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
+* **Predefined fontsets** are custom classes of fonts. Font classification specifics: cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
 * Backup. You can backup your fonts before deletion.
 * Copy or move fonts to the libraries.
 * Flexible parameter filters.
