@@ -12,10 +12,10 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 It also can backup/copy font files to predefined and user defined destinations.
 
 ## Requirements
-* Microsoft Office 2016 for Mac 15.17 or later.
+* Microsoft Office 2016 for Mac 15.17 or later to work with fonts.
 
 ## Features
-* ***Safe scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. You cannot change or harm your system without switch `-run`. Parameter `-cache` does not depend on `-run`.
+* ***Safe scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. You cannot change or harm your system without switch `-run`. 
 * Proactive **assessment**. You can evaluate your disk space taken by the MSO app components before thinning.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
@@ -81,8 +81,8 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>-ex</code></td> <td>Exclusive filter <code>font_pattern</code>. Excludes font selection with parameter <code>-font</code>. Only mask can be used as <i>font_pattern</i>.</td></tr>
 <tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (.plist) files.</td></tr>
 <tr><td valign="top"><code>-all</code></td> <td>Switch. Activates all cleaning options: <code>lang</code>, <code>proof</code>, <code>font</code>, <code>flist</code>, <code>cache</code>. It does not affect the parameter <code>-app</code>.</td></tr>
-<tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans up font cache.</td></tr>
-<tr><td nowrap valign="top"><code>-verbose</code></td> <td>Switch. Shows objects to be removed, in view mode. With special argument <code>nl</code> skips file listing.</td></tr>
+<tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans up font cache. It does not depend on <code>-run</code>.</td></tr>
+<tr><td nowrap valign="top"><code>-verbose</code></td> <td>Switch. View mode: shows objects to be removed. With special argument <code>nl</code> skips file listing.</td></tr>
 <tr><td valign="top"><code>-report</code></td> <td>Switch. Shows statistics on objects.</td></tr>
 <tr><td nowrap valign="top"><code>-fontset</code></td> <td>Switch. Shows predefined fontsets.</td></tr>
 <tr><td valign="top"><code>-rev</code></td> <td>Switch. Reverses effect of the <code>-lang</code> and <code>-proof</code> filters. For parameter <code>-font</code> it is to search for the new fonts.</td></tr>
