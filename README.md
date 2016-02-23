@@ -10,16 +10,20 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * Fontlist files.
 
 It also can backup/copy font files to predefined and user defined destinations.
+
 ## Requirements
 * Microsoft Office 2016 for Mac 15.17 or later.
 
 ## Features
 * ***Safe scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. You cannot change or harm your system without switch `-run`. Parameter `-cache` does not depend on `-run`.
-* Proactive assessment. You can evaluate your disk space taken by the MSO app components before thinning.
-* Duplicate fonts finder. You can find out conflicting and extra app fonts against the font libraries.
-* New fonts finder. You can find out new (standard sets considered) fonts added in each app after new MSO update.
+* Proactive **assessment**. You can evaluate your disk space taken by the MSO app components before thinning.
+* **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
+* **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
+* **Predefined fontsets** are custom classes of fonts. Font classification specifics (in descending): cyrillic, non-cyrillic, hieroglyphic, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
 * Backup. You can backup your fonts before deletion.
 * Copy or move fonts to the libraries.
+* Flexible parameter filters.
+* Multilanguage help. Currently english and russian. Non-english help pages are in separate module. You can extend help with your language.
 
 ## Notes
 * As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
@@ -29,7 +33,6 @@ It also can backup/copy font files to predefined and user defined destinations.
 * File operations are case insensitive.
 * Apply thinning after every MSO update.
 * Default settings for the `-lang` and `-proof` parameters: *english* and *russian*. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs.
-* **Font classification specifics** in predefined fontsets (in descending): cyrillic, non-cyrillic, hieroglyphic, symbolic, system. Fontsets do not intersect.
 
 ## Usage
 
