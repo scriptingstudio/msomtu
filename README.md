@@ -19,11 +19,11 @@ It also can backup/copy font files to predefined and user defined destinations.
 * Proactive **assessment**. You can evaluate your disk space taken by the MSO app components before thinning.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
-* **Predefined fontsets** are custom classes of fonts. Font classification specifics (in descending): cyrillic, non-cyrillic, hieroglyphic, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
+* **Predefined fontsets** are custom classes of fonts. Font classification specifics (in descending): cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
 * Backup. You can backup your fonts before deletion.
 * Copy or move fonts to the libraries.
 * Flexible parameter filters.
-* Multilanguage help. Currently english and russian. Non-english help pages are in separate module. You can extend help with your language.
+* Multilanguage help. Currently english and russian. Non-english help pages are in separate module. You can extend help with your language by the template in the module.
 
 ## Notes
 * As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
