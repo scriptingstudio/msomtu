@@ -2,7 +2,7 @@
 ***Msomtu*** is Microsoft Office for Mac Maintenance Utility.
 
 ## Description
-Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container waisting gigabytes of your disk space and making MSO unmanageable. This script safely removes (thinning) extra parts of the folowing components: 
+Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container waisting gigabytes of your disk space and making MSO unmanageable. This script safely removes (thinning) **optional parts** of the folowing components: 
 
 * UI languages; 
 * Proofing tools; 
@@ -180,5 +180,5 @@ $ msomtu.sh -fontset
 ```
 
 ## Links
-* Inspiration idea of "thinning": [OfficeThinner](https://github.com/goodbest/OfficeThinner)
+* Inspiration idea of "thinning": [@goodbest](https://github.com/goodbest/OfficeThinner)
 * More on OS X & MSO fonts: [Font Management in OS X, by Kurt Lang](http://www.jklstudios.com/misc/osxfonts.html)
