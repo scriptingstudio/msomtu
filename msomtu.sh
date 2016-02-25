@@ -3,6 +3,7 @@
 # Welcome user!
 # To get help just run this script without parameters.
 
+##< 
 # .SYNOPSIS
 #	msomtu - Microsoft Office maintenance utility. Purpose - clean up MSO.
 #
@@ -10,7 +11,7 @@
 #	Inspiration idea     : https://github.com/goodbest/OfficeThinner
 #	On OS X & MSO fonts  : http://www.jklstudios.com/misc/osxfonts.html
 #	Git Repo             : https://github.com/scriptingstudio/msomtu
-#
+##>
 
 defstate='skip'
 cmd_clean=0
@@ -36,10 +37,9 @@ cmd_log=''
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.8.41'
+version='2.9.0'
 util="${0##*/}"
 helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
-principalname='msomtu'
 defapp='w e p o n'
 		# THERE ARE DEPENDENCIES IN CODE!
 deflang='ru' # user pref; english is added in create-filter;
@@ -663,7 +663,34 @@ function clean-cache () {
 } # END cache
 
 function show-helppage () { # english page
-	local p3=3 p4=4 p6=6 p8=8 p20=20
+	print-topic () {
+	# $1 - opt/data; $2 - pad1; $3 - pad2; $4 - lineheight/delim
+		[[ $1 == 'o' ]] && 
+			{ [[ $cmd_all -eq 0 ]] && return || shift; }
+		local name=$1[@]; local array=("${!name}")
+		local pad1=$2 pad2=$3 item h2 val delim lh
+		[[ "$4" == 'lh' ]] && { lh=$4; shift; }
+		delim=$4
+	
+		[[ ${#array[@]} -lt 2 ]] && return
+		echo -e "\033[1m"${array[0]}:"\033[0m"
+		for item in "${array[@]:1}"; do
+			[[ $item == '' ]] && continue
+			h2="${item%%||*}"; val="${item#*||}"
+			[[ "$h2" == "$val" ]] && h2=''
+			if [[ $pad1 -gt -1 && $pad2 -gt -1 ]]; then # type 1
+				print-row $pad1 $pad2 "$h2" "$val" $delim
+			elif [[ $pad1 -lt 0 && $pad2 -gt -1 ]]; then # type 2
+				print-padding $pad1 "$h2"
+				print-row 0 $pad2 "" "$val"
+			else # type 3
+				print-padding $pad1 "$h2$delim"
+				print-padding $pad2 "$val" b
+			fi
+			[[ "$lh" ]] && echo
+		done
+		[[ -z "$lh" ]] && echo
+	} # END print topic
 	local fs="${dfontsets[@]/chfonts/chinese}"; fs=${fs// /, } # name/disp name
 
 	if [[ "${LANG%\.*}" != "en_US" && 
@@ -672,128 +699,128 @@ function show-helppage () { # english page
 		[[ -f "$helpfile" ]] && { . "$helpfile"; exit 0; }
 	fi
 
-	if [[ $cmd_all -eq 1 ]]; then
-	printb "SYNOPSIS:"
-	print-row 0 $p4 "" "MSOMTU is Microsoft Office maintenance utility."
-	echo
+	SYNOPSIS=(
+		"SYNOPSIS"
+		"MSOMTU is Microsoft Office maintenance utility."
+	)
+	DESCRIPTION=(
+		"DESCRIPTION"
+		"Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS X duplicated font files. It also can backup/copy font files to predefined and user defined destinations."
+	)
+	NOTES=(
+		"NOTES"
+		"Safe scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. The script cannot make changes or harm your system without parameter '-run'."
+		"As MSO is installed with root on /Applications directory you have to run this script with sudo to make changes."
 	
-	printb "DESCRIPTION:"
-	print-row 0 $p4 "" "Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thinning) extra parts of the folowing components: UI languages; proofing tools; fontlist files (.plist); OS X duplicated font files. It also can backup/copy font files to predefined and user defined destinations." 
-	echo
-
-	printb "NOTES:"
-	print-row 0 $p6 "" "Safe scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. The script cannot make changes or harm your system without parameter '-run'." '-'
-	print-row 0 $p6 "" "As MSO is installed with root on /Applications directory you have to run this script with sudo to make changes." '-'
-	print-row 0 $p6 "" "As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder." '-'
-	print-row 0 $p6 "" "If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. No third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion." '-'
-	print-row 0 $p6 "" "Caution: do not remove fonts from the 'Fonts' folder! These are minimum needed for the MSO applications to work." '-'
-	print-row 0 $p6 "" "File operations are case insensitive." '-'
-	print-row 0 $p6 "" "Script only accepts named parameters." '-'
-	print-row 0 $p6 "" "Apply thinning after every MSO update." '-'
-	print-row 0 $p6 "" "Default settings for the '-lang' and '-proof' parameters: english and russian. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs." '-'
-	print-row 0 $p6 "" "Font classification spicifics in predefined fontsets: cyrillic, non-cyrillic, hieroglyphic, symbolic, system. Fontsets do not intersect." '-'
-	echo
-	fi
-
-	printb "USAGE:"
-	print-row 0 $p4 "" "[sudo] $util [-<parameter> [<arguments>]]..."
-	echo
-	print-row 0 $p4 "" "[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
-	echo
-	print-row 0 $p4 "" "[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]"
-	echo 
-
-	if [[ $cmd_all -eq 1 ]]; then
-	local mp4=-4 p12=12
-	printb "USE CASES:"
-	print-padding $mp4 "Solo actions: 'backup', 'cache', 'fontset', 'report', 'help'."
-	echo
-	print-padding $mp4 "- Getting MSO info" 
-		print-row 0 $p12 "" "Parameter '-report'."
-	print-padding $mp4 "- Getting assessment of thinning (view mode)" 
-		print-row 0 $p12 "" "Parameter '-verbose' along with resource selector: font, flist, lang, proof."
-	print-padding $mp4 "- Listing/Removing UI languages" 
-		print-row 0 $p12 "" "Parameter '-lang'."
-	print-padding $mp4 "- Listing/Removing proofingtools" 
-		print-row 0 $p12 "" "Parameter '-proof'."
-	print-padding $mp4 "- Listing/Removing fonts" 
-		print-row 0 $p12 "" "Parameter '-font'."
-	print-padding $mp4 "- Listing/Removing font list files" 
-		print-row 0 $p12 "" "Parameter '-fontlist'."
-	print-padding $mp4 "- Listing fontsets" 
-		print-row 0 $p12 "" "Parameter '-fontset'."
-	print-padding $mp4 "- Removing font cache" 
-		print-row 0 $p12 "" "Parameter '-cache'."
-	print-padding $mp4 "- Finding new fonts" 
-		print-row 0 $p12 "" "Parameter '-font -rev'."
-	print-padding $mp4 "- Backing up fonts" 
-		print-row 0 $p12 "" "Parameter '-backup'."
-	print-padding $mp4 "- Copying fonts to font libraries" 
-		print-row 0 $p12 "" "Parameter '-backup'."
-	echo
-	fi
+		"As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder."
 	
-	printb "ARGUMENTS:"
-	print-row $p4 $p20 "app_list" "App list. w - Word, e - Excel, p - PowerPoint, o - Outlook, n - OneNote. Default: 'w e p o n'." ":"
-	print-row $p4 $p20 "lang_list" "Langauge list: ru pl de etc, see filenames with parameter '-verbose'. Default: 'en ru', see NOTES." ":"
-	print-row $p4 $p20 "proof_list" "Proofingtools list: russian finnish german etc, see filenames with parameter '-verbose'. Wildcard '*' is available. Default: 'english russian', see NOTES." ":"
-	print-row $p4 $p20 "font_pattern" "Font operations are based on patterns. Font patterns: empty - removes the 'DFonts' folder (default); <fontset> - removes fonts of predefined fontset; <mask> - removes selection: *.*, arial*, *.ttc etc. If you use single '*' enclose it in quotation marks: \"*\". Predefined fontsets: library, $fs. See parameter '-fontset' and details in code. Fontset 'library' removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (DFonts against libraries). You can use list of fontsets as well." ":"
-	print-row $p4 $p20 "destination" "Backup destination folderpath for fonts. Default value is '~/Desktop/MSOFonts'. You can use predefined destinations as well: 'syslib' - system library; 'userlib' - user library." ":"
-	echo
-
-	printb "PARAMETERS:"
-	print-row $p4 $p20 "-app" "Filter <app_list>. Selects application to process." ":"
-	print-row $p4 $p20 "-lang" "Exclusive filter <lang_list>. Removes UI languages except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults." ":"
-	print-row $p4 $p20 "-proof" "Exclusive filter <proof_list>. Removes proofing tools except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults." ":"
-	print-row $p4 $p20 "-font" "Filter <font_pattern>. Removes selected fonts or the 'DFonts' folder. Available fontsets: cyrdfonts, noncyr, chinese, sysfonts. Parameter '-rev' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update." ":"
-	print-row $p4 $p20 "-backup" "Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup alternates all deletions to backup." ":"
-	print-row $p4 $p20 "-ex" "Exclusive filter <font_pattern>. Excludes font selection with parameter '-font'. Only mask can be used as 'font_pattern'." ":"
-	print-row $p4 $p20 "-flist" "Switch. Removes fontlist (.plist) files." ":"
-	print-row $p4 $p20 "-all" "Switch. Activates all cleaning options: lang, proof, font, flist, cache. It does not affect a parameter '-app'." ":"
-	print-row $p4 $p20 "-cache" "Switch. Cleans up font cache." ":"
-	print-row $p4 $p20 "-verbose" "Switch. View mode: shows objects to be removed. With special argument 'nl' skips file listing. It does not depend on '-run'." ":"
-	print-row $p4 $p20 "-report" "Switch. Shows statistics on objects." ":"
-	print-row $p4 $p20 "-fontset" "Switch. Shows predefined fontsets." ":"
-	print-row $p4 $p20 "-rev" "Switch. Reverses effect of the 'lang' and 'proof' filters. For parameter '-font' it is to search for the new fonts." ":"
-	print-row $p4 $p20 "-run" "Switch. The default mode is view (test). Activates operations execution." ":"
-	print-row $p4 $p20 "-help" "Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters '-help -full'. Special argument 'en' forces english help page." ":"
-	echo
+		"If you remove fonts, remove font lists as well. The 'DFonts' folder and font lists are safe to remove. No third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion."
 	
-	if [[ $cmd_all -eq 1 ]]; then
-	printb "EXAMPLES:"
-	p4=$((0-$p4)); p8=$((0-$p8))
-	print-padding $p4 "Get app statistics:"
-	  print-padding $p8 "$util -report" b
-	print-padding $p4 "Thin all apps with all parameters:"
-	  print-padding $p8 "sudo $util -all -run" b
-	print-padding $p4 "Show app ('w e' for Word and Excel) language files installed:"
-	  print-padding $p8 "$util -app \"w e\" -lang -verbose" b
-	print-padding $p4 "Remove a number of languages:"
-	  print-padding $p8 "sudo $util -lang \"nl no de\" -rev -run" b
-	print-padding $p4 "Remove all proofing tools except defaults for Word:"
-	  print-padding $p8 "sudo $util -proof -app w -run" b
-	print-padding $p4 "Remove a number of proofing tools:"
-	  print-padding $p8 "sudo $util -proof \"Indonesian Isix*\" -rev -run" b
-	print-padding $p4 "Show duplicates of library fonts for Word:"
-	  print-padding $p8 "$util -font lib -app w -verbose" b
-	print-padding $p4 "Remove duplicated fonts in libraries for Word:"
-	  print-padding $p8 "sudo $util -font lib -app w -run" b
-	print-padding $p4 "Remove 'chinese' and Arial fonts:"
-	  print-padding $p8 "sudo $util -font \"chinese arial*\" -run" b
-	print-padding $p4 "Show new fonts for Outlook:"
-	  print-padding $p8 "$util -font -rev -app o" b
-	print-padding $p4 "Exclude a few useful fonts from deletion for Word:"
-	  print-padding $p8 "sudo $util -font *.* -ex \"brit* rockwell*\" -app w -run" b
-	print-padding $p4 "Clean font cache:"
-	  print-padding $p8 "sudo $util -cache" b
-	print-padding $p4 "Backup fonts to default destination:"
-	  print-padding $p8 "$util -backup -font \"cyrdfonts britanic*\" -run" b
-	print-padding $p4 "Copy original cyrillic fonts to system library:"
-	  print-padding $p8 "sudo $util -backup syslib -font cyrdfonts -run" b
-	print-padding $p4 "Show predefined fontsets:"
-	  print-padding $p8 "$util -fontset" b
-	echo
-	fi
+		"Caution: do not remove fonts from the 'Fonts' folder! These are minimum needed for the MSO applications to work."
+	
+		"File operations are case insensitive."
+	
+		"Script only accepts named parameters."
+	
+		"Apply thinning after every MSO update."
+	
+		"Default settings for the '-lang' and '-proof' parameters: english and russian. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs."
+	
+		"Font classification spicifics in predefined fontsets: cyrillic, non-cyrillic, hieroglyphic, symbolic, system. Fontsets do not intersect."
+	)
+	USAGE=(
+		"USASE"
+		"[sudo] $util [-<parameter> [<arguments>]]..."
+	
+		"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
+	
+		"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]"
+	)
+	USE_CASES=(
+		"USE CASES"
+		"Solo actions: 'backup', 'cache', 'fontset', 'report', 'help'.||"
+		"- Getting MSO info||Parameter '-report'."
+		"- Getting assessment of thinning (view mode)||Parameter '-verbose' along with resource selector: font, flist, lang, proof."
+		"- Listing/Removing UI languages||Parameter '-lang'."
+		"- Listing/Removing proofingtools||Parameter '-proof'."
+		"- Listing/Removing fonts||Parameter '-font'."
+		"- Listing/Removing font list files||Parameter '-fontlist'."
+		"- Listing fontsets||Parameter '-fontset'."
+		"- Removing font cache||Parameter '-cache'."
+		"- Finding new fonts||Parameter '-font -rev'."
+		"- Backing up fonts||Parameter '-backup'."
+		"- Copying fonts to font libraries||Parameter '-backup'."
+	)
+	ARGUMENTS=(
+		"ARGUMENTS"
+		"app_list||App list. w - Word, e - Excel, p - PowerPoint, o - Outlook, n - OneNote. Default: 'w e p o n'."
+	
+		"lang_list||Langauge list: ru pl de etc, see filenames with parameter '-verbose'. Default: 'en ru', see NOTES."
+	
+		"proof_list||Proofingtools list: russian finnish german etc, see filenames with parameter '-verbose'. Wildcard '*' is available. Default: 'english russian', see NOTES."
+	
+		"font_pattern||Font operations are based on patterns. Font patterns: empty - removes the 'DFonts' folder (default); <fontset> - removes fonts of predefined fontset; <mask> - removes selection: *.*, arial*, *.ttc etc. If you use single '*' enclose it in quotation marks: \"*\". Predefined fontsets: library, $fs. See parameter '-fontset' and details in code. Fontset 'library' removes duplicates of system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (DFonts against libraries). You can use list of fontsets as well."
+	
+		"destination||Backup destination folderpath for fonts. Default value is '~/Desktop/MSOFonts'. You can use predefined destinations as well: 'syslib' - system library; 'userlib' - user library."
+	)
+	PARAMETERS=(
+		"PARAMETERS"
+		"-app||Filter <app_list>. Selects application to process."
+	
+		"-lang||Exclusive filter <lang_list>. Removes UI languages except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults."
+	
+		"-proof||Exclusive filter <proof_list>. Removes proofing tools except defaults and user list. See also parameter '-rev'; it reverses user selection except defaults."
+	
+		"-font||Filter <font_pattern>. Removes selected fonts or the 'DFonts' folder. Available fontsets: cyrdfonts, noncyr, chinese, sysfonts. Parameter '-rev' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update."
+	
+		"-backup||Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup alternates all deletions to backup."
+	
+		"-ex||Exclusive filter <font_pattern>. Excludes font selection with parameter '-font'. Only mask can be used as 'font_pattern'."
+	
+		"-flist||Switch. Removes fontlist (.plist) files."
+	
+		"-all||Switch. Activates all cleaning options: lang, proof, font, flist, cache. It does not affect a parameter '-app'."
+	
+		"-cache||Switch. Cleans up font cache."
+	
+		"-verbose||Switch. View mode: shows objects to be removed. With special argument 'nl' skips file listing. It does not depend on '-run'."
+	
+		"-report||Switch. Shows statistics on objects."
+		"-fontset||Switch. Shows predefined fontsets."
+	
+		"-rev||Switch. Reverses effect of the 'lang' and 'proof' filters. For parameter '-font' it is to search for the new fonts."
+	
+		"-run||Switch. The default mode is view (test). Activates operations execution."
+	
+		"-help||Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters '-help -full'. Special argument 'en' forces english help page."
+	)
+	EXAMPLES=(
+		"EXAMPLES"
+		"Get app statistics||$util -report"
+		"Thin all apps with all parameters||sudo $util -all -run"
+		"Show app ('w e' for Word and Excel) language files installed||$util -app \"w e\" -lang -verbose"
+		"Remove a number of languages||sudo $util -lang \"nl no de\" -rev -run"
+		"Remove all proofing tools except defaults for Word||sudo $util -proof -app w -run"
+		"Remove a number of proofing tools||sudo $util -proof \"Indonesian Isix*\" -rev -run"
+		"Show duplicates of library fonts for Word||$util -font lib -app w -verbose"
+		"Remove duplicated fonts in libraries for Word||sudo $util -font lib -app w -run"
+		"Remove 'chinese' and Arial fonts||sudo $util -font \"chinese arial*\" -run"
+		"Show new fonts for Outlook||$util -font -rev -app o"
+		"Exclude a few useful fonts from deletion for Word||sudo $util -font *.* -ex \"brit* rockwell*\" -app w -run"
+		"Clean font cache||sudo $util -cache"
+		"Backup fonts to default destination||$util -backup -font \"cyrdfonts britanic*\" -run"
+		"Copy original cyrillic fonts to system library||sudo $util -backup syslib -font cyrdfonts -run"
+		"Show predefined fontsets||$util -fontset"
+	)
+	
+	print-topic o SYNOPSIS 0 4
+	print-topic o DESCRIPTION 0 4
+	print-topic o NOTES 0 6 '-'
+	print-topic USAGE 0 4 'lh'
+	print-topic o USE_CASES -4 12
+	print-topic ARGUMENTS 4 20 ":"
+	print-topic PARAMETERS 4 20 ":"
+	print-topic o EXAMPLES -4 -8 ":"
 	
 	exit 0
 } # END help page
@@ -905,11 +932,10 @@ function print-row () { # simple table formatter
 # $3 - column1 text
 # $4 - column2 text
 # $5 - divider char
-	local pad1=$1 pad2=$2
+	local pad1=$1 pad2=$2 s1 s2
 	local str1="$3" str2="$4" div=${5:-' '} 
 	local w=$(tput cols); let "w--"; [[ $w -gt 120 ]] && w=100
 	local rightpad=4 gap=3 # predefined margins
-	local s1 s2
 	
 	[[ $gap -lt 3 ]] && div=''
 	[[ $pad2 -lt $pad1 ]] && pad2=$pad1
@@ -940,9 +966,7 @@ function unique () { # rm dup words in string; 'echo' removes awk tail
 	echo $( awk 'BEGIN{RS=ORS=" "}!a[$0]++' <<<"$1 " )
 }
 function inarray () { # test item ($1) in array ($2 - passing by name!)
-    local s=$1
-    local name=$2[@] # var name, NOT value!
-    local a=("${!name}")
+    local s=$1 name=$2[@]; local a=("${!name}")
 	comm -1 -2 -i <(printf '%s\n' "${s[@]}" | sort -u) <(printf '%s\n' "${a[@]}" | sort -u)
 }
 function math-diffexpr () { # simple unit calculator; couldnot find in the www
