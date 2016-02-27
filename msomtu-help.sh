@@ -35,7 +35,7 @@ USAGE=(
 	
 	"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
 	
-	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]"
+	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en]] [-run]"
 )
 USE_CASES=(
 	"СЦЕНАРИИ ИСПОЛЬЗОВАНИЯ"
@@ -54,7 +54,7 @@ USE_CASES=(
 	"- Просмотр/Удаление дубликатов шрифтов||Параметр '-font lib' с аргументом 'lib' - библиотеки."
 	"- Очитска кэша шрифтов||Параметр '-cache'."
 	"- Просмотр наборов шрифтов||Параметр '-fontset'."
-	"- Поиск новых шрифтов||Параметр '-font -rev'."
+	"- Поиск новых шрифтов||Параметр '-font -inv'."
 	"- Резервное копирование шрифтов||Параметр '-backup'."
 	"- Копирование шрифтов в библиотеки шрифтов||Параметр '-backup'."
 	"- Проверка новых версий||Параметр '-check'."
@@ -86,19 +86,19 @@ PARAMETERS=(
 	
 	"-flist||Ключ. Удаление файлов списков шрифтов (.plist)." 
 	
-	"-font||Фильтр <font_pattern>. Удаление заданных шрифтов или папки 'DFonts'. Предопределенные наборы шрифтов: cyrdfonts, noncyr, chinese, sysfonts, symfonts. Для шрифтов параметр '-rev' отменяет выбор пользователя и изменяет функцию поиска: будет произведен поиск новых шрифтов. Это проверку имеет смысл производить после обновления программ MSO." 
+	"-font||Фильтр <font_pattern>. Удаление заданных шрифтов или папки 'DFonts'. Предопределенные наборы шрифтов: cyrdfonts, noncyr, chinese, sysfonts, symfonts. Для шрифтов параметр '-inv' отменяет выбор пользователя и изменяет функцию поиска: будет произведен поиск новых шрифтов. Это проверку имеет смысл производить после обновления программ MSO." 
 	
 	"-fontset||Ключ. Показывает предопределенные шрифтовые наборы." 
 	
 	"-help||Ключ. Показывает страницу помощи. Есть два вида страницы: краткая и полная. По умолчанию (без параметров) выводится краткая страница. Для полного вида используйте параметр '-help -full'. С аргументом 'en' выводит английскую страницу помощи."
+
+	"-inv||Ключ. Изменяет результат работы фильтров '-lang' и '-proof' на обратный, кроме умолчаний. Для параметра '-font' изменяется тип поиска."
 	
-	"-lang||Исключающий фильтр <lang_list>. Удаление языковых файлов локализации, кроме языков по умолчанию и выбора пользователя. Также см. параметр '-rev'; он инвертирует выбор пользователя, кроме умолчаний." 
+	"-lang||Исключающий фильтр <lang_list>. Удаление языковых файлов локализации, кроме языков по умолчанию и выбора пользователя. Также см. параметр '-inv'; он инвертирует выбор пользователя, кроме умолчаний." 
 	
-	"-proof||Исключающий фильтр <proof_list>. Удаление языковых файлов проверки правописания, кроме языков по умолчанию и выбора пользователя. Также см. параметр '-rev'; он инвертирует выбор пользователя, кроме умолчаний."
+	"-proof||Исключающий фильтр <proof_list>. Удаление языковых файлов проверки правописания, кроме языков по умолчанию и выбора пользователя. Также см. параметр '-inv'; он инвертирует выбор пользователя, кроме умолчаний."
 	
 	"-report||Ключ. Показывает статистику по приложениям."
-
-	"-rev||Ключ. Изменяет результат работы фильтров '-lang' и '-proof' на обратный, кроме умолчаний. Для параметра '-font' изменяется тип поиска."
 	"-run||Ключ. Разрешает режим изменений." 
 	
 	"-verbose||Ключ. Показывает детальную информацию по объектам выбора в режиме эмуляции. С аргументом 'nl' отменяет вывод списка файлов. Не зависит от '-run'."
@@ -111,11 +111,11 @@ EXAMPLES=(
 	
 	"Показать установленные языковые пакеты локализации для Word и Excel||$util -app \"w e\" -lang -verbose"
 	
-	"Удалить заданные языковые пакеты локализации||sudo $util -lang \"nl no de\" -rev -run"
+	"Удалить заданные языковые пакеты локализации||sudo $util -lang \"nl no de\" -inv -run"
 	
 	"Удалить все языковые файлы правописания для Word||sudo $util -proof -app w -run"
 	
-	"Удалить заданные языковые файлы правописания||sudo $util -proof \"Indonesian Isix*\" -rev -run"
+	"Удалить заданные языковые файлы правописания||sudo $util -proof \"Indonesian Isix*\" -inv -run"
 	
 	"Найти в Word дубликаты шрифтов в библиотеках||$util -font lib -app w -verbose"
 	
@@ -123,7 +123,7 @@ EXAMPLES=(
 	
 	"Удалить шрифты Arial и из набора 'chinese'||sudo $util -font \"chinese arial*\" -run"
 	
-	"Найти новые шрифты в Outlook||$util -font -rev -app o"
+	"Найти новые шрифты в Outlook||$util -font -inv -app o"
 	
 	"Удалить в Word все шрифты, кроме заданных||sudo $util -font *.* -ex \"brit* rockwell*\" -app w -run"
 	
@@ -134,6 +134,12 @@ EXAMPLES=(
 	"Скопировать оригинальные русские шрифты в системную библиотеку||sudo $util -backup syslib -font cyrdfonts -run"
 	
 	"Показать предопределенные наборы шрифтов||$util -fontset"
+)
+LINKS=(
+	"ДОПОЛНИТЕЛЬНАЯ ИФОРМАЦИЯ"
+	"- Вдохновляющая идея 'лишнего веса'||https://github.com/goodbest/OfficeThinner"
+	"- Руководство по шрифтам OS X и MSO||http://www.jklstudios.com/misc/osxfonts.html"
+	"- Github репозиторий||https://github.com/scriptingstudio/msomtu"
 )
 mylang="${LANG%\.*}"
 fi
@@ -149,7 +155,7 @@ fi
 #	"USAGE ???"
 #	"[sudo] $util [-<parameter> [<arguments>]]..."
 #	"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
-#	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]"
+#	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en]] [-run]"
 #)
 #	USE_CASES=("USE_CASES ???")
 #	ARGUMENTS=(
@@ -172,10 +178,10 @@ fi
 #	"-font||."
 #	"-fontset||."
 #	"-help||."
+#	"-inv||."
 #	"-lang||."
 #	"-report||."
 #	"-proof||."
-#	"-rev||."
 #	"-run||."
 #	"-verbose||."
 #)
@@ -184,19 +190,25 @@ fi
 #	"||$util -report"
 #	"||sudo $util -all -run"
 #	"||$util -app \"w e\" -lang -verbose"
-#	"||sudo $util -lang \"nl no de\" -rev -run"
+#	"||sudo $util -lang \"nl no de\" -inv -run"
 #	"||sudo $util -proof -app w -run"
-#	"||sudo $util -proof \"Indonesian Isix*\" -rev -run"
+#	"||sudo $util -proof \"Indonesian Isix*\" -inv -run"
 #	"||$util -font lib -app w -verbose"
 #	"||sudo $util -font lib -app w -run"
 #	"||sudo $util -font \"chinese arial*\" -run"
-#	"||$util -font -rev -app o"
+#	"||$util -font -inv -app o"
 #	"||sudo $util -font *.* -ex \"brit* rockwell*\" -app w -run"
 #	"||sudo $util -cache"
 #	"||$util -backup -font \"cyrdfonts britanic*\" -run"
 #	"||sudo $util -backup syslib -font cyrdfonts -run"
 #	"||$util -fontset"
 #)
+#	LINKS=(
+#		"RELATED LINKS"
+#		"- Inspiration idea of 'thinning'||https://github.com/goodbest/OfficeThinner"
+#		"- On OS X & MSO fonts||http://www.jklstudios.com/misc/osxfonts.html"
+#		"- The Project Github Repo||https://github.com/scriptingstudio/msomtu"
+#	)
 #	mylang="${LANG%\.*}"
 #fi
 
@@ -208,5 +220,6 @@ print-topic o USE_CASES -4 12
 print-topic   ARGUMENTS 4 20 ":"
 print-topic   PARAMETERS 4 20 ":"
 print-topic o EXAMPLES -4 -8 ":"
+print-topic o LINKS -4 12 ":"
 
 [[ -z "$mylang" ]] && echo "No help for your language? Create your own, or remove this module file, or use parameter '-help en' for english."
