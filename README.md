@@ -40,7 +40,7 @@ $ [sudo] msomtu.sh [-<parameter> [<arguments>]]...
 
 $ [sudo] msomtu.sh [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]
 
-$ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-rev] [-help|-h|-? [en]] [-run]
+$ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en]] [-run]
 ```
 
 #### Use Cases
@@ -57,7 +57,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 | Listing/Removing font list files | `-flist` |
 | Listing fontsets | `-fontset` |
 | Removing font cache | `-cache` |
-| Finding new fonts | `-font -rev` |
+| Finding new fonts | `-font -inv` |
 | Backing up fonts | `-backup -font` |
 | Copying fonts to font libraries | `-backup -font` |
 | Checking for new versions | `-check` |
@@ -81,13 +81,13 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>-check</code></td><td>Switch. Checks for new versions; opens the web-page in browser.</td></tr>
 <tr><td valign="top"><code>-ex</code></td> <td>Exclusive filter <code>font_pattern</code>. Excludes font selection with parameter <code>-font</code>. Only mask can be used as <i>font_pattern</i>.</td></tr>
 <tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (.plist) files.</td></tr>
-<tr><td valign="top"><code>-font</code></td> <td>Filter <code>font_pattern</code>. Removes selected fonts or the <code>DFonts</code> folder. Available fontsets: <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>. Parameter <code>-rev</code> ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument <code>library</code> alters searching in libraries for duplicates. </td></tr>
+<tr><td valign="top"><code>-font</code></td> <td>Filter <code>font_pattern</code>. Removes selected fonts or the <code>DFonts</code> folder. Available fontsets: <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>. Parameter <code>-inv</code> ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument <code>library</code> alters searching in libraries for duplicates. </td></tr>
 <tr><td nowrap valign="top"><code>-fontset</code></td> <td>Switch. Shows predefined fontsets.</td></tr>
 <tr><td valign="top"><code>-help</code></td> <td>Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters <code>-help -full</code>. Special argument <code>en</code> forces english help page.</td></tr>
-<tr><td valign="top"><code>-lang</code></td> <td>Exclusive filter <code>lang_list</code>. Removes UI languages except defaults and user list. See also parameter <code>-rev</code>; it reverses user selection except defaults.</td></tr>
-<tr><td valign="top"><code>-proof</code></td> <td>Exclusive filter <code>proof_list</code>. Removes proofing tools except defaults and user list. See also parameter <code>-rev</code>; it reverses user selection except defaults.</td></tr>
+<tr><td valign="top"><code>-inv</code></td> <td>Switch. Inverts effect of the <code>-lang</code> and <code>-proof</code> filters, but defaults are reserved. For parameter <code>-font</code> it is to search for the new fonts.</td></tr>
+<tr><td valign="top"><code>-lang</code></td> <td>Exclusive filter <code>lang_list</code>. Removes UI languages except defaults and user list. See also parameter <code>-inv</code>; it inverts user selection except defaults.</td></tr>
+<tr><td valign="top"><code>-proof</code></td> <td>Exclusive filter <code>proof_list</code>. Removes proofing tools except defaults and user list. See also parameter <code>-inv</code>; it inverts user selection except defaults.</td></tr>
 <tr><td valign="top"><code>-report</code></td> <td>Switch. Shows statistics on objects.</td></tr>
-<tr><td valign="top"><code>-rev</code></td> <td>Switch. Reverses effect of the <code>-lang</code> and <code>-proof</code> filters, but defaults ara reserved. For parameter <code>-font</code> it is to search for the new fonts.</td></tr><tr>
 <tr><td valign="top"><code>-run</code></td> <td>Switch. The default mode is view (test). Activates operations execution.</td></tr>
 <tr><td nowrap valign="top"><code>-verbose</code></td> <td>Switch. View mode: shows objects to be removed. With special argument <code>nl</code> skips file listing.</td></tr>
 </table>
@@ -114,7 +114,7 @@ $ msomtu.sh -app "w e" -lang -verbose
 Remove a number of languages:
 
 ```sh
-$ sudo msomtu.sh -lang "nl no de" -rev -run 
+$ sudo msomtu.sh -lang "nl no de" -inv -run 
 ```
 
 Remove all proofing tools except defaults for Word:
@@ -126,7 +126,7 @@ $ sudo msomtu.sh -proof -app w -run
 Remove a number of proofing tools:
 
 ```sh
-$ sudo msomtu.sh -proof "Indonesian Isix*" -rev -run 
+$ sudo msomtu.sh -proof "Indonesian Isix*" -inv -run 
 ```
 
 Show duplicates of the library fonts for Word:
@@ -150,7 +150,7 @@ $ sudo msomtu.sh -font "chinese arial*" -run
 Show new fonts for Outlook:
 
 ```sh
-$ msomtu.sh -font -rev -app o 
+$ msomtu.sh -font -inv -app o 
 ```
 
 Exclude a few useful fonts from deletion for Word:
