@@ -17,7 +17,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * **Analytical tools** and **proactive assessment**. You can explore the MSO app resources: fonts, languages of localization and proofing tools, disk size taken by the resources. You can evaluate your disk space taken by the MSO app components before thinning.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
-* **Predefined fontsets** are custom classes of fonts for easy manipulation of fonts. Font classification specifics: cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
+* **Predefined fontsets** are custom classes of fonts for easy manipulation with fonts. Font classification specifics: cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
 * **Font backup**. You can backup your fonts to predefined and user defined destinations before deletion.
 * Copy or move fonts to the font libraries.
 * Flexible search filters.
