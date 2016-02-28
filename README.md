@@ -20,7 +20,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * **Predefined fontsets** are custom classes of fonts. Font classification specifics: cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
 * **Font backup**. You can backup your fonts to predefined and user defined destinations before deletion.
 * Copy or move fonts to the font libraries.
-* Flexible parameter filters.
+* Flexible search filters.
 * Multilanguage help. Currently english and russian. Non-english help pages are in the separate module. You can extend help with your language by the template in the module.
 * New version checking.
 
