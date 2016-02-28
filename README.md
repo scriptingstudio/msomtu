@@ -14,10 +14,10 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 
 ## Features
 * ***Safe Scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. The script cannot make changes or harm your system without parameter `-run`. It unlocks commands.
-* **Proactive assessment**. You can evaluate your disk space taken by the MSO app components before thinning.
+* **Analytical tools** and **proactive assessment**. You can explore the MSO app resources: fonts, languages of localization and proofing tools, disk size taken by the resources. You can evaluate your disk space taken by the MSO app components before thinning.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
-* **Predefined fontsets** are custom classes of fonts. Font classification specifics: cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
+* **Predefined fontsets** are custom classes of fonts for easy manipulation of fonts. Font classification specifics: cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
 * **Font backup**. You can backup your fonts to predefined and user defined destinations before deletion.
 * Copy or move fonts to the font libraries.
 * Flexible search filters.
@@ -31,7 +31,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * **Caution**: do not remove fonts from the `Fonts` folder! These are minimum needed for the MSO applications to work.
 * File operations are case insensitive.
 * Apply thinning after every MSO update.
-* Default settings for the `-lang` and `-proof` parameters: *english* and *russian*. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs.
+* Default settings for the `-lang` and `-proof` parameters: *english* and *russian*. It depends on your system locale and common sense: for MSO integrity it is better to leave english. You can change any default settings in code for your needs. Default languages are reserved from deletion.
 
 ## Usage
 
@@ -56,7 +56,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 | Listing/Removing font duplicates | `-font lib` |
 | Listing/Removing font list files | `-flist` |
 | Listing fontsets | `-fontset` |
-| Removing font cache | `-cache` |
+| Clearing font cache | `-cache` |
 | Finding new fonts | `-font -inv` |
 | Backing up fonts | `-backup -font` |
 | Copying fonts to font libraries | `-backup -font` |
@@ -76,14 +76,14 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <table>
 <tr><td valign="top"><code>-all</code></td> <td>Switch. Activates all cleaning options: <code>lang</code>, <code>proof</code>, <code>font</code>, <code>flist</code>, <code>cache</code>. It does not affect the parameter <code>-app</code>.</td></tr>
 <tr><td valign="top"><code>-app</code></td> <td>Filter <code>app_list</code>. Selects application to process.</td></tr>
-<tr><td valign="top"><code>-backup</code></td> <td>Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup alternates all deletions to backup.</td></tr>
+<tr><td valign="top"><code>-backup</code></td> <td>Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup command alternates all deletions to backup.</td></tr>
 <tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans up font cache. It does not depend on <code>-run</code>.</td></tr>
 <tr><td valign="top"><code>-check</code></td><td>Switch. Checks for new versions; opens the web-page in browser.</td></tr>
 <tr><td valign="top"><code>-ex</code></td> <td>Exclusive filter <code>font_pattern</code>. Excludes font selection with parameter <code>-font</code>. Only mask can be used as <i>font_pattern</i>.</td></tr>
-<tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (.plist) files.</td></tr>
+<tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult remove all of the .plist files. They all have to do with the fixed font lists you see in Office.</td></tr>
 <tr><td valign="top"><code>-font</code></td> <td>Filter <code>font_pattern</code>. Removes selected fonts or the <code>DFonts</code> folder. Available fontsets: <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>. Parameter <code>-inv</code> ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument <code>library</code> alters searching in libraries for duplicates. </td></tr>
 <tr><td nowrap valign="top"><code>-fontset</code></td> <td>Switch. Shows predefined fontsets.</td></tr>
-<tr><td valign="top"><code>-help</code></td> <td>Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no paramaters). To get the full page use parameters <code>-help -full</code>. Special argument <code>en</code> forces english help page.</td></tr>
+<tr><td valign="top"><code>-help</code></td> <td>Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no parameters). To get the full page use parameters <code>-help -full</code>. Special argument <code>en</code> forces english help page.</td></tr>
 <tr><td valign="top"><code>-inv</code></td> <td>Switch. Inverts effect of the <code>-lang</code> and <code>-proof</code> filters, but defaults are reserved. For parameter <code>-font</code> it is to search for the new fonts.</td></tr>
 <tr><td valign="top"><code>-lang</code></td> <td>Exclusive filter <code>lang_list</code>. Removes UI languages except defaults and user list. See also parameter <code>-inv</code>; it inverts user selection except defaults.</td></tr>
 <tr><td valign="top"><code>-proof</code></td> <td>Exclusive filter <code>proof_list</code>. Removes proofing tools except defaults and user list. See also parameter <code>-inv</code>; it inverts user selection except defaults.</td></tr>
