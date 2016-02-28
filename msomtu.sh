@@ -34,7 +34,7 @@ cmd_run=''			# switch to unlock commands
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.9.3'
+version='2.9.4'
 util="${0##*/}"; util="${util%%-*}.sh"
 helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
 defapp='w e p o n'
@@ -74,12 +74,12 @@ dfontsets=(cyrdfonts noncyr chfonts sysfonts symfonts)
 fontsets=(cyrfonts msoessential)
 allfontsets=("${dfontsets[@]}" "${fontsets[@]}")
 fsdescriptor=( # for display-fontset function; good for hashtable
-	"sysfonts|sysfonts|OS X duplicated fonts (in DFonts)"
+	"sysfonts|-|OS X duplicated fonts (in DFonts)"
 	"chfonts|chinese|All kind of hieroglyphic/eastern fonts (in DFonts)" # 2 replmnt in code
-	"noncyr|noncyr|Non-cyrillic fonts (in DFonts)"
-	"cyrdfonts|cyrdfonts|Cyrillic original fonts (in DFonts; do not include 'sysfonts')"
-	"cyrfonts|cyrfonts|Cyrillic original fonts (in Fonts)"
-	"symfonts|symfonts|Symbolic fonts (in DFonts)"
+	"noncyr|-|Non-cyrillic fonts (in DFonts)"
+	"cyrdfonts|-|Cyrillic original fonts (in DFonts; do not include 'sysfonts')"
+	"cyrfonts|-|Cyrillic original fonts (in Fonts)"
+	"symfonts|-|Symbolic fonts (in DFonts)"
 )
 # END all definitions
 
@@ -115,6 +115,9 @@ function main () {
 			-help|-h|-\?)     param="help" ;;
 			-all|-full)       param="all" ;;
 			-check)           param="checkupdate" ;;
+			--test) param="test" ;; # for testing
+			*) [[ $INPUTPARAM ]] && 
+				{ echo "ERROR: unknown parameter '$INPUTPARAM'"; exit 1; } ;;
 		esac
 		if [[ "$param" ]]; then
 			paramorder+=" $prefix$param"
@@ -129,6 +132,10 @@ function main () {
 	[[ "$cmd_proof" ]]              && cmd+=" clean"
 	[[ "$cmd_font" ]]               && cmd+=" clean"
 	[[ "$cmd_fontlist" == true ]]   && cmd+=" clean"
+	#[[ "$cmd_backup" ]]             && cmd+=" backup" # extra logics
+	#[[ "$cmd_cache" == true ]]      && cmd+=" cache"
+	#[[ "$cmd_report" == true ]]     && cmd+=" report"
+	#[[ "$cmd_fontset" == true ]]    && cmd+=" fontset"
 	[[ "$cmd_checkupdate" == true ]] && cmd+=" checkupdate"
 
 	# default value settings
@@ -146,12 +153,12 @@ function main () {
 	elif [[ "$cmd_all" ]]; then cmd_all=''
 	fi
 	if [[ "$cmd_lang" == true ]]; then 
-		cmd_lang="$deflang"
+		cmd_lang="$deflang"; reserved_note=true
 	elif [[ "$cmd_lang" ]]; then
 		cmd_lang=$(unique "$cmd_lang $deflang")
 	fi
 	if [[ "$cmd_proof" == true ]]; then 
-		cmd_proof="$defproof"
+		cmd_proof="$defproof"; reserved_note=true
 	elif [[ "$cmd_proof" ]]; then
 		cmd_proof=$(unique "$cmd_proof $defproof")
 	fi	
@@ -169,7 +176,7 @@ function main () {
 	[[ "$cmd_report" == true ]]  && cmd="report"
 	[[ "$script_params" == 0 || "$cmd_help" ]] && cmd="help"
 	[[ -z "$cmd" ]] && 
-		{ echo -e "\nNo valid actions or parameters defined (font lang proof flist report fontset cache backup help checkupdate). Correct your command line parameters. See help.\n"; exit 3; }
+		{ echo -e "\nNo valid parameters defined (font lang proof flist report fontset cache backup help checkupdate). Correct your command line parameters. See help.\n"; exit 3; }
 	# END input parser
 	
 	############ Operation selector
@@ -369,14 +376,14 @@ function clean-application () {
 		fi # END plist (fontlist files)
 	
 	# - cleaning of lproj folders; keep en_GB.lproj en.lproj
-		[[ "$cmd_lang" ]] && clean-lang "$wpath"
+		[[ "$cmd_lang" ]] && clean-lang "$wpath";
 	
 	# - cleaning of Proofing Tools; keep English*.proofingtool Grammar.proofingtool
 		[[ "$cmd_proof" ]] &&
-			clean-ptools "$basePATH$appPATH$proofingPATH$proofingName"
+			clean-ptools "$basePATH$appPATH$proofingPATH$proofingName";
 			
-		[[ $cmd_inverse ]] && [[ -z $defproof || -z $deflang ]] && #
-			echo "Default languages are reserved."
+		[[ $reserved_note ]] && [[ -z $cmd_proof || -z $cmd_lang ]] && 
+			echo "Default languages are reserved, nothing to do."
 		
 		appfat=$( echo "$appfat" | awk '{e1=$1;} END {
 			unit="K"; fmt1="%.f%s"; kilo=1024
@@ -530,23 +537,22 @@ function clean-lang () {
 		[[ -z $cmd_inverse ]] &&
 		fs=$( find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec basename {} \; ) ||
 		fs=$( find -E "$wpath" -type d -d 1 -name *.lproj -iregex $filter -exec basename {} \; )
-		[[ $cmd_verb != 'nl' ]] && echo "$fs"; 
+		[[ $cmd_verb != 'nl' && "$fs" ]] && echo "$fs"; 
 		[[ "$fs" ]] && update-counter "$fs" "$wpath" 
 	}
-	__rm-lang () { find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec rm -fdr {} \; ; }
 	local wpath="$1"
 	local filter=$( create-filter "lang" )
 	if [[ -z $cmd_inverse ]]; then
 		if [[ $cmd_run ]]; then
-			__rm-lang
+			find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec rm -fdr {} \; ;
 		else # trace mode
 			cmd_lang=$(unique "en $cmd_lang")
 			echo "  TRACE: remove extra UI languages. Keep '$cmd_lang'."
 			[[ $cmd_verb ]] && __list-lang
 		fi
-	else # reverse filter
+	else # inverse filter
 		if [[ $cmd_run ]]; then
-			__rm-lang
+			find -E "$wpath" -type d -d 1 -name *.lproj -iregex $filter -exec rm -fdr {} \; ;
 		else # trace mode
 			echo "  TRACE: remove extra UI languages - '$cmd_lang'."
 			[[ $cmd_verb ]] && __list-lang 
@@ -555,6 +561,14 @@ function clean-lang () {
 } # END lang
 
 function clean-ptools () {
+	__list-ptools () {
+		local fs fc
+		[[ -z $cmd_inverse ]] &&
+		fs=$(find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec basename {} \;) ||
+		fs=$(find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec basename {} \;)
+		[[ $cmd_verb != 'nl' && "$fs" ]] && echo "$fs"; 
+		[[ "$fs" ]] && update-counter "$fs" "$wpath" 
+	}
 	local wpath="$1" fs fc
 	local filter=$( create-filter "proof" )
 	if [[ -z $cmd_inverse ]]; then
@@ -563,22 +577,14 @@ function clean-ptools () {
 		else # trace mode
 			cmd_proof=$(unique "english $cmd_proof")
 			echo "  TRACE: remove extra proofing tools. Keep '$cmd_proof'."
-			if [[ $cmd_verb ]]; then 
-				fs=$( find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec basename {} \; )
-				[[ $cmd_verb != 'nl' ]] && echo "$fs"; 
-				[[ "$fs" ]] && update-counter "$fs" "$wpath" 
-			fi
+			[[ $cmd_verb ]] && __list-ptools
 		fi
-	else # reverse filter
+	else # inverse filter
 		if [[ $cmd_run ]]; then
 			find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec rm -fdr {} \;
 		else # trace mode
 			echo "  TRACE: remove extra proofing tools - '$cmd_proof'."
-			if [[ $cmd_verb ]]; then 
-				fs=$( find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec basename {} \; )
-				[[ $cmd_verb != 'nl' ]] && echo "$fs"; 
-				[[ "$fs" ]] && update-counter "$fs" "$wpath"
-			fi
+			[[ $cmd_verb ]] && __list-ptools 
 		fi
 	fi
 } # END proofingtools
@@ -588,6 +594,7 @@ function display-fontset () {
 	printb "Predefined fontsets:"
 	for f in "${fsdescriptor[@]}"; do
 		fn="${f%%|*}"; disp="${f%|*}"; disp="${disp#*|}"; desc="${f##*|}"
+		[[ "$disp" == '-' ]] && disp="$fn"
 		name=${fn}[@]; array=("${!name}")
 		fset=$(joina ',' "${array[@]}")
 		print-row 4 20 "$disp" "$desc:" "-"
