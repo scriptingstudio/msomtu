@@ -13,7 +13,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * Microsoft Office 2016 for Mac 15.17 or later to work with fonts.
 
 ## Features
-* ***Safe Scripting*** technique — "Foolproof" or "Harmless Run". The default running mode is view. The script cannot make changes or harm your system without parameter `-run`. It unlocks commands.
+* ***Safe Scripting*** technique—"Foolproof" or "Harmless Run". The default running mode is view. The script cannot make changes or harm your system without parameter `-run`. It unlocks commands.
 * **Analytical tools** and **proactive assessment**. You can explore the MSO app resources: fonts, languages of localization and proofing tools, disk size taken by the resources. You can evaluate your disk space taken by the MSO app components before thinning.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
@@ -27,7 +27,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 ## Notes
 * As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
 * As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the `Fonts` folder within each app. The rest are in the `DFonts` folder.
-* If you remove fonts, remove font lists as well. The `DFonts` folder and font lists are safe to remove. No third party app can see MSO fonts installed to the `DFonts` folder. Some of the fonts you may find useful, save them before deletion.
+* If you remove fonts, remove font lists as well; see PARAMETERS. The `DFonts` folder and font lists are safe to remove. No third party app can see MSO fonts installed to the `DFonts` folder. Some of the fonts you may find useful, save them before deletion.
 * **Caution**: do not remove fonts from the `Fonts` folder! These are minimum needed for the MSO applications to work.
 * File operations are case insensitive.
 * Apply thinning after every MSO update.
@@ -61,18 +61,19 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 | Backing up fonts | `-backup -font` |
 | Copying fonts to font libraries | `-backup -font` |
 | Checking for new versions | `-check` |
-| Getting help | Short page — no parameters <br/>Full page — `-help -full` <br/>Force english page — `-help en` |
+| Getting help | Short page: no parameters <br/>Full page: `-help -full` <br/>Force english page: `-help en` |
 
 ## Arguments
 <table>
-<tr><td valign="top"><code>app_list</code></td><td>Application list. <b>w</b> — Word, <b>e</b> — Excel, <b>p</b> — PowerPoint, <b>o</b> — Outlook, <b>n</b> — OneNote. Default: <code>w e p o n</code>.</td></tr>
+<tr><td valign="top"><code>app_list</code></td><td>Application list. <b>w</b>—Word, <b>e</b>—Excel, <b>p</b>—PowerPoint, <b>o</b>—Outlook, <b>n</b>—OneNote. Default: <code>w e p o n</code>.</td></tr>
 <tr><td valign="top"><code>lang_list</code></td><td>Langauge list: <code>ru pl de</code> etc; see filenames with parameter <code>-verbose</code>. Default: <code>en ru</code>, see NOTES.</td></tr>
 <tr><td valign="top"><code>proof_list</code></td><td>Proofingtools list: <code>russian finnish german</code> etc; see filenames with parameter <code>-verbose</code>. Wildcard <code>*</code> is available to use. Default: <code>english russian</code>, see NOTES.</td></tr>
-<tr><td valign="top"><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty — removes the <code>DFonts</code> folder (default); <i>fontset</i> — removes fonts of predefined fontset; <i>mask</i> — removes selection: <i>*.*, arial*, *.ttc</i> etc. If you use single <code>*</code> enclose it in quotation marks: <code>"*"</code>. Predefined fontsets: <code>library</code>, <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>, <code>symfonts</code>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates from system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (<code>DFonts</code> against libraries). You can use list of fontsets as well.</td></tr>
-<tr><td valign="top"><code>destination</code></td><td>Backup destination folderpath for fonts. Default value is <code>~/Desktop/MSOFonts</code>. You can use predefined destinations as well: <code>syslib</code> — system library; <code>userlib</code> — user library.</td></tr>
+<tr><td valign="top"><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty—removes the <code>DFonts</code> folder (default); <i>fontset</i>—removes fonts of predefined fontset; <i>mask</i>—removes selection: <i>*.*, arial*, *.ttc</i> etc. If you use single <code>*</code> enclose it in quotation marks: <code>"*"</code>. Predefined fontsets: <code>library</code>, <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>, <code>symfonts</code>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates from system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (<code>DFonts</code> against libraries). You can use list of fontsets as well.</td></tr>
+<tr><td valign="top"><code>destination</code></td><td>Backup destination folderpath for fonts. Default value is <code>~/Desktop/MSOFonts</code>. You can use predefined destinations as well: <code>syslib</code>—system library; <code>userlib</code>—user library.</td></tr>
 </table>
 
 ## Parameters
+**Note:** In case of parameter duplicates the latter is ignored.
 <table>
 <tr><td valign="top"><code>-all</code></td> <td>Switch. Activates all cleaning options: <code>lang</code>, <code>proof</code>, <code>font</code>, <code>flist</code>, <code>cache</code>. It does not affect the parameter <code>-app</code>.</td></tr>
 <tr><td valign="top"><code>-app</code></td> <td>Filter <code>app_list</code>. Selects application to process.</td></tr>
@@ -89,7 +90,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>-proof</code></td> <td>Exclusive filter <code>proof_list</code>. Removes proofing tools except defaults and user list. See also parameter <code>-inv</code>; it inverts user selection except defaults.</td></tr>
 <tr><td valign="top"><code>-report</code></td> <td>Switch. Shows statistics on objects.</td></tr>
 <tr><td valign="top"><code>-run</code></td> <td>Switch. The default mode is view (test). Activates operations execution.</td></tr>
-<tr><td nowrap valign="top"><code>-verbose</code></td> <td>Switch. View mode: shows objects to be removed. With special argument <code>nl</code> skips file listing.</td></tr>
+<tr><td nowrap valign="top"><code>-verbose</code></td> <td>Switch. Shows objects to be removed or searched, and assessment report. With special argument <code>nl</code> skips file listing. This parameter only works in view mode.</td></tr>
 </table>
 
 ## Examples
