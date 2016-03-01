@@ -13,7 +13,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * Microsoft Office 2016 for Mac 15.17 or later to work with fonts.
 
 ## Features
-* ***Safe Scripting*** technique—"Foolproof" or "Harmless Run". The default running mode is view. The script cannot make changes or harm your system without parameter `-run`. It unlocks commands.
+* ***Safe Scripting*** technique—"Foolproof" or "Harmless Run". The default running mode is view. The script cannot make changes or harm your system without parameter `-run`. It unlocks commands, it is also like protection from accidental click the ENTER.
 * **Analytical tools** and **proactive assessment**. You can explore the MSO app resources: fonts, languages of localization and proofing tools, disk size taken by the resources. You can evaluate your disk space taken by the MSO app components before thinning.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
@@ -73,7 +73,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 </table>
 
 ## Parameters
-**Note:** In case of parameter duplicates the latter is ignored.
+**Note:** In case of parameter duplicates the latter wins.
 <table>
 <tr><td valign="top"><code>-all</code></td> <td>Switch. Activates all cleaning options: <code>lang</code>, <code>proof</code>, <code>font</code>, <code>flist</code>, <code>cache</code>. It does not affect the parameter <code>-app</code>.</td></tr>
 <tr><td valign="top"><code>-app</code></td> <td>Filter <code>app_list</code>. Selects application to process.</td></tr>
