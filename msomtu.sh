@@ -34,7 +34,7 @@ cmd_run=''			# switch to unlock commands
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.9.5'
+version='2.9.6'
 util="${0##*/}"; util="${util%%-*}.sh"; util="${util%%.sh*}.sh"
 helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
 defapp='w e p o n'
@@ -169,7 +169,7 @@ function main () {
 		[[ $s == $i ]] && m=$i
 	done done
 	[[ $m ]] && [[ $m == "${paramorder##* }" || -z "$cmd" ]] && cmd=$m # priority
-	[[ $script_params -eq 0 ]] || [[ $m == 'help' && "$cmd_all" == true ]] && cmd="help"
+	[[ $script_params -eq 0 ]] && cmd="help"
 	[[ -z "$cmd" ]] && 
 		{ echo "No valid parameters defined. Correct your command line parameters. See help."; exit 3; }
 	
@@ -181,12 +181,12 @@ function main () {
 	for c in $cmd; do
 		case $c in
 			report) 
-				check-app 'skip' 
+				show-appbanner 'skip2' 
 				echo
-				make-report ;;
+				get-msoinfo ;;
 				
 			clean) 
-				check-app 
+				show-appbanner 
 				echo
 				local score1 score2 appdu=()
 				get-diskusage score1 
@@ -216,7 +216,6 @@ function main () {
 } # END main
 
 function prepare-env () {
-# Preparing runtime environment
 	local temp=$(unique "$cmd_app") appPATH i
 	cmd_app=()
 	for i in $temp; do # hashtable: bash4
@@ -226,6 +225,8 @@ function prepare-env () {
 		[[ $i == 'o' ]] && cmd_app+=("$OutlookPATH")
 		[[ $i == 'n' ]] && cmd_app+=("$OneNotePATH")
 	done
+	[[ ${#cmd_app[@]} -eq 0 ]] && 
+		{ echo "ERROR: Invalid app ID defined ['${temp[@]}']."; exit 1; }
 
 	appInstalled=()
 	temp=("$WordPATH" "$ExcelPATH" "$PowerPointPATH" "$OutlookPATH" "$OneNotePATH")
@@ -240,12 +241,8 @@ function prepare-env () {
 	done
 } # END prepare
 
-function check-app () {
+function show-appbanner () {
 	local appPATH
-	if [[ ${#appPathArray} -eq 0 ]]; then
-		echo "Nothing to do - no app defined or found. Bye."
-		exit
-	fi
 	printb "Installed apps:"
 	for appPATH in "${appInstalled[@]}"; do
 		echo "- $appPATH"
@@ -256,17 +253,9 @@ function check-app () {
 		for appPATH in "${appPathArray[@]}"; do
 			echo "- ${appPATH/.app/}"
 		done
-} # END checking app list
+} # END script header
 
-function make-report () {
-	__normalize-number () { # restr: input - kilobytes
-		echo "$1" | awk '{e1=$1;} END {
-			unit="K"; fmt1="%.f %s"; kilo=1024
-			if (e1 > kilo) {e1/=1024; unit="M"; fmt1="%.f %s"}
-			if (e1 > kilo) {e1/=1024; unit="G"; fmt1="%.1f %s"}
-			printf fmt1,e1,unit
-		}'
-	}
+function get-msoinfo () {
 	__separate-unit () { echo "${1/[A-Z]/} ${1:(-1)}"; }
 	local versionPATH="/Contents/Info.plist"
 	local versionKey="CFBundleShortVersionString"
@@ -283,7 +272,7 @@ function make-report () {
 		##### fonts
 		if [[ -d "$wpath" ]]; then
 			fs=''; fs=$(du -sh -k "$wpath" | cut -f 1); let "appfat+=${fs}"
-			fs=$(__normalize-number $fs)
+			fs=$(normalize-number $fs)
 			fc=$(ls -A "$wpath" | wc -l) #fc=$(find "$wpath" -type f | wc -l)
 			let "appfiles+=${fc// }"
 			printf "$fmt1" "DFonts" "${fc// }" "${fs}$sfx"
@@ -304,7 +293,7 @@ function make-report () {
 			printf "$fmt1" "Plists" $na
 		else
 			fs=$(du -sh -k "$wpath/"*.plist | awk '{ total += $1 }; END {print total}')
-			let "appfat+=${fs}"; fs=$(__normalize-number $fs)
+			let "appfat+=${fs}"; fs=$(normalize-number $fs)
 			fc=$(echo "$flist" | wc -l)
 			let "appfiles+=${fc// }"
 			printf "$fmt1" "Plists" "${fc// }" "${fs}$sfx"
@@ -316,7 +305,7 @@ function make-report () {
 			printf "$fmt1" "Langpacks" $na
 		else
 			fs=$(du -sh -k "$wpath/"*.lproj | awk '{ total += $1 }; END {print total}')
-			let "appfat+=${fs}"; fs=$(__normalize-number $fs)
+			let "appfat+=${fs}"; fs=$(normalize-number $fs)
 			fc=$(echo "$flist" | wc -l); 
 			let "appfiles+=${fc// }"
 			printf "$fmt1" "Langpacks" "${fc// }" "${fs}$sfx"
@@ -329,7 +318,7 @@ function make-report () {
 			printf "$fmt1" "Proofingtools" $na
 		else
 			fs=''; fs=$(du -sh -k "$wpath" | cut -f 1); let "appfat+=${fs}"
-			fs=$(__normalize-number $fs)	
+			fs=$(normalize-number $fs)	
 			fc=$(echo "$flist" | wc -l); let "appfiles+=${fc// }"
 			printf "$fmt1" "Proofingtools" "${fc// }" "${fs}$sfx"
 		fi
@@ -339,14 +328,14 @@ function make-report () {
 		fs=$(__separate-unit $fs); fc=$(printf "%'d" $fc)
 		printf "$fmt1" '' '' '------'
 		printf "$fmt1" "Total app bundle" "$fc" "${fs}$sfx"
-		appfat=$(__normalize-number $appfat)
+		appfat=$(normalize-number $appfat)
 		printf "$fmt1" "Approx. thinning" "$appfiles*" "-${appfat}$sfx"
 
 		echo
 	done # app selection
 	echo -e "----\n[*] Includes the default file sets which are reserved\n    by settings. The folder 'Fonts' is reserved."
 	echo
-} # END report
+} # END MSO report
 
 function clean-application () {
 	__list-langrc () { # for clean-lang, clean-ptools
@@ -390,12 +379,7 @@ function clean-application () {
 		[[ "$cmd_proof" ]] &&
 			clean-ptools "$basePATH$appPATH$proofingPATH$proofingName";
 		
-		appfat=$( echo "$appfat" | awk '{e1=$1;} END {
-			unit="K"; fmt1="%.f%s"; kilo=1024
-			if (e1 > kilo) {e1/=1024; unit="M"; fmt1="%.f%s"}
-			if (e1 > kilo) {e1/=1024; unit="G"; fmt1="%.1f%s"}
-			printf fmt1,e1,unit
-		}' )
+		appfat=$(normalize-number "$appfat" ns)
 		appdu+=("${appfat}	$basePATH$appPATH") # tab char between
 		echo
 	done
@@ -578,7 +562,7 @@ function clean-ptools () {
 } # END proofingtools
 
 function display-fontset () {
-	local fset name array fs fd fn f disp desc
+	local fset name array fn f disp desc
 	printb "Predefined fontsets:"
 	for f in "${fsdescriptor[@]}"; do
 		fn="${f%%|*}"; disp="${f%|*}"; disp="${disp#*|}"; desc="${f##*|}"
@@ -668,8 +652,7 @@ function invoke-backup () { # for fonts only
 function show-helppage () {
 	print-topic () {
 	# $1 - opt-flag/data; $2 - pad1; $3 - pad2; $4 - lineheight/delim
-		[[ $1 == 'o' ]] && 
-			{ [[ ! $cmd_all ]] && return || shift; }
+		[[ $1 == 'full' ]] && shift || return
 		local name=$1[@]; local array=("${!name}")
 		local pad1=$2 pad2=$3 item h2 val delim lh
 		[[ "$4" == 'lh' ]] && { lh=$4; shift; }
@@ -695,8 +678,9 @@ function show-helppage () {
 		[[ -z "$lh" ]] && echo
 	} # END print topic
 	local fs="${dfontsets[@]/chfonts/chinese}"; fs=${fs// /, } # name/disp name
+	local opt=$(inarray 'full' cmd_help)
 
-	if [[ "${LANG%\.*}" != en_* && "$cmd_help" != 'en' ]]; then
+	if [[ "${LANG%\.*}" != en_* && -z $(inarray 'en' cmd_help) ]]; then
 		[[ -f "$helpfile" ]] && { . "$helpfile"; return; }
 	fi
 
@@ -735,7 +719,7 @@ function show-helppage () {
 	
 		"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
 	
-		"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en]] [-run]"
+		"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run]"
 	)
 	USE_CASES=(
 		"USE CASES"
@@ -785,7 +769,7 @@ function show-helppage () {
 
 		"-fontset||Switch. Shows predefined fontsets."
 	
-		"-help||Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no parameters). To get the full page use parameters '-help -full'. Special argument 'en' forces english help page."
+		"-help||Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no parameters). To get the full page use parameter '-help full'. Special argument 'en' forces english help page."
 	
 		"-inv||Switch. Inverts effect of the 'lang' and 'proof' filters, but defaults are reserved. For parameter '-font' it is to search for the new fonts."
 	
@@ -824,15 +808,15 @@ function show-helppage () {
 		"- The Project Github Repo||https://github.com/scriptingstudio/msomtu"
 	)
 	
-	print-topic o SYNOPSIS 0 4
-	print-topic o DESCRIPTION 0 4
-	print-topic o NOTES 0 6 '-'
-	print-topic   USAGE 0 4 'lh'
-	print-topic o USE_CASES -4 12 ':'
-	print-topic   ARGUMENTS 4 20 ':'
-	print-topic   PARAMETERS 4 20 ':'
-	print-topic o EXAMPLES -4 -8 ':'
-	print-topic o LINKS -4 12 ':'
+	print-topic $opt   SYNOPSIS 0 4
+	print-topic $opt   DESCRIPTION 0 4
+	print-topic $opt   NOTES 0 6 '-'
+	print-topic full   USAGE 0 4 'lh'
+	print-topic $opt   USE_CASES -4 12 ':'
+	print-topic full   ARGUMENTS 4 20 ':'
+	print-topic full   PARAMETERS 4 20 ':'
+	print-topic $opt   EXAMPLES -4 -8 ':'
+	print-topic $opt   LINKS -4 12 ':'
 } # END help page
 
 function clean-cache () { echo; atsutil databases -remove; }
@@ -863,11 +847,8 @@ function show-appdu () { # final/assessment report
 					difpc="${dif#*|}"; dif="${dif%|*}"
 				fi
 				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='n/a'
-				###[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='<1'${dif:(-1)}
-				#if [[ $dif != 'n/a' && $difpc ]]; then
 					printf -v difpc ": %3s" "$difpc"
 					dif="$dif $difpc"
-				#fi
 				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2" "$dif"
 			fi
 		done
@@ -907,11 +888,9 @@ function create-filter () {
 			search+="|$i"
 		done
 		[[ ${search:0:1} == '|' ]] && search="${search:1}"
-		if [[ "$search" ]]; then
-			printf '%s%s%s' ".+/(" $search ")\..+"
-		else
+		[[ "$search" ]] &&
+			printf '%s%s%s' ".+/(" $search ")\..+" ||
 			echo ''
-		fi
 		return
 	fi
 	[[ $cmd_inverse ]] && pre=".+/("
@@ -921,7 +900,6 @@ function create-filter () {
 } # END search filter
 
 ##########  Common routines library
-function joina { local oldifs="$IFS"; IFS="$1"; shift; echo "$*"; IFS="$oldifs"; }
 function printb () { echo -e "\033[1m$1\033[0m"; }
 function printu () { echo -e "\033[4m$1\033[0m"; }
 function print-padding () {
@@ -973,6 +951,7 @@ function print-row () { # simple table formatter
 		div=''
 	done
 } # END print-row
+function joina { local oldifs="$IFS"; IFS="$1"; shift; echo "$*"; IFS="$oldifs"; }
 function unique () { # rm dup words in string; 'echo' removes awk tail
 	[[ "${1// }" == '' ]] && { echo; return; }
 	echo $( awk 'BEGIN{RS=ORS=" "}!a[$0]++' <<<"$1 " )
@@ -982,7 +961,16 @@ function inarray () { # test item ($1) in array ($2 - passing by name!)
     local s=$1 name=$2[@]; local a=("${!name}")
 	comm -1 -2 -i <(printf '%s\n' "${s[@]}" | sort -u) <(printf '%s\n' "${a[@]}" | sort -u)
 }
-function math-diffexpr () { # simple unit calculator; couldnot find in the inet
+function normalize-number () { 
+	echo "$1" "$2" | awk '{e1=$1; v2=$2} END {
+		unit="K"; fmt1="%.f"; kilo=1024
+		if (e1 > kilo) {e1/=1024; unit="M"; fmt1="%.f"}
+		if (e1 > kilo) {e1/=1024; unit="G"; fmt1="%.1f"}
+		fmt1 = (v2 == "ns") ? fmt1"%s" : fmt1" %s"
+		printf fmt1,e1,unit
+	}'
+}
+function math-diffexpr () { # simple unit calculator; couldnot find better
 	local dif difpc exp='{
 		e1=toupper($1); e2=toupper($2); child=$3}; END {
 		u1=substr(e1,length(e1),1); u2=substr(e2,length(e2),1)
