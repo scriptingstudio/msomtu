@@ -21,7 +21,7 @@ NOTES=(
 	"Внимание: не удаляйте шрифты из папки 'Fonts'! Они необходимы для работы самих приложений."
 	
 	"Все файловые операции регистронезависимы." 
-	"Скрипт обрабатывает только именные параметры. Если параметры дублируются, последний удаляется из списка."
+	"Скрипт обрабатывает только именные параметры. Если параметры дублируются, используются аргументы последнего."
 	
 	"Скрипт необходимо запускать после каждого обновления программ MSO."
 	
@@ -35,7 +35,7 @@ USAGE=(
 	
 	"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
 	
-	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en]] [-run]"
+	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run]"
 )
 USE_CASES=(
 	"СЦЕНАРИИ ИСПОЛЬЗОВАНИЯ"
@@ -90,7 +90,7 @@ PARAMETERS=(
 	
 	"-fontset||Ключ. Показывает предопределенные шрифтовые наборы." 
 	
-	"-help||Ключ. Показывает страницу помощи. Есть два вида страницы: краткая и полная. По умолчанию (без параметров) выводится краткая страница. Для полного вида используйте параметр '-help -full'. С аргументом 'en' выводит английскую страницу помощи."
+	"-help||Ключ. Показывает страницу помощи. Есть два вида страницы: краткая и полная. По умолчанию (без параметров) выводится краткая страница. Для полного вида используйте параметр '-help full'. С аргументом 'en' выводит английскую страницу помощи."
 
 	"-inv||Ключ. Изменяет результат работы фильтров '-lang' и '-proof' на обратный, кроме умолчаний. Для параметра '-font' изменяется тип поиска."
 	
@@ -155,7 +155,7 @@ fi
 #	"USAGE ???"
 #	"[sudo] $util [-<parameter> [<arguments>]]..."
 #	"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
-#	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en]] [-run]"
+#	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run]"
 #)
 #	USE_CASES=("USE_CASES ???")
 #	ARGUMENTS=(
@@ -212,14 +212,14 @@ fi
 #	mylang="${LANG%\.*}"
 #fi
 
-print-topic o SYNOPSIS 0 4
-print-topic o DESCRIPTION 0 4
-print-topic o NOTES 0 6 '-'
-print-topic   USAGE 0 4 'lh'
-print-topic o USE_CASES -4 12
-print-topic   ARGUMENTS 4 20 ":"
-print-topic   PARAMETERS 4 20 ":"
-print-topic o EXAMPLES -4 -8 ":"
-print-topic o LINKS -4 12 ":"
+print-topic $opt SYNOPSIS 0 4
+print-topic $opt DESCRIPTION 0 4
+print-topic $opt NOTES 0 6 '-'
+print-topic full USAGE 0 4 'lh'
+print-topic $opt USE_CASES -4 12 ':'
+print-topic full ARGUMENTS 4 20 ':'
+print-topic full PARAMETERS 4 20 ':'
+print-topic $opt EXAMPLES -4 -8 ':'
+print-topic $opt LINKS -4 12 ':'
 
 [[ -z "$mylang" ]] && echo "No help for your language? Create your own, or remove this module file, or use parameter '-help en' for english."
