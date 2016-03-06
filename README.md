@@ -47,6 +47,8 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 #### Use Cases
 **Solo actions:** `-report`, `-fontset`, `-backup`, `-cache`, `-help`.
 
+**Group actions:** `-font`, `-lang`, `-proof`, `-flist`, `-check`, `-all`.
+
 | Action  | Parameter |
 |:--------|:----------|
 | Getting MSO info | `-report` |
