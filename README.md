@@ -13,7 +13,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * Microsoft Office 2016 for Mac 15.17 or later to work with fonts.
 
 ## Features
-* ***Safe Scripting*** technique—“Foolproof” or “Harmless Run”. The default running mode is view. The script cannot make changes or harm your system without parameter `-run`. It unlocks commands, it is also like protection from accidental click the ENTER.
+* ***Safe Scripting*** technique—“Foolproof” or “Harmless Run”. The default running mode is view. You can think of it as **“what-if”** mode. The script cannot make changes or harm your system without parameter `-run`. It unlocks commands, it is also like protection from accidental click the ENTER.
 * **Analytical tools** and **proactive assessment**. You can explore the MSO app resources: fonts, languages of localization and proofing tools, disk size taken by the resources. You can evaluate your disk space taken by the MSO app components before thinning.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
@@ -39,7 +39,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 # Syntax schema
 $ [sudo] msomtu.sh [-<parameter> [<arguments>]]...
 
-$ [sudo] msomtu.sh [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]
+$ [sudo] msomtu.sh -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]
 
 $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]
 ```
