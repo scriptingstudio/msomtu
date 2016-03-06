@@ -33,9 +33,9 @@ USAGE=(
 	"ИСПОЛЬЗОВАНИЕ"
 	"[sudo] $util [-<parameter> [<arguments>]]..."
 	
-	"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
+	"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
 	
-	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run]"
+	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
 )
 USE_CASES=(
 	"СЦЕНАРИИ ИСПОЛЬЗОВАНИЯ"
@@ -82,7 +82,7 @@ PARAMETERS=(
 	"-cache||Ключ. Очистка кэша шрифтов." 
 	"-check||Ключ. Проверка новых версий на веб-сайте; открывает веб-страницу в браузере."
 	
-	"-ex||Исключающий фильтр <font_pattern> для параметра '-font'. Инвертирует выбор пользователя. В качестве 'font_pattern' можно использовать только маску."
+	"-ex||Исключающий фильтр <font_pattern> для параметра '-font'. Фильтрует выбор пользователя. В качестве 'font_pattern' можно использовать только маску."
 	
 	"-flist||Ключ. Удаление файлов списков шрифтов (.plist). Эти списки похожи на кэш. Если вы удаляете ненужный шрифт, необходимо очистить соответствующие списки. Поиск описаний шрифтов по файлам долгая операция, и нарушается целостность файлов, поэтому можно удалить все файлы."
 	
@@ -154,8 +154,8 @@ fi
 #	USAGE=(
 #	"USAGE ???"
 #	"[sudo] $util [-<parameter> [<arguments>]]..."
-#	"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
-#	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run]"
+#	"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
+#	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
 #)
 #	USE_CASES=("USE_CASES ???")
 #	ARGUMENTS=(
