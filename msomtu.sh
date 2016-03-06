@@ -34,24 +34,21 @@ cmd_run=''			# switch to unlock commands
 
 # Definitions
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.9.6'
+version='2.9.7'
 util="${0##*/}"; util="${util%%-*}.sh"; util="${util%%.sh*}.sh"
 helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
 defapp='w e p o n'
-deflang='ru' # user locale/pref; english never deleted
-defproof='Russian' # user locale/pref; english never deleted
-
-WordPATH="Microsoft Word.app" # app-path hashtable -> bash4 :-(
+deflang='ru'       # user pref; english never deleted
+defproof='Russian' # user pref; english never deleted
+backupPATH=~/Desktop/MSOFonts/ # user pref
+basePATH="/Applications/"
+fontPATH="/Contents/Resources"
+prooftoolPATH="/Contents/SharedSupport/Proofing Tools"
+WordPATH="Microsoft Word.app" # declare -A msoapps -> bash4
 ExcelPATH="Microsoft Excel.app"
 PowerPointPATH="Microsoft PowerPoint.app"
 OutlookPATH="Microsoft Outlook.app"
 OneNotePATH="Microsoft OneNote.app"
-
-basePATH="/Applications/"
-proofingPATH="/Contents/SharedSupport/"
-proofingName="Proofing Tools"
-fontPATH="/Contents/Resources"
-backupPATH=~/"Desktop/MSOFonts/"
 
 ## Predefined fontsets definition block. You can change them here.
 ## in bash4 it would be a hashtable
@@ -61,7 +58,7 @@ backupPATH=~/"Desktop/MSOFonts/"
 sysfonts=("arial*" "ariblk*" "Baskerville*" "Book Antiqua*" "ComicSans*" "Cooper*" "Gill Sans*" "GillSans*" "pala*" "Trebuchet*" "verdana*" "MonotypeCors*")
  # OS X duplicates; in Fonts folder
 msoessential=("tahoma*" "Wingding*" "webding*")
- # chfonts - all kind of hieroglyphic/eastern fonts (in DFonts folder)
+ # chfonts - all kinds of hieroglyphic/eastern fonts (in DFonts folder)
 chfonts=("Fangsong*" "Deng*" "gulim*" "HGR*" "kaiti*" "malgun*" "Meiryo*" "mingliu*" "MSJH*" "msyh*" "SimHei*" "simsun*" "STH*" "STX*" "STZ*" "STL*" "taile*" "YuGoth*" "yumin*")
 noncyr=("Abadi*" "angsa*" "BellMT*" "Bauhaus93*" "BernardMT*" "Calisto MT*" "Braggadocio*" "Britannic*" "CalistoMT*" "ColonnaMT*" "COOPBL*" "CopperplateGothic*" "CurlzMT*" "Desdemona*" "EdwardianScriptITC*" "EngraversMT*" "Eurostile*" "FootlightMT*" "GloucesterMT*" "Goudy Old Style*" "Haettenschweiler*" "Harrington*" "ImprintMTShadow*" "KinoMT*" "Lucida Sans.*" "Lucida Sans Demibold*" "Lucida Sans Italic.*" "LucidaBright*" "LucidaBlackletter.*" "LucidaFax*" "LucidaCalligraphy*" "LucidaHandwriting*" "LucidaSansTypewrite*" "MaturaMTScriptCapitals*" "ModernNo.20*" "News Gothic MT*" "ntailu*" "Onyx*" "Perpetua*" "Rockwell*" "Stencil*" "Tw Cen*" "WideLatin*") # but some of non-cyr fonts may be useful
 symfonts=("Bookshelf Symbol*" "Marlett*" "MS Reference Specialty*" "MonotypeSorts*")
@@ -72,7 +69,7 @@ cyrfonts=("Calibri*" "Cambria*" "Century.*" "Corbel.*")
 dfontsets=(cyrdfonts noncyr chfonts sysfonts symfonts)
 fontsets=(cyrfonts msoessential)
 allfontsets=("${dfontsets[@]}" "${fontsets[@]}")
-fsdescriptor=( # for display-fontset function; good for hashtable
+fsdescriptor=( # for display-fontset function
 	"sysfonts|-|OS X duplicated fonts (in DFonts)"
 	"chfonts|chinese|All kind of hieroglyphic/eastern fonts (in DFonts)" # 2 replmnt in code
 	"noncyr|-|Non-cyrillic fonts (in DFonts)"
@@ -80,12 +77,13 @@ fsdescriptor=( # for display-fontset function; good for hashtable
 	"cyrfonts|-|Cyrillic original fonts (in Fonts)"
 	"symfonts|-|Symbolic fonts (in DFonts)"
 )
-# END all definitions
+# END Definitions region
 
 	
 function main () {
 	printb "$toolname. Version $version."
-
+	export starttime=$( perl -MTime::HiRes -e 'print int(1000 * Time::HiRes::gettimeofday)' )
+	
 	############ Simple input named parameter parser v2.2 [inline method]
 	local script_params="$#" prefix='cmd_' paramorder='' unknown=''
 	local PARGS=() INPUTPARAM=''
@@ -118,7 +116,7 @@ function main () {
 			*) [[ $INPUTPARAM ]] && unknown+=" $INPUTPARAM" ;;
 		esac
 		if [[ "$param" ]]; then
-			paramorder+=" $param"
+			paramorder+=" $param" # actual parameters
 			[[ "${#PARGS[@]}" > 0 ]] && 
 				eval $prefix$param='("${PARGS[@]}")' || 
 				eval $prefix$param=true
@@ -165,18 +163,18 @@ function main () {
 	
 	# solo operation list filter: backup, fontset, report, cache, help
 	param='backup fontset report cache help'
-	for i in $paramorder; do for s in $param; do # search for the last
-		[[ $s == $i ]] && m=$i
+	for i in $paramorder; do for s in $param; do
+		[[ $s == $i ]] && m=$i # search for the last actual param
 	done done
 	[[ $m ]] && [[ $m == "${paramorder##* }" || -z "$cmd" ]] && cmd=$m # priority
 	[[ $script_params -eq 0 ]] && cmd="help"
 	[[ -z "$cmd" ]] && 
-		{ echo "No valid parameters defined. Correct your command line parameters. See help."; exit 3; }
+		{ echo "No valid command defined. Correct your command line parameters. See help."; exit 3; }
 	
 	############ Operation selector
 	local c
 	cmd=$(unique "$cmd")
-	prepare-env	
+	prepare-AppPath	
 	echo
 	for c in $cmd; do
 		case $c in
@@ -213,9 +211,12 @@ function main () {
 		esac
 	done # END operation selector
 	echo
+	[[ $cmd_verb || $cmd_run ]] && {
+		runtime=$( perl -MTime::HiRes -e '$s=int(1000 * Time::HiRes::gettimeofday); $s-=$ENV{starttime}; $s-=80; if ($s > 1000) {$s/=1000} else {$s="0.$s"}; print $s' );
+		echo "Runtime: $runtime sec"; }
 } # END main
 
-function prepare-env () {
+function prepare-AppPath () {
 	local temp=$(unique "$cmd_app") appPATH i
 	cmd_app=()
 	for i in $temp; do # hashtable: bash4
@@ -263,7 +264,7 @@ function get-msoinfo () {
 	local appPATH wpath appVersion msbuild fs fc plist flist filter
 	
 	for appPATH in "${appPathArray[@]}"; do
-		printb "Processing '${appPATH/.app/}'"
+		printb "Application: ${appPATH/.app/}"
 		wpath="$basePATH$appPATH$fontPATH/DFonts"
 		appVersion=$(defaults read "$basePATH$appPATH$versionPATH" $versionKey)
 		msbuild=$(defaults read "$basePATH$appPATH$versionPATH" "MicrosoftBuildNumber")
@@ -271,7 +272,7 @@ function get-msoinfo () {
 		appfat=0; appfiles=0
 		##### fonts
 		if [[ -d "$wpath" ]]; then
-			fs=''; fs=$(du -sh -k "$wpath" | cut -f 1); let "appfat+=${fs}"
+			fs=$(du -sh -k "$wpath" | cut -f 1); let "appfat+=${fs}"
 			fs=$(normalize-number $fs)
 			fc=$(ls -A "$wpath" | wc -l) #fc=$(find "$wpath" -type f | wc -l)
 			let "appfiles+=${fc// }"
@@ -281,7 +282,7 @@ function get-msoinfo () {
 			cmd_font=''
 		fi
 		wpath="$basePATH$appPATH$fontPATH/Fonts"
-		fs=''; fs=$(du -sh "$wpath" | cut -f 1)
+		fs=$(du -sh "$wpath" | cut -f 1)
 		fc=$(ls -A "$wpath" | wc -l) 
 		fs=$(__separate-unit $fs);
 		printf "$fmt1" "Fonts" "${fc// }" "${fs}$sfx"
@@ -311,7 +312,7 @@ function get-msoinfo () {
 			printf "$fmt1" "Langpacks" "${fc// }" "${fs}$sfx"
 		fi
 		##### proofing tools
-		wpath="$basePATH$appPATH$proofingPATH$proofingName"
+		wpath="$basePATH$appPATH$prooftoolPATH"
 		filter=$( create-filter "proof" )
 		flist=$(find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter)
 		if [[ -z "$flist" ]]; then
@@ -377,7 +378,7 @@ function clean-application () {
 	
 	# - cleaning of proofing tools
 		[[ "$cmd_proof" ]] &&
-			clean-ptools "$basePATH$appPATH$proofingPATH$proofingName";
+			clean-ptools "$basePATH$appPATH$prooftoolPATH";
 		
 		appfat=$(normalize-number "$appfat" ns)
 		appdu+=("${appfat}	$basePATH$appPATH") # tab char between
@@ -386,7 +387,7 @@ function clean-application () {
 } # END cleanup wrapper
 
 function clean-font () {
-	local wpath="$1" fl=() name='' f m filter fc fs
+	local wpath="$1" fl=() name='' f m a filter fc fs
 	if [[ ! -d "$wpath" ]]; then
 		echo "  Folder 'DFonts' does not exist."
 		return
@@ -428,7 +429,7 @@ function clean-font () {
 		return
 	fi
 	
-	echo "  TRACE: remove fonts/folder '$wpath'."
+	echo "  TRACE: remove fonts/folder in '$wpath'."
 	[[ -z $cmd_verb ]] && return
 	if [[ "$cmd_font" == 'folder' ]]; then # folder alone
 		if [[ "$filter" == '' ]]; then
@@ -694,7 +695,7 @@ function show-helppage () {
 	)
 	NOTES=(
 		"NOTES"
-		"Safe scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. The script cannot make changes or harm your system without parameter '-run'."
+		"Safe Scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. The script cannot make changes or harm your system without parameter '-run'."
 		"As MSO is installed with root on '/Applications' directory you have to run this script with sudo to make changes."
 	
 		"As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder."
@@ -717,9 +718,9 @@ function show-helppage () {
 		"USASE"
 		"[sudo] $util [-<parameter> [<arguments>]]..."
 	
-		"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run]"
+		"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
 	
-		"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run]"
+		"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
 	)
 	USE_CASES=(
 		"USE CASES"
@@ -769,7 +770,7 @@ function show-helppage () {
 
 		"-fontset||Switch. Shows predefined fontsets."
 	
-		"-help||Switch. Shows the help page. There are two kinds of help page: short and full. The default is short one (no parameters). To get the full page use parameter '-help full'. Special argument 'en' forces english help page."
+		"-help||Switch. Shows the help page. Text language depends on your locale. There are two kinds of help page: short and full. The default is short one (no parameters). To get the full page use parameter '-help full'. Special argument 'en' forces english help page."
 	
 		"-inv||Switch. Inverts effect of the 'lang' and 'proof' filters, but defaults are reserved. For parameter '-font' it is to search for the new fonts."
 	
@@ -805,18 +806,18 @@ function show-helppage () {
 		"RELATED LINKS"
 		"- Inspiration idea of 'thinning'||https://github.com/goodbest/OfficeThinner"
 		"- On OS X & MSO fonts||http://www.jklstudios.com/misc/osxfonts.html"
-		"- The Project Github Repo||https://github.com/scriptingstudio/msomtu"
+		"- The project Github repo||https://github.com/scriptingstudio/msomtu"
 	)
 	
-	print-topic $opt   SYNOPSIS 0 4
-	print-topic $opt   DESCRIPTION 0 4
-	print-topic $opt   NOTES 0 6 '-'
-	print-topic full   USAGE 0 4 'lh'
-	print-topic $opt   USE_CASES -4 12 ':'
-	print-topic full   ARGUMENTS 4 20 ':'
-	print-topic full   PARAMETERS 4 20 ':'
-	print-topic $opt   EXAMPLES -4 -8 ':'
-	print-topic $opt   LINKS -4 12 ':'
+	print-topic $opt   SYNOPSIS     0 4
+	print-topic $opt   DESCRIPTION  0 4
+	print-topic $opt   NOTES        0 6 '-'
+	print-topic full   USAGE        0 4 'lh'
+	print-topic $opt   USE_CASES   -4 12 ':'
+	print-topic full   ARGUMENTS    4 20 ':'
+	print-topic full   PARAMETERS   4 20 ':'
+	print-topic $opt   EXAMPLES    -4 -8 ':'
+	print-topic $opt   LINKS       -4 12 ':'
 } # END help page
 
 function clean-cache () { echo; atsutil databases -remove; }
@@ -847,8 +848,11 @@ function show-appdu () { # final/assessment report
 					difpc="${dif#*|}"; dif="${dif%|*}"
 				fi
 				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='n/a'
+				###[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='<1'${dif:(-1)}
+				#if [[ $dif != 'n/a' && $difpc ]]; then
 					printf -v difpc ": %3s" "$difpc"
 					dif="$dif $difpc"
+				#fi
 				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2" "$dif"
 			fi
 		done
@@ -899,7 +903,7 @@ function create-filter () {
 	printf '%s%s%s' "$pre" "$search" "$sfx"
 } # END search filter
 
-##########  Common routines library
+##########  Common-purpose routines library
 function printb () { echo -e "\033[1m$1\033[0m"; }
 function printu () { echo -e "\033[4m$1\033[0m"; }
 function print-padding () {
