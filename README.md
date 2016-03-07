@@ -1,5 +1,5 @@
 # MSOMTU  
-***Msomtu*** is Microsoft Office for Mac Maintenance Utility. The solid fitness solution for your Office.
+***Msomtu*** is Microsoft Office for Mac Maintenance Utility—a solid fitness solution for your Office.
 
 ## Description
 Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container that's waisting gigabytes of your disk space and making MSO unmanageable. This script safely removes (thins) **optional parts** of the following components: 
