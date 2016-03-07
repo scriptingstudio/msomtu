@@ -1,5 +1,5 @@
 # MSOMTU  
-***Msomtu*** is Microsoft Office for Mac Maintenance Utility.
+***Msomtu*** is Microsoft Office for Mac Maintenance Utility. The solid fitness solution for your Office.
 
 ## Description
 Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container that's waisting gigabytes of your disk space and making MSO unmanageable. This script safely removes (thins) **optional parts** of the following components: 
@@ -13,7 +13,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * Microsoft Office 2016 for Mac 15.17 or later to work with fonts.
 
 ## Features
-* ***Safe Scripting*** technique—“Foolproof” or “Harmless Run”. The default running mode is view. You can think of it as **“what-if”** mode. The script cannot make changes or harm your system without parameter `-run`. It unlocks commands, it is also like protection from accidental click the ENTER.
+* ***Safe Scripting*** technique—“Foolproof” or “Harmless Run”. The default running mode is view. You can think of it as **“what-if”** mode. The script cannot make changes or harm your system without parameter `-run`. It unlocks commands.
 * **Analytical tools** and **proactive assessment**. You can explore the MSO app resources: fonts, languages of localization and proofing tools, disk size taken by the resources. You can evaluate your disk space taken by the MSO app components before thinning.
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
@@ -188,5 +188,5 @@ $ msomtu.sh -fontset
 ```
 
 ## Links
-* Inspiration idea of "thinning": [ @goodbest ](https://github.com/goodbest/OfficeThinner)
+* Inspiration idea of “thinning”: [ @goodbest ](https://github.com/goodbest/OfficeThinner)
 * More on OS X & MSO fonts: [Font Management in OS X, by Kurt Lang](http://www.jklstudios.com/misc/osxfonts.html)
