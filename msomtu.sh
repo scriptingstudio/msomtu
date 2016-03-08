@@ -25,21 +25,21 @@ cmd_cache=''		# command to clean font cache
 cmd_fontset=''		# command to view predefined fontsets
 cmd_checkupdate=''	# command to check new version
 cmd_help=''			# command to select help pages
-cmd_all=''			# switch to activate all commands
+cmd_all=''			# switch to force all commands
 cmd_verb=''			# switch to activate verbose mode
 cmd_inverse=''		# inverting search filter
 cmd_exclude=''		# exclusive font search filter
 cmd_run=''			# switch to unlock commands
 # END params
 
-# Definitions
+# Definitions: defaults and constants
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.9.7'
+version='2.9.8'
 util="${0##*/}"; util="${util%%-*}.sh"; util="${util%%.sh*}.sh"
 helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
 defapp='w e p o n'
-deflang='ru'       # user pref; english never deleted
-defproof='Russian' # user pref; english never deleted
+deflang='ru'       # user pref; + english never deleted
+defproof='Russian' # user pref; + english never deleted
 backupPATH=~/Desktop/MSOFonts/ # user pref
 basePATH="/Applications/"
 fontPATH="/Contents/Resources"
@@ -84,9 +84,9 @@ function main () {
 	printb "$toolname. Version $version."
 	export starttime=$( perl -MTime::HiRes -e 'print int(1000 * Time::HiRes::gettimeofday)' )
 	
-	############ Simple input named parameter parser v2.2 [inline method]
+	############ Simple input parameter parser v2.2 [inline method]
 	local script_params="$#" prefix='cmd_' paramorder='' unknown=''
-	local PARGS=() INPUTPARAM=''
+	local PARGS=() INPUTPARAM='' param cmd='' c
 	while [ "$#" != 0 ]; do
 		[[ "${1:0:1}" == "-" ]] && { INPUTPARAM="$1"; shift; }
 		PARGS=()
@@ -112,17 +112,16 @@ function main () {
 			-help|-h|-\?)     param="help" ;;
 			-all|-full)       param="all" ;;
 			-check)           param="checkupdate" ;;
-			--test) param="test" ;; # for testing
 			*) [[ $INPUTPARAM ]] && unknown+=" $INPUTPARAM" ;;
 		esac
 		if [[ "$param" ]]; then
 			paramorder+=" $param" # actual parameters
-			[[ "${#PARGS[@]}" > 0 ]] && 
+			[[ "${#PARGS[@]}" > 0 ]] && # output: paramvar = value of its arguments
 				eval $prefix$param='("${PARGS[@]}")' || 
 				eval $prefix$param=true
 		fi
 	done # END input parser
-	[[ "$unknown" ]] && { echo "ERROR: unknown parameter(s) '${unknown:1}'. See help."; exit 1; }
+	[[ "$unknown" ]] && { echo "ERROR: unknown parameter(s) '${unknown:1}' specified. See help."; exit 1; }
 
 	# default value parser
 	[[ "$cmd_run" && "$cmd_run" != true ]] && cmd_run=''
@@ -156,7 +155,6 @@ function main () {
 	fi
 	
 	# group operation list: "clean=(flist font proof lang) check all"
-	local cmd='' 
 	[[ "$cmd_lang" || "$cmd_proof" || "$cmd_font" ||
 		"$cmd_fontlist" == true || "$cmd_all" == true ]] && cmd+=" clean"
 	[[ "$cmd_checkupdate" == true ]] && cmd+=" checkupdate"
@@ -169,12 +167,11 @@ function main () {
 	[[ $m ]] && [[ $m == "${paramorder##* }" || -z "$cmd" ]] && cmd=$m # priority
 	[[ $script_params -eq 0 ]] && cmd="help"
 	[[ -z "$cmd" ]] && 
-		{ echo "No valid command defined. Correct your command line parameters. See help."; exit 3; }
+		{ echo "No valid command specified. Correct your command line parameters. See help."; exit 3; }
 	
 	############ Operation selector
-	local c
 	cmd=$(unique "$cmd")
-	prepare-AppPath	
+	create-AppPath	
 	echo
 	for c in $cmd; do
 		case $c in
@@ -216,7 +213,7 @@ function main () {
 		echo "Runtime: $runtime sec"; }
 } # END main
 
-function prepare-AppPath () {
+function create-AppPath () {
 	local temp=$(unique "$cmd_app") appPATH i
 	cmd_app=()
 	for i in $temp; do # hashtable: bash4
@@ -227,7 +224,7 @@ function prepare-AppPath () {
 		[[ $i == 'n' ]] && cmd_app+=("$OneNotePATH")
 	done
 	[[ ${#cmd_app[@]} -eq 0 ]] && 
-		{ echo "ERROR: Invalid app ID defined ['${temp[@]}']."; exit 1; }
+		{ echo "ERROR: Invalid app ID ['${temp[@]}'] specified."; exit 1; }
 
 	appInstalled=()
 	temp=("$WordPATH" "$ExcelPATH" "$PowerPointPATH" "$OutlookPATH" "$OneNotePATH")
@@ -363,15 +360,16 @@ function clean-application () {
 		wpath="$basePATH$appPATH$fontPATH"
 		if [[ $cmd_fontlist ]]; then
 			if [[ $cmd_run ]]; then
+				echo "Remove font-list files (.plist)"
 				find "$wpath" -type f -name font*.plist -d 1 -exec rm -f {} \;
 			else
-				echo "  TRACE: remove font-list files (.plist)."
+				echo "TRACE: remove font-list files (.plist)."
 				if [[ $cmd_verb ]]; then
 					fl=$(find "$wpath" -type f -name font*.plist -d 1 -exec basename {} \;)
 					[[ $cmd_verb != 'nl' ]] && echo "$fl"; update-counter "$fl" "$wpath"
 				fi
 			fi
-		fi # END plist (fontlist files)
+		fi # END fontlist files
 	
 	# - cleaning of lproj folders
 		[[ "$cmd_lang" ]] && clean-lang "$wpath";
@@ -409,6 +407,7 @@ function clean-font () {
 	done # fontset selector
 	filter=$(create-filter 'exclude')
 	if [[ $cmd_run ]]; then # action mode
+		echo "Remove fonts"
 		if [[ "$cmd_font" == 'folder' ]]; then # folder alone
 			if [[ "$filter" == '' ]]; then
 				rm -fdr "$wpath"
@@ -419,7 +418,7 @@ function clean-font () {
 			remove-duplicate "$wpath"
 		fi
 		for f in "${fl[@]}"; do # font lists
-			echo "Removing '$f'..."
+			echo " Removing '$f'..."
 			if [[ "$filter" != '' ]]; then
 				find -E "$wpath" -type f -iname "$f" -d 1 ! -iregex "$filter" -exec rm -f {} \;
 			else
@@ -429,7 +428,7 @@ function clean-font () {
 		return
 	fi
 	
-	echo "  TRACE: remove fonts/folder in '$wpath'."
+	echo "TRACE: remove fonts in '$wpath'."
 	[[ -z $cmd_verb ]] && return
 	if [[ "$cmd_font" == 'folder' ]]; then # folder alone
 		if [[ "$filter" == '' ]]; then
@@ -487,7 +486,7 @@ function find-newfont () {
 	local fsfiles='' allfiles=() list=''
 	local fc f i name fs newfont wpath="$1"
 	[[ ! $cmd_run ]] &&
-		echo -e "  TRACE: find and remove new fonts.\n"
+		echo -e "TRACE: find and remove new fonts.\n"
 	echo "Searching for new fonts..."
 	for i in ${dfontsets[@]}; do # expand fontsets
     	name=$i[@]
@@ -522,43 +521,40 @@ function find-newfont () {
 } # END new fonts
 
 function clean-lang () {
-	local wpath="$1" filter=$( create-filter "lang" )
+	local wpath="$1" filter=$( create-filter "lang" ) cmdrm msg
 	if [[ -z $cmd_inverse ]]; then
-		if [[ $cmd_run ]]; then
-			find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec rm -fdr {} \; ;
-		else # trace mode
-			cmd_lang=$(unique "en $cmd_lang") # english never deleted
-			echo "  TRACE: remove extra UI languages. Keep '$cmd_lang'."
-			[[ $cmd_verb ]] && __list-langrc 'lproj' "$wpath" "$filter"
-		fi
+		cmdrm='find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec rm -fdr {} \;'
+		cmd_lang=$(unique "en $cmd_lang") # english never deleted
+		msg="Remove optional UI languages. Keep '$cmd_lang'."
 	else # inverse filter
-		if [[ $cmd_run ]]; then
-			find -E "$wpath" -type d -d 1 -name *.lproj -iregex $filter -exec rm -fdr {} \; ;
-		else # trace mode
-			echo "  TRACE: remove extra UI languages - '$cmd_lang'."
-			[[ $cmd_verb ]] && __list-langrc 'lproj' "$wpath" "$filter"
-		fi
+		cmdrm='find -E "$wpath" -type d -d 1 -name *.lproj -iregex $filter -exec rm -fdr {} \;'
+		msg="Remove optional UI languages - '$cmd_lang'."
+	fi
+	if [[ $cmd_run ]]; then
+		echo "$msg"
+		eval '$cmdrm'
+	else
+		echo "TRACE: $msg"
+		[[ $cmd_verb ]] && __list-langrc 'lproj' "$wpath" "$filter"
 	fi
 } # END lang
 
 function clean-ptools () {
-	local wpath="$1"
-	local filter=$( create-filter "proof" )
+	local wpath="$1" filter=$( create-filter "proof" ) cmdrm msg
 	if [[ -z $cmd_inverse ]]; then
-		if [[ $cmd_run ]]; then
-			find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec rm -fdr {} \;
-		else # trace mode
-			cmd_proof=$(unique "english $cmd_proof") # english never deleted
-			echo "  TRACE: remove extra proofing tools. Keep '$cmd_proof'."
-			[[ $cmd_verb ]] && __list-langrc 'proofingtool' "$wpath" "$filter"
-		fi
+		cmdrm='find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec rm -fdr {} \;'
+		cmd_proof=$(unique "English $cmd_proof") # english never deleted
+		msg="Remove optional proofing tools. Keep '$cmd_proof'."
 	else # inverse filter
-		if [[ $cmd_run ]]; then
-			find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec rm -fdr {} \;
-		else # trace mode
-			echo "  TRACE: remove extra proofing tools - '$cmd_proof'."
-			[[ $cmd_verb ]] && __list-langrc 'proofingtool' "$wpath" "$filter"
-		fi
+		cmdrm='find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec rm -fdr {} \;'
+		msg="Remove optional proofing tools - '$cmd_proof'."
+	fi
+	if [[ $cmd_run ]]; then
+		echo "$msg"
+		eval '$cmdrm'
+	else
+		echo "TRACE: $msg";
+		[[ $cmd_verb ]] && __list-langrc 'proofingtool' "$wpath" "$filter";
 	fi
 } # END proofingtools
 
@@ -662,7 +658,7 @@ function show-helppage () {
 		[[ ${#array[@]} -lt 2 ]] && return
 		[[ "${array[0]}" ]] && echo -e "\033[1m"${array[0]}:"\033[0m"
 		for item in "${array[@]:1}"; do
-			[[ $item == '' ]] && continue
+			[[ -z $item ]] && continue
 			h2="${item%%||*}"; val="${item#*||}"
 			[[ "$h2" == "$val" ]] && h2=''
 			if [[ $pad1 -gt -1 && $pad2 -gt -1 ]]; then # type 1
@@ -687,20 +683,21 @@ function show-helppage () {
 
 	SYNOPSIS=(
 		"SYNOPSIS"
-		"MSOMTU is Microsoft Office Maintenance Utility."
+		"MSOMTU is Microsoft Office Maintenance Utility. The solid fitness solution for your Office."
 	)
 	DESCRIPTION=(
 		"DESCRIPTION"
-		"Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thins) extra parts of the following components: UI languages; proofing tools; fontlist files (.plist); OS X duplicated font files. It also can backup/copy font files to predefined and user defined destinations."
+		"Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in its own application container that's waisting gigabytes of your disk space. This script safely removes (thins) extra parts of the following components: UI languages; proofing tools; fontlist files (font*.plist); OS X duplicated font files. It also can backup/copy font files to predefined and user defined destinations."
 	)
 	NOTES=(
 		"NOTES"
-		"Safe Scripting technique - 'Foolproof' or 'Harmless Run'. The default running mode is view. The script cannot make changes or harm your system without parameter '-run'."
+		"Safe Scripting technique - \"Foolproof\" or \"Harmless Run\". The default running mode is view. You can think of it as \"what-if\" mode. The script cannot make changes or harm your system without parameter '-run'."
+		
 		"As MSO is installed with root on '/Applications' directory you have to run this script with sudo to make changes."
 	
 		"As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder."
 	
-		"If you remove fonts, remove font lists as well; see PARAMETERS. The 'DFonts' folder and font lists are safe to remove. No third party app can see MSO fonts installed to the 'DFonts' folder. Some of the fonts you may find useful, save them before deletion."
+		"If you remove fonts, remove font lists (font*.plist) as well; see PARAMETERS. The 'DFonts' folder and font lists are safe to remove. No third party app can see MSO fonts installed to the 'DFonts' and 'Fonts' folders. Some of the fonts you may find useful, save them before deletion."
 	
 		"Caution: do not remove fonts from the 'Fonts' folder! These are minimum needed for the MSO applications to work."
 	
@@ -718,7 +715,7 @@ function show-helppage () {
 		"USASE"
 		"[sudo] $util [-<parameter> [<arguments>]]..."
 	
-		"[sudo] $util [-backup|-fcopy [<destination>]] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
+		"[sudo] $util -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
 	
 		"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
 	)
@@ -764,7 +761,7 @@ function show-helppage () {
 	
 		"-ex||Exclusive filter <font_pattern>. Excludes font selection with parameter '-font'. Only mask can be used as 'font_pattern'."
 	
-		"-flist||Switch. Removes fontlist (.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult remove all of the .plist files. They all have to do with the fixed font lists you see in Office."
+		"-flist||Switch. Removes fontlist (font*.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult remove all of the .plist files. They all have to do with the fixed font lists you see in Office."
 	
 		"-font||Filter <font_pattern>. Removes selected fonts or the 'DFonts' folder. Available fontsets: cyrdfonts, noncyr, chinese, sysfonts. Parameter '-inv' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument 'library' alters searching in libraries for duplicates."
 
