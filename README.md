@@ -1,5 +1,5 @@
 # MSOMTU  
-***Msomtu*** is Microsoft Office for Mac Maintenance Utility—a solid fitness solution for your Office.
+***Msomtu*** is Microsoft Office for Mac Maintenance Utility—the integrated fitness solution for your Office.
 
 ## Description
 Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container that's waisting gigabytes of your disk space and making MSO unmanageable. This script safely removes (thins) **optional parts** of the following components: 
@@ -84,7 +84,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans up font cache. It does not depend on <code>-run</code>.</td></tr>
 <tr><td valign="top"><code>-check</code></td><td>Switch. Checks for new versions; opens the web-page in browser.</td></tr>
 <tr><td valign="top"><code>-ex</code></td> <td>Exclusive filter <code>font_pattern</code>. Excludes font selection with parameter <code>-font</code>. Only mask can be used as <code>font_pattern</code>.</td></tr>
-<tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (font*.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult remove all of the .plist files. They all have to do with the fixed font lists you see in Office.</td></tr>
+<tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (font*.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult, remove all of the .plist files. They all have to do with the fixed font lists you see in Office.</td></tr>
 <tr><td valign="top"><code>-font</code></td> <td>Filter <code>font_pattern</code>. Removes selected fonts or the <code>DFonts</code> folder. Available fontsets: <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>. Parameter <code>-inv</code> ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument <code>library</code> alters searching in libraries for duplicates. </td></tr>
 <tr><td nowrap valign="top"><code>-fontset</code></td> <td>Switch. Shows predefined fontsets.</td></tr>
 <tr><td valign="top"><code>-help</code></td> <td>Switch. Shows the help page. Text language depends on your locale. There are two kinds of help page: short and full. The default is short one (no parameters). To get the full page use parameter <code>-help full</code>. Special argument <code>en</code> forces english help page.</td></tr>
