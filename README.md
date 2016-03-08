@@ -7,7 +7,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * UI languages; 
 * Proofing tools; 
 * OS X duplicated font files;
-* Fontlist files.
+* Fontlist files (font*.plist).
 
 ## Requirements
 * Microsoft Office 2016 for Mac 15.17 or later to work with fonts.
@@ -27,7 +27,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 ## Notes
 * As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
 * As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the `Fonts` folder within each app. The rest are in the `DFonts` folder.
-* If you remove fonts, remove font lists as well; see PARAMETERS. The `DFonts` folder and font lists are safe to remove. No third party app can see MSO fonts installed to the `DFonts` folder. Some of the fonts you may find useful, save them before deletion.
+* If you remove fonts, remove font lists (font*.plist) as well; see PARAMETERS. The `DFonts` folder and font lists are safe to remove. No third party app can see MSO fonts installed to the `DFonts` and `Fonts` folders. Some of the fonts you may find useful, save them before deletion.
 * **Caution**: do not remove fonts from the `Fonts` folder! These are minimum needed for the MSO applications to work.
 * File operations are case insensitive.
 * Apply thinning after every MSO update.
@@ -84,7 +84,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans up font cache. It does not depend on <code>-run</code>.</td></tr>
 <tr><td valign="top"><code>-check</code></td><td>Switch. Checks for new versions; opens the web-page in browser.</td></tr>
 <tr><td valign="top"><code>-ex</code></td> <td>Exclusive filter <code>font_pattern</code>. Excludes font selection with parameter <code>-font</code>. Only mask can be used as <code>font_pattern</code>.</td></tr>
-<tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult remove all of the .plist files. They all have to do with the fixed font lists you see in Office.</td></tr>
+<tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (font*.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult remove all of the .plist files. They all have to do with the fixed font lists you see in Office.</td></tr>
 <tr><td valign="top"><code>-font</code></td> <td>Filter <code>font_pattern</code>. Removes selected fonts or the <code>DFonts</code> folder. Available fontsets: <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>. Parameter <code>-inv</code> ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument <code>library</code> alters searching in libraries for duplicates. </td></tr>
 <tr><td nowrap valign="top"><code>-fontset</code></td> <td>Switch. Shows predefined fontsets.</td></tr>
 <tr><td valign="top"><code>-help</code></td> <td>Switch. Shows the help page. Text language depends on your locale. There are two kinds of help page: short and full. The default is short one (no parameters). To get the full page use parameter <code>-help full</code>. Special argument <code>en</code> forces english help page.</td></tr>
