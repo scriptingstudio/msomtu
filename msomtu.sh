@@ -34,10 +34,11 @@ cmd_run=''			# switch to unlock commands
 
 # Definitions: defaults and constants
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.9.8'
+version='2.9.9'
 util="${0##*/}"; util="${util%%-*}.sh"; util="${util%%.sh*}.sh"
 helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
 defapp='w e p o n'
+	# Dependencies: create-filter(), clean-lang(), clean-proof()
 deflang='ru'       # user pref; + english never deleted
 defproof='Russian' # user pref; + english never deleted
 backupPATH=~/Desktop/MSOFonts/ # user pref
@@ -132,7 +133,8 @@ function main () {
 	if [[ $cmd_all == true ]]; then
 		cmd_proof=${cmd_proof:=true}
 		cmd_lang=${cmd_lang:=true}
-		cmd_font=${cmd_font:=true}; 
+		cmd_font=${cmd_font:=true} 
+		cmd_cache=${cmd_cache:=true}
 		cmd_fontlist=true
 	elif [[ "$cmd_all" ]]; then
 		cmd_all=''
@@ -154,13 +156,14 @@ function main () {
 		cmd_font=$(unique "$cmd_font")
 	fi
 	
-	# group operation list: "clean=(flist font proof lang) check all"
+	# group operation list: "clean=(flist font proof lang) check all cache"
 	[[ "$cmd_lang" || "$cmd_proof" || "$cmd_font" ||
 		"$cmd_fontlist" == true || "$cmd_all" == true ]] && cmd+=" clean"
 	[[ "$cmd_checkupdate" == true ]] && cmd+=" checkupdate"
+	[[ "$cmd_cache" ]] && cmd+=" cache"
 	
 	# solo operation list filter: backup, fontset, report, cache, help
-	param='backup fontset report cache help'
+	param='backup fontset report help' # cache?
 	for i in $paramorder; do for s in $param; do
 		[[ $s == $i ]] && m=$i # search for the last actual param
 	done done
@@ -338,6 +341,7 @@ function get-msoinfo () {
 function clean-application () {
 	__list-langrc () { # for clean-lang, clean-ptools
 		local fs name="$1" wpath="$2" filter="$3"
+		[[ -z $cmd_verb ]] && return
 		if [[ -z $cmd_inverse ]]; then
 			[[ "$name" == 'lproj' ]] &&
 			fs=$( find -E "$wpath" -type d -d 1 -name "*.$name" ! -iregex $filter -exec basename {} \; ) ||
@@ -489,8 +493,7 @@ function find-newfont () {
 		echo -e "TRACE: find and remove new fonts.\n"
 	echo "Searching for new fonts..."
 	for i in ${dfontsets[@]}; do # expand fontsets
-    	name=$i[@]
-		fs=("${!name}")
+    	name=$i[@]; fs=("${!name}")
 		for f in "${fs[@]}"; do
 			list=$(find "$wpath" -type f -d 1 -iname "$f" -exec basename {} \;)
 			[[ "$list" != '' ]] && fsfiles+=$'\n'"$list"
@@ -535,7 +538,7 @@ function clean-lang () {
 		eval '$cmdrm'
 	else
 		echo "TRACE: $msg"
-		[[ $cmd_verb ]] && __list-langrc 'lproj' "$wpath" "$filter"
+		__list-langrc 'lproj' "$wpath" "$filter"
 	fi
 } # END lang
 
@@ -553,8 +556,8 @@ function clean-ptools () {
 		echo "$msg"
 		eval '$cmdrm'
 	else
-		echo "TRACE: $msg";
-		[[ $cmd_verb ]] && __list-langrc 'proofingtool' "$wpath" "$filter";
+		echo "TRACE: $msg"
+		__list-langrc 'proofingtool' "$wpath" "$filter"
 	fi
 } # END proofingtools
 
@@ -578,15 +581,15 @@ function invoke-backup () { # for fonts only
 		return -1
 	fi
 	
+	printb "Backup fonts from '$appPathArray'"
+	local ffolder="DFonts" f i m a name fl fc=0 c
 	local bsrc="$basePATH$appPathArray$fontPATH" bset=()
 	local bdest="${cmd_backup}"
-	local ffolder="DFonts" f i m a name fl fc=0 c
-	printb "Backup fonts of '$appPathArray'"
-	if [[ "$bdest" == 'syslib' ]]; then
-		bdest="/Libraries/Fonts/"
-	elif [[ "$bdest" == 'userlib' ]]; then
-		bdest=~/Libraries/Fonts/
-	fi
+	case "$bdest" in
+		"$backupPATH") f="${appPathArray/.app/}"; bdest="$bdest${f#* }/" ;;
+		syslib) bdest="/Libraries/Fonts/" ;;
+		userlib) bdest=~/Libraries/Fonts/ ;;
+	esac
 	if [[ ! -d "$bdest" ]]; then
 		if [[ $cmd_run ]]; then
 			mkdir -p "$bdest"
@@ -622,15 +625,15 @@ function invoke-backup () { # for fonts only
 			let "fc+=$c"
 		done
 		echo "-----------"
-		echo "Total files : ${fc// }."
-		echo "Destination : '$bdest'."
+		echo "Total files  : ${fc// }"
+		echo "Destination  : '$bdest'"
 		if [[ $error -ne 0 ]]; then
 			echo "Error ($error) in copying."
 		else
 			echo "Done. Files copied : $fc. If 0 copied check fontsets (see help)."
 		fi
 	else # trace mode
-		echo "TRACE: source folder : '$bsrc'."
+		echo "TRACE: source folder : '$bsrc'"
 		for i in "${bset[@]}"; do
 			fl=$(find "$bsrc" -type f -iname "$i" -d 1 -exec basename {} \;)
 			[[ "${fl// }" == '' ]] && continue
@@ -639,8 +642,8 @@ function invoke-backup () { # for fonts only
 			[[ $cmd_verb ]] && echo "$fl"
 		done
 		echo "-----------"
-		echo "Total files : ${fc// }."
-		echo "Destination : '$bdest'."
+		echo "Total files  : ${fc// }"
+		echo "Destination  : '$bdest'"
 		[[ ! -d "$bdest" ]] &&
 			echo "TRACE: cannot access '$bdest'."
 	fi
@@ -648,7 +651,7 @@ function invoke-backup () { # for fonts only
 
 function show-helppage () {
 	print-topic () {
-	# $1 - opt-flag/data; $2 - pad1; $3 - pad2; $4 - lineheight/delim
+	# $1 - opt-flag; $2 - data; $3 - pad1; $4 - pad2; $5 - lineheight/delim
 		[[ $1 == 'full' ]] && shift || return
 		local name=$1[@]; local array=("${!name}")
 		local pad1=$2 pad2=$3 item h2 val delim lh
@@ -683,7 +686,7 @@ function show-helppage () {
 
 	SYNOPSIS=(
 		"SYNOPSIS"
-		"MSOMTU is Microsoft Office Maintenance Utility. The solid fitness solution for your Office."
+		"MSOMTU is Microsoft Office Maintenance Utility. The integrated fitness solution for your Office."
 	)
 	DESCRIPTION=(
 		"DESCRIPTION"
@@ -717,7 +720,7 @@ function show-helppage () {
 	
 		"[sudo] $util -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
 	
-		"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
+		"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc [u|user]] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
 	)
 	USE_CASES=(
 		"USE CASES"
@@ -756,12 +759,13 @@ function show-helppage () {
 	
 		"-backup||Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup alternates all deletions to backup."
 	
-		"-cache||Switch. Cleans up font cache."
+		"-cache||Switch. Cleans up font cache (the system and the current user). The argument 'user' indicates to clean cache for the current user only. It does not depend on '-run'."
+		
 		"-check||Switch. Checks for new versions; opens the web-page in browser."
 	
 		"-ex||Exclusive filter <font_pattern>. Excludes font selection with parameter '-font'. Only mask can be used as 'font_pattern'."
 	
-		"-flist||Switch. Removes fontlist (font*.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult remove all of the .plist files. They all have to do with the fixed font lists you see in Office."
+		"-flist||Switch. Removes fontlist (font*.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult, remove all of the .plist files. They all have to do with the fixed font lists you see in Office."
 	
 		"-font||Filter <font_pattern>. Removes selected fonts or the 'DFonts' folder. Available fontsets: cyrdfonts, noncyr, chinese, sysfonts. Parameter '-inv' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument 'library' alters searching in libraries for duplicates."
 
@@ -817,7 +821,11 @@ function show-helppage () {
 	print-topic $opt   LINKS       -4 12 ':'
 } # END help page
 
-function clean-cache () { echo; atsutil databases -remove; }
+function clean-cache () { 
+	echo -e "\nCleaning cache..."
+	[[ $cmd_cache == 'u' || $cmd_cache == 'user' ]] && 
+		atsutil databases -removeUser || atsutil databases -remove
+} # END cache
 
 function show-appdu () { # final/assessment report
 	[[ ! $cmd_run && -z $cmd_verb ]] && return
@@ -890,8 +898,7 @@ function create-filter () {
 		done
 		[[ ${search:0:1} == '|' ]] && search="${search:1}"
 		[[ "$search" ]] &&
-			printf '%s%s%s' ".+/(" $search ")\..+" ||
-			echo ''
+			printf '%s%s%s' ".+/(" $search ")\..+" || echo ''
 		return
 	fi
 	[[ $cmd_inverse ]] && pre=".+/("
