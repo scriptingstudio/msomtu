@@ -21,7 +21,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * **Font backup**. You can backup your fonts to predefined and user defined destinations before deletion.
 * Copy or move fonts to the font libraries.
 * Flexible search filters.
-* Multilanguage help. Currently english and russian. Non-english help pages are in the separate module. You can extend help with your language by the template in the module.
+* Multi-language help. Currently english and russian. Non-english help pages are in the separate module. You can extend help with your language by the template in the module.
 * New version checker.
 
 ## Notes
@@ -41,29 +41,29 @@ $ [sudo] msomtu.sh [-<parameter> [<arguments>]]...
 
 $ [sudo] msomtu.sh -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]
 
-$ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]
+$ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc [u|user]] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]
 ```
 
 #### Use Cases
-**Solo actions:** `-report`, `-fontset`, `-backup`, `-cache`, `-help`.
+**Solo actions:** `-report`, `-fontset`, `-backup`, `-help`.
 
-**Group actions:** `-font`, `-lang`, `-proof`, `-flist`, `-check`, `-all`.
+**Group actions:** `-font`, `-lang`, `-proof`, `-flist`, `-cache`, `-check`, `-all`.
 
 | Action  | Parameter |
 |:--------|:----------|
 | Getting MSO info | `-report` |
-| Getting proactive assessment of thinning (view mode) <br/><br/> | Fonts: `-font -verbose nl` <br/>UI langs: `-lang -verbose nl` <br/>Proofingtools: `-proof -verbose nl` <br/>Fontlists: `-flist -verbose nl` |
-| Listing/Removing UI languages | `-lang` |
-| Listing/Removing proofingtools | `-proof` |
+| Getting proactive assessment <br/>of thinning (view mode) <br/><br/> | Fonts: `-font -verbose nl` <br/>UI langs: `-lang -verbose nl` <br/>Proofingtools: `-proof -verbose nl` <br/>Fontlists: `-flist -verbose nl` |
+| Listing/Removing UI languages    | `-lang` |
+| Listing/Removing proofingtools   | `-proof` |
 | Listing/Removing fonts | `-font` |
 | Listing/Removing font duplicates | `-font lib` |
 | Listing/Removing font list files | `-flist` |
-| Listing fontsets | `-fontset` |
-| Clearing font cache | `-cache` |
-| Finding new fonts | `-font -inv` |
-| Backing up fonts | `-backup -font` |
+| Listing fontsets     | `-fontset` |
+| Clearing font cache  | `-cache` |
+| Finding new fonts    | `-font -inv` |
+| Backing up fonts     | `-backup -font` |
 | Copying fonts to font libraries | `-backup -font` |
-| Checking for new versions | `-check` |
+| Checking for new versions       | `-check` |
 | Getting help | Short page: no parameters <br/>Full page: `-help full` <br/>Force english page: `-help en` |
 
 ## Arguments
@@ -81,7 +81,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 <tr><td valign="top"><code>-all</code></td> <td>Switch. Activates all cleaning options: <code>lang</code>, <code>proof</code>, <code>font</code>, <code>flist</code>, <code>cache</code>. It does not affect the parameter <code>-app</code>.</td></tr>
 <tr><td valign="top"><code>-app</code></td> <td>Filter <code>app_list</code>. Selects application to process.</td></tr>
 <tr><td valign="top"><code>-backup</code></td> <td>Backs up fonts to user defined destination. If destination folder does not exist it will be created. You can use system and user libraries as destination, see ARGUMENTS. Backup command alternates all deletions to backup.</td></tr>
-<tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans up font cache. It does not depend on <code>-run</code>.</td></tr>
+<tr><td valign="top"><code>-cache</code></td> <td>Switch. Cleans up font cache (the system and the current user). The argument <code>user</code> indicates to clean cache for the current user only. It does not depend on <code>-run</code>.</td></tr>
 <tr><td valign="top"><code>-check</code></td><td>Switch. Checks for new versions; opens the web-page in browser.</td></tr>
 <tr><td valign="top"><code>-ex</code></td> <td>Exclusive filter <code>font_pattern</code>. Excludes font selection with parameter <code>-font</code>. Only mask can be used as <code>font_pattern</code>.</td></tr>
 <tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (font*.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult, remove all of the .plist files. They all have to do with the fixed font lists you see in Office.</td></tr>
