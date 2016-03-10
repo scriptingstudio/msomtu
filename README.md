@@ -166,7 +166,10 @@ $ sudo msomtu.sh -font *.* -ex "brit* rockwell*" -app w -run
 Clean font cache:
 
 ```sh
+# system and user cache
 $ sudo msomtu.sh -cache
+# current user cache
+$ msomtu.sh -cache u
 ```
 
 Backup fonts to default destination:
