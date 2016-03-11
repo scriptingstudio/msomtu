@@ -34,7 +34,7 @@ cmd_run=''			# switch to unlock commands
 
 # Definitions: defaults and constants
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.9.10'
+version='2.9.11'
 util="${0##*/}"; util="${util%%-*}.sh"; util="${util%%.sh*}.sh"
 helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
 defapp='w e p o n'
@@ -70,7 +70,7 @@ cyrfonts=("Calibri*" "Cambria*" "Century.*" "Corbel.*")
 dfontsets=(cyrdfonts noncyr chfonts sysfonts symfonts)
 fontsets=(cyrfonts msoessential)
 allfontsets=("${dfontsets[@]}" "${fontsets[@]}")
-fsdescriptor=( # for display-fontset function
+fsdescriptor=( # for display-fontset()
 	"sysfonts|-|OS X duplicated fonts (in DFonts)"
 	"chfonts|chinese|All kind of hieroglyphic/eastern fonts (in DFonts)" # 2 replmnt in code
 	"noncyr|-|Non-cyrillic fonts (in DFonts)"
@@ -88,6 +88,7 @@ function main () {
 	############ Simple input parameter parser v2.2 [inline method]
 	local script_params="$#" prefix='cmd_' paramorder='' unknown=''
 	local PARGS=() INPUTPARAM='' param cmd='' c
+	runus=''
 	while [ "$#" != 0 ]; do
 		[[ "${1:0:1}" == "-" ]] && { INPUTPARAM="$1"; shift; }
 		PARGS=()
@@ -282,7 +283,7 @@ function get-msoinfo () {
 		wpath="$basePATH$appPATH$fontPATH/Fonts"
 		fs=$(du -sh "$wpath" | cut -f 1)
 		fc=$(ls -A "$wpath" | wc -l) 
-		fs=$(__separate-unit $fs);
+		fs=$(__separate-unit $fs)
 		printf "$fmt1" "Fonts" "${fc// }" "${fs}$sfx"
 		##### fontlists
 		wpath="$basePATH$appPATH$fontPATH"
@@ -321,6 +322,12 @@ function get-msoinfo () {
 			fc=$(echo "$flist" | wc -l); let "appfiles+=${fc// }"
 			printf "$fmt1" "Proofingtools" "${fc// }" "${fs}$sfx"
 		fi
+		##### frameworks
+		wpath="$basePATH$appPATH/Contents/Frameworks"
+		fs=$(du -sh "$wpath" | cut -f 1)
+		fc=$(ls -A "$wpath" | wc -l) 
+		fs=$(__separate-unit $fs)
+		printf "$fmt1" "Frameworks" "${fc// }" "${fs}$sfx"
 		##### total disk usage
 		fs=$(du -sh "$basePATH$appPATH" | cut -f 1)
 		fc=$(ls -AR "$basePATH$appPATH" | wc -l)
@@ -363,7 +370,7 @@ function clean-application () {
 		if [[ $cmd_fontlist ]]; then
 			if [[ $cmd_run ]]; then
 				echo "Remove font-list files (.plist)"
-				find "$wpath" -type f -name font*.plist -d 1 -exec rm -f {} \;
+				sudo find "$wpath" -type f -name font*.plist -d 1 -exec rm -f {} \;
 			else
 				echo "TRACE: remove font-list files (.plist)."
 				if [[ $cmd_verb ]]; then
@@ -412,9 +419,9 @@ function clean-font () {
 		echo "Remove fonts"
 		if [[ "$cmd_font" == 'folder' ]]; then # folder alone
 			if [[ "$filter" == '' ]]; then
-				rm -fdr "$wpath"
+				sudo rm -fdr "$wpath"
 			else
-				find -E "$wpath" -type f -d 1 ! -iregex "$filter" -exec rm -f {} \;
+				sudo find -E "$wpath" -type f -d 1 ! -iregex "$filter" -exec rm -f {} \;
 			fi
 		elif [[ "$cmd_font" == lib* ]]; then 
 			remove-duplicate "$wpath"
@@ -422,9 +429,9 @@ function clean-font () {
 		for f in "${fl[@]}"; do # font lists
 			echo " Removing '$f'..."
 			if [[ "$filter" != '' ]]; then
-				find -E "$wpath" -type f -iname "$f" -d 1 ! -iregex "$filter" -exec rm -f {} \;
+				sudo find -E "$wpath" -type f -iname "$f" -d 1 ! -iregex "$filter" -exec rm -f {} \;
 			else
-				find "$wpath" -type f -iname "$f" -d 1 -exec rm -f {} \; 
+				sudo find "$wpath" -type f -iname "$f" -d 1 -exec rm -f {} \; 
 			fi
 		done
 		return
@@ -467,7 +474,7 @@ function remove-duplicate () { # fonts
 			echo "------------------------------"
 			echo "$dup" | xargs -I{} echo "- {}" 
 		else
-			echo "$dup" | xargs -I{} rm -f "$wpath/{}" 
+			sudo echo "$dup" | xargs -I{} rm -f "$wpath/{}" 
 		fi
 	} # ENDBLOCK deduplication
 	local wpath="$1"
@@ -516,7 +523,7 @@ function find-newfont () {
 	else
 		for f in "${newfont[@]}"; do # remove or someth else ???
 			echo "Removing '$f'..."
-			#find "$wpath" -type f -d 1 -name "$f" -exec rm -f {} \;
+			#sudo find "$wpath" -type f -d 1 -name "$f" -exec rm -f {} \;
 		done
 	fi
 } # END new fonts
@@ -533,7 +540,7 @@ function clean-lang () {
 	fi
 	if [[ $cmd_run ]]; then
 		echo "$msg"
-		eval '$cmdrm'
+		sudo eval '$cmdrm'
 	else
 		echo "TRACE: $msg"
 		__list-langrc 'lproj' "$wpath" "$filter"
@@ -552,7 +559,7 @@ function clean-ptools () {
 	fi
 	if [[ $cmd_run ]]; then
 		echo "$msg"
-		eval '$cmdrm'
+		sudo eval '$cmdrm'
 	else
 		echo "TRACE: $msg"
 		__list-langrc 'proofingtool' "$wpath" "$filter"
@@ -580,13 +587,13 @@ function invoke-backup () { # for fonts only
 	fi
 	
 	printb "Backup fonts from '$appPathArray'"
-	local ffolder="DFonts" f i m a name fl fc=0 c
+	local ffolder="DFonts" f i m a name fl fc=0 c runsu='sudo'
 	local bsrc="$basePATH$appPathArray$fontPATH" bset=()
 	local bdest="${cmd_backup}"
 	case "$bdest" in
 		"$backupPATH") f="${appPathArray/.app/}"; bdest="$bdest${f#* }/" ;;
 		syslib) bdest="/Libraries/Fonts/" ;;
-		userlib) bdest=~/Libraries/Fonts/ ;;
+		userlib) bdest=~/Libraries/Fonts/; runsu='' ;;
 	esac
 	if [[ ! -d "$bdest" ]]; then
 		if [[ $cmd_run ]]; then
@@ -617,7 +624,7 @@ function invoke-backup () { # for fonts only
 		for i in "${bset[@]}"; do
 			fl=$(find "$bsrc" -type f -iname "$i" -d 1)
 			[[ "${fl// }" == '' ]] && continue
-			echo "$fl" | xargs -I{} cp -f "{}" "$bdest"/
+			sudo echo "$fl" | xargs -I{} cp -f "{}" "$bdest"/
 			error=$?
 			c=$(echo "$fl" | wc -l); [[ "$fl" == '' ]] && c=0;
 			let "fc+=$c"
@@ -694,7 +701,7 @@ function show-helppage () {
 		"NOTES"
 		"Safe Scripting technique - \"Foolproof\" or \"Harmless Run\". The default running mode is view. You can think of it as \"what-if\" mode. The script cannot make changes or harm your system without parameter '-run'."
 		
-		"As MSO is installed with root on '/Applications' directory you have to run this script with sudo to make changes."
+		"As MSO is installed with root on '/Applications' directory you will be asked for an administrative account's password to make changes."
 	
 		"As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the 'Fonts' folder within each app. The rest are in the 'DFonts' folder."
 	
@@ -714,11 +721,11 @@ function show-helppage () {
 	)
 	USAGE=(
 		"USASE"
-		"[sudo] $util [-<parameter> [<arguments>]]..."
+		"$util [-<parameter> [<arguments>]]..."
 	
-		"[sudo] $util -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
+		"$util -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
 	
-		"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc [u|user]] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
+		"$util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc [u|user]] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
 	)
 	USE_CASES=(
 		"USE CASES"
@@ -786,24 +793,24 @@ function show-helppage () {
 	EXAMPLES=(
 		"EXAMPLES"
 		"Get app statistics||$util -report"
-		"Thin all apps with all parameters||sudo $util -all -run"
+		"Thin all apps with all parameters||$util -all -run"
 		"Show app ('w e' for Word and Excel) language files installed||$util -app \"w e\" -lang -verbose"
-		"Remove a number of languages||sudo $util -lang \"nl no de\" -inv -run"
-		"Remove all proofing tools except defaults for Word||sudo $util -proof -app w -run"
-		"Remove a number of proofing tools||sudo $util -proof \"Indonesian Isix*\" -inv -run"
+		"Remove a number of languages||$util -lang \"nl no de\" -inv -run"
+		"Remove all proofing tools except defaults for Word||$util -proof -app w -run"
+		"Remove a number of proofing tools||$util -proof \"Indonesian Isix*\" -inv -run"
 		"Show duplicates of library fonts for Word||$util -font lib -app w -verbose"
-		"Remove duplicated fonts in libraries for Word||sudo $util -font lib -app w -run"
-		"Remove 'chinese' and Arial fonts||sudo $util -font \"chinese arial*\" -run"
+		"Remove duplicated fonts in libraries for Word||$util -font lib -app w -run"
+		"Remove 'chinese' and Arial fonts||$util -font \"chinese arial*\" -run"
 		"Show new fonts for Outlook||$util -font -inv -app o"
-		"Exclude a few useful fonts from deletion for Word||sudo $util -font *.* -ex \"brit* rockwell*\" -app w -run"
-		"Clean font cache||sudo $util -cache"
+		"Exclude a few useful fonts from deletion for Word||$util -font *.* -ex \"brit* rockwell*\" -app w -run"
+		"Clean font cache||$util -cache"
 		"Backup fonts to default destination||$util -backup -font \"cyrdfonts britanic*\" -run"
-		"Copy original cyrillic fonts to system library||sudo $util -backup syslib -font cyrdfonts -run"
+		"Copy original cyrillic fonts to system library||$util -backup syslib -font cyrdfonts -run"
 		"Show predefined fontsets||$util -fontset"
 	)
 	LINKS=(
 		"RELATED LINKS"
-		"- Inspiration idea of 'thinning'||https://github.com/goodbest/OfficeThinner"
+		"- Inspirational idea of 'thinning'||https://github.com/goodbest/OfficeThinner"
 		"- On OS X & MSO fonts||http://www.jklstudios.com/misc/osxfonts.html"
 		"- The project Github repo||https://github.com/scriptingstudio/msomtu"
 	)
@@ -822,7 +829,7 @@ function show-helppage () {
 function clean-cache () { 
 	echo -e "\nCleaning cache..."
 	[[ $cmd_cache == 'u' || $cmd_cache == 'user' ]] && 
-		atsutil databases -removeUser || atsutil databases -remove
+		atsutil databases -removeUser || sudo atsutil databases -remove
 } # END cache
 
 function show-appdu () { # final/assessment report
@@ -851,8 +858,11 @@ function show-appdu () { # final/assessment report
 					difpc="${dif#*|}"; dif="${dif%|*}"
 				fi
 				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='n/a'
+				###[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='<1'${dif:(-1)}
+				#if [[ $dif != 'n/a' && $difpc ]]; then
 					printf -v difpc ": %3s" "$difpc"
 					dif="$dif $difpc"
+				#fi
 				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2" "$dif"
 			fi
 		done
