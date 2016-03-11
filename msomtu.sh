@@ -34,13 +34,14 @@ cmd_run=''			# switch to unlock commands
 
 # Definitions: defaults and constants
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.9.9'
+version='2.9.10'
 util="${0##*/}"; util="${util%%-*}.sh"; util="${util%%.sh*}.sh"
 helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
 defapp='w e p o n'
-	# Dependencies: create-filter(), clean-lang(), clean-proof()
-deflang='ru'       # user pref; + english never deleted
-defproof='Russian' # user pref; + english never deleted
+	# lang dependencies: main(), create-filter(), clean-lang(), clean-proof()
+deflang='ru'       # user pref;
+defproof='Russian' # user pref;
+reservedlang=('en' 'English')  # english never deleted
 backupPATH=~/Desktop/MSOFonts/ # user pref
 basePATH="/Applications/"
 fontPATH="/Contents/Resources"
@@ -52,7 +53,6 @@ OutlookPATH="Microsoft Outlook.app"
 OneNotePATH="Microsoft OneNote.app"
 
 ## Predefined fontsets definition block. You can change them here.
-## in bash4 it would be a hashtable
  # os x duplicates; in  DFonts folder.
  # exclusion: Microsoft no longer provides cyrillic MonotypeCorsiva, so
  # I included it here for deletion (Ive got it cyrillic in the lib).
@@ -131,23 +131,23 @@ function main () {
 	[[ "$cmd_backup" == true ]] && cmd_backup="$backupPATH"
 	[[ "$cmd_app" == true || -z "$cmd_app" ]] && cmd_app="$defapp"
 	if [[ $cmd_all == true ]]; then
+		cmd_cache=${cmd_cache:=true}
 		cmd_proof=${cmd_proof:=true}
 		cmd_lang=${cmd_lang:=true}
 		cmd_font=${cmd_font:=true} 
-		cmd_cache=${cmd_cache:=true}
 		cmd_fontlist=true
-	elif [[ "$cmd_all" ]]; then
+	elif [[ $cmd_all ]]; then
 		cmd_all=''
 	fi
-	if [[ "$cmd_lang" == true ]]; then 
-		cmd_lang="$deflang"
+	if [[ "$cmd_lang" == true ]]; then  # default langs come here
+		[[ $deflang ]] && cmd_lang="$deflang" || cmd_lang=$reservedlang
 	elif [[ "$cmd_lang" ]]; then
-		cmd_lang=$(unique "$deflang $cmd_lang") # default langs come here
+		cmd_lang=$(unique "$deflang $cmd_lang")
 	fi
-	if [[ "$cmd_proof" == true ]]; then 
-		cmd_proof="$defproof"
+	if [[ "$cmd_proof" == true ]]; then  # default langs come here
+		[[ $defproof ]] && cmd_proof="$defproof" || cmd_proof=${reservedlang[1]}
 	elif [[ "$cmd_proof" ]]; then
-		cmd_proof=$(unique "$defproof $cmd_proof") # default langs come here
+		cmd_proof=$(unique "$defproof $cmd_proof")
 	fi	
 	if [[ "$cmd_font" == true ]]; then 
 		cmd_font='folder'
@@ -162,7 +162,7 @@ function main () {
 	[[ "$cmd_checkupdate" == true ]] && cmd+=" checkupdate"
 	[[ "$cmd_cache" ]] && cmd+=" cache"
 	
-	# solo operation list filter: backup, fontset, report, cache, help
+	# solo operation list filter: backup, fontset, report, help
 	param='backup fontset report help' # cache?
 	for i in $paramorder; do for s in $param; do
 		[[ $s == $i ]] && m=$i # search for the last actual param
@@ -173,10 +173,8 @@ function main () {
 		{ echo "No valid command specified. Correct your command line parameters. See help."; exit 3; }
 	
 	############ Operation selector
-	cmd=$(unique "$cmd")
-	create-AppPath	
-	echo
-	for c in $cmd; do
+	create-AppPath;	echo
+	for c in $(unique "$cmd"); do
 		case $c in
 			report) 
 				show-appbanner 'skip2' 
@@ -339,15 +337,15 @@ function get-msoinfo () {
 } # END MSO report
 
 function clean-application () {
-	__list-langrc () { # for clean-lang, clean-ptools
+	__list-langrc () { # helper for clean-lang, clean-ptools
 		local fs name="$1" wpath="$2" filter="$3"
 		[[ -z $cmd_verb ]] && return
 		if [[ -z $cmd_inverse ]]; then
 			[[ "$name" == 'lproj' ]] &&
-			fs=$( find -E "$wpath" -type d -d 1 -name "*.$name" ! -iregex $filter -exec basename {} \; ) ||
+			fs=$(find -E "$wpath" -type d -d 1 -name "*.$name" ! -iregex $filter -exec basename {} \;) ||
 			fs=$(find -E "$wpath" -type d -d 1 -name "*.$name" ! -name Grammar.proofingtool ! -iregex $filter -exec basename {} \;) 
 		else
-			fs=$( find -E "$wpath" -type d -d 1 -name "*.$name" -iregex $filter -exec basename {} \; )
+			fs=$(find -E "$wpath" -type d -d 1 -name "*.$name" -iregex $filter -exec basename {} \;)
 		fi
 		[[ $cmd_verb != 'nl' && "$fs" ]] && echo "$fs"; 
 		[[ "$fs" ]] && update-counter "$fs" "$wpath" 
@@ -376,11 +374,11 @@ function clean-application () {
 		fi # END fontlist files
 	
 	# - cleaning of lproj folders
-		[[ "$cmd_lang" ]] && clean-lang "$wpath";
+		[[ "$cmd_lang" ]] && clean-lang "$wpath"
 	
 	# - cleaning of proofing tools
 		[[ "$cmd_proof" ]] &&
-			clean-ptools "$basePATH$appPATH$prooftoolPATH";
+			clean-ptools "$basePATH$appPATH$prooftoolPATH"
 		
 		appfat=$(normalize-number "$appfat" ns)
 		appdu+=("${appfat}	$basePATH$appPATH") # tab char between
@@ -527,7 +525,7 @@ function clean-lang () {
 	local wpath="$1" filter=$( create-filter "lang" ) cmdrm msg
 	if [[ -z $cmd_inverse ]]; then
 		cmdrm='find -E "$wpath" -type d -d 1 -name *.lproj ! -iregex $filter -exec rm -fdr {} \;'
-		cmd_lang=$(unique "en $cmd_lang") # english never deleted
+		cmd_lang=$(unique "$reservedlang $cmd_lang")
 		msg="Remove optional UI languages. Keep '$cmd_lang'."
 	else # inverse filter
 		cmdrm='find -E "$wpath" -type d -d 1 -name *.lproj -iregex $filter -exec rm -fdr {} \;'
@@ -546,7 +544,7 @@ function clean-ptools () {
 	local wpath="$1" filter=$( create-filter "proof" ) cmdrm msg
 	if [[ -z $cmd_inverse ]]; then
 		cmdrm='find -E "$wpath" -type d -d 1 -name *.proofingtool ! -name Grammar.proofingtool ! -iregex $filter -exec rm -fdr {} \;'
-		cmd_proof=$(unique "English $cmd_proof") # english never deleted
+		cmd_proof=$(unique "${reservedlang[1]} $cmd_proof")
 		msg="Remove optional proofing tools. Keep '$cmd_proof'."
 	else # inverse filter
 		cmdrm='find -E "$wpath" -type d -d 1 -name *.proofingtool -iregex $filter -exec rm -fdr {} \;'
@@ -853,11 +851,8 @@ function show-appdu () { # final/assessment report
 					difpc="${dif#*|}"; dif="${dif%|*}"
 				fi
 				[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='n/a'
-				###[[ ${#dif} -eq 2 && ${dif:0:1} == '0' ]] && dif='<1'${dif:(-1)}
-				#if [[ $dif != 'n/a' && $difpc ]]; then
 					printf -v difpc ": %3s" "$difpc"
 					dif="$dif $difpc"
-				#fi
 				printf "$fmt1" "${a1/Microsoft /}" "$as1" "$as2" "$dif"
 			fi
 		done
@@ -874,7 +869,7 @@ function get-diskusage () {
 } # END MSO DU
 function update-counter () {
 # $1 - '\n' delimited file list; $2 - filepath;	
-	local fc=$( echo "${1}" | 
+	local fc=$( echo "$1" | 
 		xargs -I{} du -sh -k "$2"/"{}" | 
 		awk '{ total += $1 }; END {print total}' )
 	let "appfat+=fc" # appfat - prev declared var
@@ -884,11 +879,11 @@ function create-filter () {
 	local l='' pre='' sfx='' search='' i
 	if [[ "$1" == "lang" ]]; then
 		l="$cmd_lang"
-		pre=".+/(en|en_GB" # english never deleted
+		pre=".+/(${reservedlang}|${reservedlang}_GB" # english never deleted
 		sfx=")\.lproj"
 	elif [[ "$1" == "proof" ]]; then
 		l="$cmd_proof"
-		pre=".+/(English"
+		pre=".+/(${reservedlang[1]}" # english never deleted
 		sfx=").+\.proofingtool"
 	elif [[ "$1" == "exclude" && $cmd_exclude ]]; then
 		local patterns=($cmd_exclude)
@@ -994,9 +989,9 @@ function math-diffexpr () { # simple unit calculator; couldnot find better
 		if (m2 < 1 && u2 != "K") {m2*=1024; u2 = (u2 == "G") ? "M":"K"}
 
 		if (u1 == "G") m1*=(1024*1024); else
-			if (u1 == "M") m1*=1024
+			if (u1 == "M") m1*=1024;
 		if (u2 == "G") m2*=(1024*1024); else
-			if (u2 == "M") m2*=1024
+			if (u2 == "M") m2*=1024;
 		if (m2 > m1) {r=m1; m1=m2; m2=r} # swap or exit ???
 		r = m1-m2; pc = (child) ? m2/m1 : r/m1; pc*=100
 		if (r > kilo) {r/=1024; unit="M"}; if (r > kilo) {r/=1024; unit="G"}
