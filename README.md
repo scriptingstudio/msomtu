@@ -25,7 +25,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * New version checker.
 
 ## Notes
-* As MSO is installed with root on the `/Applications` directory you have to run this script with `sudo` to make changes.
+* As MSO is installed with root on the `/Applications` directory you will be asked for an administrative account's password to make changes.
 * As application font structure has been changed since MSO version 15.17 font deletion only works with 15.17 or later. Microsoft separated font sets for some reasons. Essential fonts to the MSO apps are in the `Fonts` folder within each app. The rest are in the `DFonts` folder.
 * If you remove fonts, remove font lists (font*.plist) as well; see PARAMETERS. The `DFonts` folder and font lists are safe to remove. No third party app can see MSO fonts installed to the `DFonts` and `Fonts` folders. Some of the fonts you may find useful, save them before deletion.
 * **Caution**: do not remove fonts from the `Fonts` folder! These are minimum needed for the MSO applications to work.
@@ -37,11 +37,11 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 
 ```sh
 # Syntax schema
-$ [sudo] msomtu.sh [-<parameter> [<arguments>]]...
+$ msomtu.sh [-<parameter> [<arguments>]]...
 
-$ [sudo] msomtu.sh -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]
+$ msomtu.sh -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]
 
-$ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc [u|user]] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]
+$ msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proof_list>"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc [u|user]] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]
 ```
 
 #### Use Cases
@@ -106,7 +106,7 @@ $ msomtu.sh -report
 Thin all apps with all parameters:
 
 ```sh
-$ sudo msomtu.sh -all -run
+$ msomtu.sh -all -run
 ```
 
 Show which app ('w e' for Word and Excel) language files installed:
@@ -118,19 +118,19 @@ $ msomtu.sh -app "w e" -lang -verbose
 Remove a number of languages:
 
 ```sh
-$ sudo msomtu.sh -lang "nl no de" -inv -run 
+$ msomtu.sh -lang "nl no de" -inv -run 
 ```
 
 Remove all proofing tools except defaults for Word:
 
 ```sh
-$ sudo msomtu.sh -proof -app w -run 
+$ msomtu.sh -proof -app w -run 
 ```
 
 Remove a number of proofing tools:
 
 ```sh
-$ sudo msomtu.sh -proof "Indonesian Isix*" -inv -run 
+$ msomtu.sh -proof "Indonesian Isix*" -inv -run 
 ```
 
 Show duplicates of the library fonts for Word:
@@ -142,13 +142,13 @@ $ msomtu.sh -font lib -app w -verbose
 Remove duplicated fonts in the libraries for Word:
 
 ```sh
-$ sudo msomtu.sh -font lib -app w -run 
+$ msomtu.sh -font lib -app w -run 
 ```
 
 Remove `chinese` and Arial fonts:
 
 ```sh
-$ sudo msomtu.sh -font "chinese arial*" -run 
+$ msomtu.sh -font "chinese arial*" -run 
 ```
 
 Show new fonts for Outlook:
@@ -160,14 +160,14 @@ $ msomtu.sh -font -inv -app o
 Exclude a few useful fonts from deletion for Word:
 
 ```sh
-$ sudo msomtu.sh -font *.* -ex "brit* rockwell*" -app w -run 
+$ msomtu.sh -font *.* -ex "brit* rockwell*" -app w -run 
 ```
 
 Clean font cache:
 
 ```sh
 # system and user cache
-$ sudo msomtu.sh -cache
+$ msomtu.sh -cache
 # current user cache
 $ msomtu.sh -cache u
 ```
@@ -181,7 +181,7 @@ $ msomtu.sh -backup -font "cyrdfonts britanic*" -run
 Copy original cyrillic fonts to system library:
 
 ```sh
-$ sudo msomtu.sh -backup syslib -font cyrdfonts -run 
+$ msomtu.sh -backup syslib -font cyrdfonts -run 
 ```
 
 Show predefined fontsets:
@@ -191,5 +191,5 @@ $ msomtu.sh -fontset
 ```
 
 ## Links
-* Inspiration idea of “thinning”: [ @goodbest ](https://github.com/goodbest/OfficeThinner)
+* Inspirational idea of “thinning”: [ @goodbest ](https://github.com/goodbest/OfficeThinner)
 * More on OS X & MSO fonts: [Font Management in OS X, by Kurt Lang](http://www.jklstudios.com/misc/osxfonts.html)
