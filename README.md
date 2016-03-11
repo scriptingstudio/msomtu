@@ -18,7 +18,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * **Duplicate fonts finder**. You can find out conflicting and extra app fonts against the font libraries.
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
 * **Predefined fontsets** are custom classes of fonts for easy manipulation with fonts. Font classification specifics: cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
-* **Font backup**. You can backup your fonts to predefined and user defined destinations before deletion.
+* **Font backup**. You can backup your fonts to predefined and user defined destinations as well before deletion.
 * Copy or move fonts to the font libraries.
 * Flexible search filters.
 * Multi-language help. Currently english and russian. Non-english help pages are in the separate module. You can extend help with your language by the template in the module.
@@ -45,7 +45,7 @@ $ [sudo] msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p 
 ```
 
 #### Use Cases
-**Solo actions:** `-report`, `-fontset`, `-backup`, `-help`.
+**Solo actions:** `-report`, `-fontset`, `-backup`, `-help`. <br/>If two or more actions specified the latter wins.
 
 **Group actions:** `-font`, `-lang`, `-proof`, `-flist`, `-cache`, `-check`, `-all`.
 
