@@ -12,7 +12,7 @@ NOTES=(
 	"ПРИМЕЧАНИЯ"
 	"В скрипте реализована техника безопасного исполнения - \"защита от дураков\". Режим исполнения по умолчанию - эмуляция. Скрипт не сможет внести изменения в систему без параметра '-run'. Это реализация режима \"что-если\"."
 	
-	"Так как приложения устанавливаются с привилегиями root, для запуска скрипта (когда нужно сделать изменения) необходимо использовать sudo." 
+	"Так как приложения устанавливаются с привилегиями root, при внесении изменений потребуется пароль учетной записи с административными привилегиями." 
 	
 	"Удаление шрифтов работает только с версией MSO 15.17 и выше, поскольку Microsoft изменила организацию шрифтов. В папке 'Fonts' обязательные шрифты, в 'DFonts' - не обязательные."
 	
@@ -31,11 +31,11 @@ NOTES=(
 )
 USAGE=(
 	"ИСПОЛЬЗОВАНИЕ"
-	"[sudo] $util [-<parameter> [<arguments>]]..."
+	"$util [-<parameter> [<arguments>]]..."
 	
-	"[sudo] $util -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
+	"$util -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
 	
-	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc [u|user]] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
+	"$util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache|-fc [u|user]] [-report|-rep|-info] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
 )
 USE_CASES=(
 	"СЦЕНАРИИ ИСПОЛЬЗОВАНИЯ"
@@ -154,9 +154,9 @@ fi
 #	NOTES=("NOTES ???")
 #	USAGE=(
 #	"USAGE ???"
-#	"[sudo] $util [-<parameter> [<arguments>]]..."
-#	"[sudo] $util -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
-#	"[sudo] $util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache [u|user]] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
+#	"$util [-<parameter> [<arguments>]]..."
+#	"$util -backup [<destination>] [-app [<app>]] [-font [<font_pattern>]] [-ex|-x <font_pattern>] [-run|-ok]"
+#	"$util [-app [\"<app_list>\"]] [-lang|-ui [\"<lang_list>\"]] [-proof|-p [\"<proof_list>\"]] [-font [<font_pattern>]] [-flist|-fl] [-ex|-x <font_pattern>] [-cache [u|user]] [-report|-rep] [-verbose|-verb [nl]] [-fontset|-fs] [-all|-full] [-inv] [-help|-h|-? [en] [full]] [-run|-ok]"
 #)
 #	USE_CASES=("USE_CASES ???")
 #	ARGUMENTS=(
@@ -189,24 +189,24 @@ fi
 #	EXAMPLES=(
 #	"EXAMPLES ???"
 #	"||$util -report"
-#	"||sudo $util -all -run"
+#	"||$util -all -run"
 #	"||$util -app \"w e\" -lang -verbose"
-#	"||sudo $util -lang \"nl no de\" -inv -run"
-#	"||sudo $util -proof -app w -run"
-#	"||sudo $util -proof \"Indonesian Isix*\" -inv -run"
+#	"||$util -lang \"nl no de\" -inv -run"
+#	"||$util -proof -app w -run"
+#	"||$util -proof \"Indonesian Isix*\" -inv -run"
 #	"||$util -font lib -app w -verbose"
-#	"||sudo $util -font lib -app w -run"
-#	"||sudo $util -font \"chinese arial*\" -run"
+#	"||$util -font lib -app w -run"
+#	"||$util -font \"chinese arial*\" -run"
 #	"||$util -font -inv -app o"
-#	"||sudo $util -font *.* -ex \"brit* rockwell*\" -app w -run"
-#	"||sudo $util -cache"
+#	"||$util -font *.* -ex \"brit* rockwell*\" -app w -run"
+#	"||$util -cache"
 #	"||$util -backup -font \"cyrdfonts britanic*\" -run"
-#	"||sudo $util -backup syslib -font cyrdfonts -run"
+#	"||$util -backup syslib -font cyrdfonts -run"
 #	"||$util -fontset"
 #)
 #	LINKS=(
 #		"RELATED LINKS"
-#		"- Inspiration idea of 'thinning'||https://github.com/goodbest/OfficeThinner"
+#		"- Inspired by||https://github.com/goodbest/OfficeThinner"
 #		"- On OS X & MSO fonts||http://www.jklstudios.com/misc/osxfonts.html"
 #		"- The Project Github Repo||https://github.com/scriptingstudio/msomtu"
 #	)
