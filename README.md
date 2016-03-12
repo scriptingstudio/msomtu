@@ -6,7 +6,7 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 
 * UI languages; 
 * Proofing tools; 
-* OS X duplicated font files;
+* OS X duplicated fonts;
 * Fontlist files (font*.plist).
 
 ## Requirements
@@ -19,10 +19,10 @@ Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing
 * **New fonts finder**. You can find out new (standard sets considered) fonts added in each app after new MSO update.
 * **Predefined fontsets** are custom classes of fonts for easy manipulation with fonts. Font classification specifics: cyrillic, non-cyrillic, hieroglyphic of any kind, symbolic, system. Fontsets do not intersect. You can modify fontsets for your needs.
 * **Font backup**. You can backup your fonts to predefined and user defined destinations as well before deletion.
-* Copy or move fonts to the font libraries.
-* Flexible search filters.
+* Copy/move fonts to the font libraries.
+* Flexible search filters: exclusion, inversion, macros, masks, lists.
 * Multi-language help. Currently english and russian. Non-english help pages are in the separate module. You can extend help with your language by the template in the module.
-* New version checker.
+* MSO new version checker.
 
 ## Notes
 * As MSO is installed with root on the `/Applications` directory you will be asked for an administrative account's password to make changes.
