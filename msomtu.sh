@@ -34,13 +34,13 @@ cmd_run=''			# switch to unlock commands
 
 # Definitions: defaults and constants
 toolname="Microsoft Office 2016 Maintenance Utility"
-version='2.9.11'
+version='2.9.12'
 util="${0##*/}"; util="${util%%-*}.sh"; util="${util%%.sh*}.sh"
 helpfile="${0%.*}"; helpfile="${helpfile%%-*}-help.sh"
 defapp='w e p o n'
 	# lang dependencies: main(), create-filter(), clean-lang(), clean-proof()
-deflang='ru'       # user pref;
-defproof='Russian' # user pref;
+deflang='ru'       # user pref; reserved lang
+defproof='Russian' # user pref; reserved lang
 reservedlang=('en' 'English')  # english never deleted
 backupPATH=~/Desktop/MSOFonts/ # user pref
 basePATH="/Applications/"
@@ -55,24 +55,24 @@ OneNotePATH="Microsoft OneNote.app"
 ## Predefined fontsets definition block. You can change them here.
  # os x duplicates; in  DFonts folder.
  # exclusion: Microsoft no longer provides cyrillic MonotypeCorsiva, so
- # I included it here for deletion (Ive got it cyrillic in the lib).
+ # I included it here for deletion (Ive got it cyrillic in my lib).
 sysfonts=("arial*" "ariblk*" "Baskerville*" "Book Antiqua*" "ComicSans*" "Cooper*" "Gill Sans*" "GillSans*" "pala*" "Trebuchet*" "verdana*" "MonotypeCors*")
  # OS X duplicates; in Fonts folder
 msoessential=("tahoma*" "Wingding*" "webding*")
- # chfonts - all kinds of hieroglyphic/eastern fonts (in DFonts folder)
-chfonts=("Fangsong*" "Deng*" "gulim*" "HGR*" "kaiti*" "malgun*" "Meiryo*" "mingliu*" "MSJH*" "msyh*" "SimHei*" "simsun*" "STH*" "STX*" "STZ*" "STL*" "taile*" "YuGoth*" "yumin*")
+ # hieroglyphic - all kinds of hieroglyphic/eastern fonts (in DFonts folder)
+hieroglyphic=("Fangsong*" "Deng*" "gulim*" "HGR*" "kaiti*" "malgun*" "Meiryo*" "mingliu*" "MSJH*" "msyh*" "SimHei*" "simsun*" "STH*" "STX*" "STZ*" "STL*" "taile*" "YuGoth*" "yumin*")
 noncyr=("Abadi*" "angsa*" "BellMT*" "Bauhaus93*" "BernardMT*" "Calisto MT*" "Braggadocio*" "Britannic*" "CalistoMT*" "ColonnaMT*" "COOPBL*" "CopperplateGothic*" "CurlzMT*" "Desdemona*" "EdwardianScriptITC*" "EngraversMT*" "Eurostile*" "FootlightMT*" "GloucesterMT*" "Goudy Old Style*" "Haettenschweiler*" "Harrington*" "ImprintMTShadow*" "KinoMT*" "Lucida Sans.*" "Lucida Sans Demibold*" "Lucida Sans Italic.*" "LucidaBright*" "LucidaBlackletter.*" "LucidaFax*" "LucidaCalligraphy*" "LucidaHandwriting*" "LucidaSansTypewrite*" "MaturaMTScriptCapitals*" "ModernNo.20*" "News Gothic MT*" "ntailu*" "Onyx*" "Perpetua*" "Rockwell*" "Stencil*" "Tw Cen*" "WideLatin*") # but some of non-cyr fonts may be useful
 symfonts=("Bookshelf Symbol*" "Marlett*" "MS Reference Specialty*" "MonotypeSorts*")
 cyrdfonts=("batang*" "Bookman Old Style*" "Candara*" "Century*" "Consola*" "Constan*" "Corbel*" "Franklin Gothic*" "Gabriola*" "GARA*" "Lucida Console*" "Lucida Sans Unicode*" "Mistral*" "MS Reference Sans Serif.*" "msgothic*" "Segoe Print Bold.*" "Segoe Script Bold.*")
  # original cyr fonts; in Fonts folder
 cyrfonts=("Calibri*" "Cambria*" "Century.*" "Corbel.*")
  # fontset blocks
-dfontsets=(cyrdfonts noncyr chfonts sysfonts symfonts)
+dfontsets=(cyrdfonts noncyr hieroglyphic sysfonts symfonts)
 fontsets=(cyrfonts msoessential)
 allfontsets=("${dfontsets[@]}" "${fontsets[@]}")
 fsdescriptor=( # for display-fontset()
 	"sysfonts|-|OS X duplicated fonts (in DFonts)"
-	"chfonts|chinese|All kind of hieroglyphic/eastern fonts (in DFonts)" # 2 replmnt in code
+	"hieroglyphic|glyph|All kind of hieroglyphic/eastern fonts (in DFonts)" # 1 replmnt in code
 	"noncyr|-|Non-cyrillic fonts (in DFonts)"
 	"cyrdfonts|-|Cyrillic original fonts (in DFonts; do not include 'sysfonts')"
 	"cyrfonts|-|Cyrillic original fonts (in Fonts)"
@@ -87,16 +87,14 @@ function main () {
 	
 	############ Simple input parameter parser v2.2 [inline method]
 	local script_params="$#" prefix='cmd_' paramorder='' unknown=''
-	local PARGS=() INPUTPARAM='' param cmd='' c
-	runus=''
+	local PARGS INPUTPARAM='' param cmd='' c
 	while [ "$#" != 0 ]; do
+		PARGS=(); param=''
 		[[ "${1:0:1}" == "-" ]] && { INPUTPARAM="$1"; shift; }
-		PARGS=()
 		while [ "${1:0:1}" != "-" ] && [ "$#" != 0 ]; do
 			PARGS+=("$1") # collect arguments of the current parameter
 			shift
 		done
-		param=''
 		case "$INPUTPARAM" in # translate parameters
 			-report|-rep|-info|-inf) param="report" ;;
 			-app)             param="app" ;;
@@ -118,7 +116,7 @@ function main () {
 		esac
 		if [[ "$param" ]]; then
 			paramorder+=" $param" # actual parameters
-			[[ "${#PARGS[@]}" > 0 ]] && # output: paramvar = value of its arguments
+			[[ "${#PARGS[@]}" > 0 ]] && # output: paramvar = (arguments)
 				eval $prefix$param='("${PARGS[@]}")' || 
 				eval $prefix$param=true
 		fi
@@ -153,9 +151,9 @@ function main () {
 	if [[ "$cmd_font" == true ]]; then 
 		cmd_font='folder'
 	elif [[ "$cmd_font" ]]; then
-		cmd_font=${cmd_font//chinese/chfonts} # name/disp name
+		cmd_font=${cmd_font//glyph/hieroglyphic} # disp name/name
 		cmd_font=$(unique "$cmd_font")
-	fi
+	fi # END def value 
 	
 	# group operation list: "clean=(flist font proof lang) check all cache"
 	[[ "$cmd_lang" || "$cmd_proof" || "$cmd_font" ||
@@ -164,7 +162,7 @@ function main () {
 	[[ "$cmd_cache" ]] && cmd+=" cache"
 	
 	# solo operation list filter: backup, fontset, report, help
-	param='backup fontset report help' # cache?
+	param='backup fontset report help'
 	for i in $paramorder; do for s in $param; do
 		[[ $s == $i ]] && m=$i # search for the last actual param
 	done done
@@ -218,7 +216,7 @@ function main () {
 function create-AppPath () {
 	local temp=$(unique "$cmd_app") appPATH i
 	cmd_app=()
-	for i in $temp; do # hashtable: bash4
+	for i in $temp; do
 		[[ $i == 'w' ]] && cmd_app+=("$WordPATH")
 		[[ $i == 'e' ]] && cmd_app+=("$ExcelPATH")
 		[[ $i == 'p' ]] && cmd_app+=("$PowerPointPATH")
@@ -287,8 +285,7 @@ function get-msoinfo () {
 		printf "$fmt1" "Fonts" "${fc// }" "${fs}$sfx"
 		##### fontlists
 		wpath="$basePATH$appPATH$fontPATH"
-					#- flist=$(find "$wpath" -type f -name font*.plist -d 1)
-		flist=$(ls "$wpath/"font*.plist 2> /dev/null)
+		flist=$(ls "$wpath/"font*.plist 2> /dev/null) #- flist=$(find "$wpath" -type f -name font*.plist -d 1)
 		if [[ -z "$flist" ]]; then
 			printf "$fmt1" "Plists" $na
 		else
@@ -624,7 +621,7 @@ function invoke-backup () { # for fonts only
 		for i in "${bset[@]}"; do
 			fl=$(find "$bsrc" -type f -iname "$i" -d 1)
 			[[ "${fl// }" == '' ]] && continue
-			sudo echo "$fl" | xargs -I{} cp -f "{}" "$bdest"/
+			sudo echo "$fl" | xargs -I{} cp -f "{}" "$bdest"/ # $runsu
 			error=$?
 			c=$(echo "$fl" | wc -l); [[ "$fl" == '' ]] && c=0;
 			let "fc+=$c"
@@ -682,7 +679,7 @@ function show-helppage () {
 		done
 		[[ -z "$lh" ]] && echo
 	} # END print topic
-	local fs="${dfontsets[@]/chfonts/chinese}"; fs=${fs// /, } # name/disp name
+	local fs="${dfontsets[@]// /, }"
 	local opt=$(inarray 'full' cmd_help)
 
 	if [[ "${LANG%\.*}" != en_* && -z $(inarray 'en' cmd_help) ]]; then
@@ -772,7 +769,7 @@ function show-helppage () {
 	
 		"-flist||Switch. Removes fontlist (font*.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult, remove all of the .plist files. They all have to do with the fixed font lists you see in Office."
 	
-		"-font||Filter <font_pattern>. Removes selected fonts or the 'DFonts' folder. Available fontsets: cyrdfonts, noncyr, chinese, sysfonts. Parameter '-inv' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument 'library' alters searching in libraries for duplicates."
+		"-font||Filter <font_pattern>. Removes selected fonts or the 'DFonts' folder. Available fontsets: cyrdfonts, noncyr, glyph, sysfonts. Parameter '-inv' ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument 'library' alters searching in libraries for duplicates."
 
 		"-fontset||Switch. Shows predefined fontsets."
 	
@@ -800,7 +797,7 @@ function show-helppage () {
 		"Remove a number of proofing tools||$util -proof \"Indonesian Isix*\" -inv -run"
 		"Show duplicates of library fonts for Word||$util -font lib -app w -verbose"
 		"Remove duplicated fonts in libraries for Word||$util -font lib -app w -run"
-		"Remove 'chinese' and Arial fonts||$util -font \"chinese arial*\" -run"
+		"Remove hieroglyphic and Arial fonts||$util -font \"glyph arial*\" -run"
 		"Show new fonts for Outlook||$util -font -inv -app o"
 		"Exclude a few useful fonts from deletion for Word||$util -font *.* -ex \"brit* rockwell*\" -app w -run"
 		"Clean font cache||$util -cache"
