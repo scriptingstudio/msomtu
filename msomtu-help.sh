@@ -87,7 +87,7 @@ PARAMETERS=(
 	
 	"-flist||Ключ. Удаление файлов списков шрифтов (font*.plist). Эти списки похожи на кэш. Если вы удаляете ненужный шрифт, необходимо очистить соответствующие списки. Поиск описаний шрифтов по файлам долгая операция, и нарушается целостность файлов, поэтому можно удалить все файлы."
 	
-	"-font||Фильтр <font_pattern>. Удаление заданных шрифтов или папки 'DFonts'. Предопределенные наборы шрифтов: cyrdfonts, noncyr, chinese, sysfonts, symfonts. Для шрифтов параметр '-inv' отменяет выбор пользователя и изменяет функцию поиска: будет произведен поиск новых шрифтов. Эту проверку имеет смысл производить после обновления программ MSO. Аргумент 'library' переключает поиск на библиотеки для обнаружения дубликатов." 
+	"-font||Фильтр <font_pattern>. Удаление заданных шрифтов или папки 'DFonts'. Предопределенные наборы шрифтов: cyrdfonts, noncyr, glyph, sysfonts, symfonts. Для шрифтов параметр '-inv' отменяет выбор пользователя и изменяет функцию поиска: будет произведен поиск новых шрифтов. Эту проверку имеет смысл производить после обновления программ MSO. Аргумент 'library' переключает поиск на библиотеки для обнаружения дубликатов." 
 	
 	"-fontset||Ключ. Показывает предопределенные шрифтовые наборы." 
 	
@@ -106,33 +106,33 @@ PARAMETERS=(
 )
 EXAMPLES=(
 	"ПРИМЕРЫ"
-	"Очистить все приложения с параметрами по умолчанию||sudo $util -all -run"
+	"Очистить все приложения с параметрами по умолчанию||$util -all -run"
 	
 	"Показать статистику по приложениям||$util -report"
 	
 	"Показать установленные языковые пакеты локализации для Word и Excel||$util -app \"w e\" -lang -verbose"
 	
-	"Удалить заданные языковые пакеты локализации||sudo $util -lang \"nl no de\" -inv -run"
+	"Удалить заданные языковые пакеты локализации||$util -lang \"nl no de\" -inv -run"
 	
-	"Удалить все языковые файлы правописания для Word||sudo $util -proof -app w -run"
+	"Удалить все языковые файлы правописания для Word||$util -proof -app w -run"
 	
-	"Удалить заданные языковые файлы правописания||sudo $util -proof \"Indonesian Isix*\" -inv -run"
+	"Удалить заданные языковые файлы правописания||$util -proof \"Indonesian Isix*\" -inv -run"
 	
 	"Найти в Word дубликаты шрифтов в библиотеках||$util -font lib -app w -verbose"
 	
-	"Удалить в Word дубликаты шрифтов в библиотеках||sudo $util -font lib -app w -run"
+	"Удалить в Word дубликаты шрифтов в библиотеках||$util -font lib -app w -run"
 	
-	"Удалить шрифты Arial и из набора 'chinese'||sudo $util -font \"chinese arial*\" -run"
+	"Удалить шрифты Arial и из набора 'glyph'||$util -font \"glyph arial*\" -run"
 	
 	"Найти новые шрифты в Outlook||$util -font -inv -app o"
 	
-	"Удалить в Word все шрифты, кроме заданных||sudo $util -font *.* -ex \"brit* rockwell*\" -app w -run"
+	"Удалить в Word все шрифты, кроме заданных||$util -font *.* -ex \"brit* rockwell*\" -app w -run"
 	
-	"Очистить кэш шрифтов||sudo $util -cache"
+	"Очистить кэш шрифтов||$util -cache"
 	
 	"Выполнить резервное копирование выбранных шрифтов по умолчанию||$util -backup -font \"cyrdfonts britanic*\" -run"
 	
-	"Скопировать оригинальные русские шрифты в системную библиотеку||sudo $util -backup syslib -font cyrdfonts -run"
+	"Скопировать оригинальные русские шрифты в системную библиотеку||$util -backup syslib -font cyrdfonts -run"
 	
 	"Показать предопределенные наборы шрифтов||$util -fontset"
 )
@@ -196,7 +196,7 @@ fi
 #	"||$util -proof \"Indonesian Isix*\" -inv -run"
 #	"||$util -font lib -app w -verbose"
 #	"||$util -font lib -app w -run"
-#	"||$util -font \"chinese arial*\" -run"
+#	"||$util -font \"glyph arial*\" -run"
 #	"||$util -font -inv -app o"
 #	"||$util -font *.* -ex \"brit* rockwell*\" -app w -run"
 #	"||$util -cache"
