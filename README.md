@@ -1,6 +1,9 @@
 # MSOMTU  
 ***Msomtu*** is Microsoft Office for Mac Maintenance Utility—the integrated fitness solution for your Office.
 
+## The initial idea
+Font management for Microsoft Office. MSO has a completely isolated and partly duplicated fonts. Why?
+
 ## Description
 Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container that's waisting gigabytes of your disk space and making MSO unmanageable. This script safely removes (thins) **optional parts** of the following components: 
 
@@ -71,7 +74,7 @@ $ msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proo
 <tr><td valign="top"><code>app_list</code></td><td>Application list. <b>w</b>—Word, <b>e</b>—Excel, <b>p</b>—PowerPoint, <b>o</b>—Outlook, <b>n</b>—OneNote. Default: <code>w e p o n</code>.</td></tr>
 <tr><td valign="top"><code>lang_list</code></td><td>Langauge list: <code>ru pl de</code> etc; see filenames with parameter <code>-verbose</code>. Default: <code>en ru</code>, see NOTES.</td></tr>
 <tr><td valign="top"><code>proof_list</code></td><td>Proofingtools list: <code>russian finnish german</code> etc; see filenames with parameter <code>-verbose</code>. Wildcard <code>*</code> is available to use. Default: <code>english russian</code>, see NOTES.</td></tr>
-<tr><td valign="top"><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty—removes the <code>DFonts</code> folder (default); <i>fontset</i>—removes fonts of predefined fontset; <i>mask</i>—removes selection: <code>*.*</code>, <code>arial*</code>, <code>*.ttc</code> etc. If you use single <code>*</code> enclose it in quotation marks: <code>"*"</code>. Predefined fontsets: <code>library</code>, <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>, <code>symfonts</code>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates from system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (<code>DFonts</code> against libraries). You can use list of fontsets as well.</td></tr>
+<tr><td valign="top"><code>font_pattern</code></td><td>Font operations are based on patterns. Font patterns: empty—removes the <code>DFonts</code> folder (default); <i>fontset</i>—removes fonts of predefined fontset; <i>mask</i>—removes selection: <code>*.*</code>, <code>arial*</code>, <code>*.ttc</code> etc. If you use single <code>*</code> enclose it in quotation marks: <code>"*"</code>. Predefined fontsets: <code>library</code>, <code>cyrdfonts</code>, <code>noncyr</code>, <code>glyph</code>, <code>sysfonts</code>, <code>symfonts</code>. See parameter <code>-fontset</code> and details in code. Fontset <code>library</code> removes duplicates from system and user libraries; it may not exactly match fonts because based on file-by-file (unlike font family) comparison (<code>DFonts</code> against libraries). You can use list of fontsets as well.</td></tr>
 <tr><td valign="top"><code>destination</code></td><td>Backup destination folderpath for fonts. Default value is <code>~/Desktop/MSOFonts</code>. You can use predefined destinations as well: <code>syslib</code>—system library; <code>userlib</code>—user library.</td></tr>
 </table>
 
@@ -85,7 +88,7 @@ $ msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proo
 <tr><td valign="top"><code>-check</code></td><td>Switch. Checks for new versions; opens the web-page in browser.</td></tr>
 <tr><td valign="top"><code>-ex</code></td> <td>Exclusive filter <code>font_pattern</code>. Excludes font selection with parameter <code>-font</code>. Only mask can be used as <code>font_pattern</code>.</td></tr>
 <tr><td valign="top"><code>-flist</code></td> <td>Switch. Removes fontlist (font*.plist) files. Fontlists are like cache. When you remove unneeded fonts you can also have to clear all non existent fonts from its lists. Since discovering fonts through all lists is difficult, remove all of the .plist files. They all have to do with the fixed font lists you see in Office.</td></tr>
-<tr><td valign="top"><code>-font</code></td> <td>Filter <code>font_pattern</code>. Removes selected fonts or the <code>DFonts</code> folder. Available fontsets: <code>cyrdfonts</code>, <code>noncyr</code>, <code>chinese</code>, <code>sysfonts</code>. Parameter <code>-inv</code> ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument <code>library</code> alters searching in libraries for duplicates. </td></tr>
+<tr><td valign="top"><code>-font</code></td> <td>Filter <code>font_pattern</code>. Removes selected fonts or the <code>DFonts</code> folder. Available fontsets: <code>cyrdfonts</code>, <code>noncyr</code>, <code>glyph</code>, <code>sysfonts</code>. Parameter <code>-inv</code> ignores user selection and alternates search function: new fonts are going to be discovered. It is useful to check new fonts up after new update. Argument <code>library</code> alters searching in libraries for duplicates. </td></tr>
 <tr><td nowrap valign="top"><code>-fontset</code></td> <td>Switch. Shows predefined fontsets.</td></tr>
 <tr><td valign="top"><code>-help</code></td> <td>Switch. Shows the help page. Text language depends on your locale. There are two kinds of help page: short and full. The default is short one (no parameters). To get the full page use parameter <code>-help full</code>. Special argument <code>en</code> forces english help page.</td></tr>
 <tr><td valign="top"><code>-inv</code></td> <td>Switch. Inverts effect of the <code>-lang</code> and <code>-proof</code> filters, but defaults are reserved. For parameter <code>-font</code> it is to search for the new fonts.</td></tr>
@@ -145,10 +148,10 @@ Remove duplicated fonts in the libraries for Word:
 $ msomtu.sh -font lib -app w -run 
 ```
 
-Remove `chinese` and Arial fonts:
+Remove `glyph` and Arial fonts:
 
 ```sh
-$ msomtu.sh -font "chinese arial*" -run 
+$ msomtu.sh -font "glyph arial*" -run 
 ```
 
 Show new fonts for Outlook:
@@ -189,6 +192,13 @@ Show predefined fontsets:
 ```sh
 $ msomtu.sh -fontset
 ```
+
+## Customization
+You can easily modify for your needs:
+
+* Languages to reserve from deletion
+* Font sets to work with fonts
+* Extend help with your language
 
 ## Links
 * Inspirational idea of “thinning”: [ @goodbest ](https://github.com/goodbest/OfficeThinner)
