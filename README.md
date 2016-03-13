@@ -2,10 +2,10 @@
 ***Msomtu*** is Microsoft Office for Mac Maintenance Utility—the integrated fitness solution for your Office.
 
 ## The initial idea
-Font management for Microsoft Office. MSO has a completely isolated and partly duplicated fonts. Why?
+**Font management** for Microsoft Office. MSO has completely isolated and partly duplicated fonts (duplication came with MSO 2011). Why? 
 
 ## Description
-Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container that's waisting gigabytes of your disk space and making MSO unmanageable. This script safely removes (thins) **optional parts** of the following components: 
+Microsoft Office 2016 for Mac uses an isolated resource architecture (sandboxing), so the MSO apps duplicate all of the components in their own application container that's waisting gigabytes of your disk space and making MSO unmanageable—it has stopped being integrated. This script safely removes (thins) **optional parts** of the following components: 
 
 * UI languages; 
 * Proofing tools; 
@@ -194,7 +194,7 @@ $ msomtu.sh -fontset
 ```
 
 ## Customization
-You can easily modify for your needs:
+You can easily modify the code for your needs:
 
 * Languages to reserve from deletion
 * Font sets to work with fonts
