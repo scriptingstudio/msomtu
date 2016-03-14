@@ -1,6 +1,19 @@
 # MSOMTU  
 ***Msomtu*** is Microsoft Office for Mac Maintenance Utility—the integrated fitness solution for your Office.
 
+## Table of contents
+* [The initial idea] (#The-initial-idea)
+* [Description] (#Description)
+* [Requirements] (#Requirements)
+* [Features] (#Features)
+* [Notes] (#Notes)
+* [Usage] (#Usage)
+* [Arguments] (#Arguments)
+* [Parameters] (#Parameters)
+* [Examples] (#Examples)
+* [Customization] (#Customization)
+* [Links] (#links)
+
 ## The initial idea
 **Font management** for Microsoft Office. MSO has completely isolated and partly duplicated fonts. Why? 
 
@@ -80,6 +93,7 @@ $ msomtu.sh [-app ["<app_list>"]] [-lang|-ui ["<lang_list>"]] [-proof|-p ["<proo
 
 ## Parameters
 **Note:** In case of parameter duplicates the latter wins.
+
 <table>
 <tr><td valign="top"><code>-all</code></td> <td>Switch. Activates all cleaning options: <code>lang</code>, <code>proof</code>, <code>font</code>, <code>flist</code>, <code>cache</code>. It does not affect the parameter <code>-app</code>.</td></tr>
 <tr><td valign="top"><code>-app</code></td> <td>Filter <code>app_list</code>. Selects application to process.</td></tr>
