@@ -2,16 +2,16 @@
 ***Msomtu*** is Microsoft Office for Mac Maintenance Utility—the integrated fitness solution for your Office.
 
 ## Table of contents
-* [The initial idea] (#The-initial-idea)
-* [Description] (#Description)
-* [Requirements] (#Requirements)
-* [Features] (#Features)
-* [Notes] (#Notes)
-* [Usage] (#Usage)
-* [Arguments] (#Arguments)
-* [Parameters] (#Parameters)
-* [Examples] (#Examples)
-* [Customization] (#Customization)
+* [The initial idea] (#the-initial-idea)
+* [Description] (#description)
+* [Requirements] (#requirements)
+* [Features] (#features)
+* [Notes] (#notes)
+* [Usage] (#usage)
+* [Arguments] (#arguments)
+* [Parameters] (#parameters)
+* [Examples] (#examples)
+* [Customization] (#customization)
 * [Links] (#links)
 
 ## The initial idea
