@@ -1,4 +1,4 @@
-# MSOMTU  
+# MSOMTU
 ***Msomtu*** is Microsoft Office for Mac Maintenance Utility—the integrated fitness solution for your Office.
 
 ## Table of contents
